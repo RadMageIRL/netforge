@@ -10,9 +10,9 @@ test.describe('navigation', () => {
     const nav = page.getByRole('navigation', { name: 'Tools' });
     await expect(nav.locator('.nav-heading')).toHaveText(['Network', 'Scheduling', 'Data', 'Encoding', 'Text', 'Generators', 'Automation / DevOps']);
     await expect(nav.locator('a[data-tool]')).toHaveCount(20);
-    await expect(nav.locator('a[data-tool].planned')).toHaveCount(13);
-    await expect(nav.locator('a[data-tool]:not(.planned)')).toHaveText(['Subnet Calculator', 'VLSM Allocator', 'NetForge Subnet & VLAN Planner', 'IP Range Analyzer', 'Route Summarization', 'Timestamp Converter', 'JSON Formatter']);
-    await expect(page.locator('.tool-card')).toHaveCount(7);
+    await expect(nav.locator('a[data-tool].planned')).toHaveCount(11);
+    await expect(nav.locator('a[data-tool]:not(.planned)')).toHaveText(['Subnet Calculator', 'VLSM Allocator', 'NetForge Subnet & VLAN Planner', 'IP Range Analyzer', 'Route Summarization', 'Cron Explainer', 'Schedule Builder', 'Timestamp Converter', 'JSON Formatter']);
+    await expect(page.locator('.tool-card')).toHaveCount(9);
     await expect(page.locator('#brand-version')).toHaveText('v0.1.0-dev');
     expect(errors).toEqual([]);
   });

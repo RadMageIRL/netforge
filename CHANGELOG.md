@@ -6,6 +6,14 @@ All notable changes to NetForge are recorded here. Versions follow [Semantic Ver
 
 ### 0.1.0-dev
 
+Scheduling (ScheduleForge):
+
+- Cron Explainer for standard five-field cron (Vixie rules, including the day-of-month OR day-of-week rule and the AND case when a day field starts with *), Quartz cron (seconds, ?, L, L-n, LW, nW, nL, n#k, years to 2099) and systemd calendar expressions (weekdays, dates, times, repetitions, "~" end-of-month days, shorthands, time zones), each with its own parser; unsupported syntax is refused with the reason.
+- Field-by-field explanations, warnings for common traps, the next 10 runs in a chosen time zone and UTC, DST changes in the next year that affect the schedule, and copy, CSV and JSON export.
+- DST handling stated per scheduler: skipped and repeated local times are shown, marked with the observed systemd 257 behavior or as uncertain where cron daemons, Quartz or Windows Task Scheduler differ or do not document it.
+- Schedule Builder: one schedule translated into standard cron, Quartz, systemd and Windows Task Scheduler (PowerShell and schtasks.exe), each labeled exact, approximate or unsupported, with differences, conditions, DST notes, each output's own next runs, and a systemd timer unit preview. Generated commands use safe quoting, keep placeholders for anything not supplied, request no credentials or elevation, and are never run.
+- Bounded next-run search (400 years or the scheduler's last year, and a cap on candidate times), with a stated reason when fewer runs are found.
+
 Network planning:
 
 - NetForge Subnet & VLAN Planner: sites, VRFs, VLAN namespaces and VLANs in one plan, with IPv4 and IPv6 networks, gateways, DHCP pools, reserved addresses, host targets, descriptions and notes, and optional parent blocks per site.

@@ -4,26 +4,13 @@ import {
   AUTO_MS_THRESHOLD, formatIsoInZone, formatIsoUtc, formatReadable, formatRelative, formatUnixSeconds,
   formatWallIso, parseTimestamp, resolveTimestamp, type ParsedTimestamp, type TimestampMode,
 } from '../../core/time/timestamp';
-import { browserTimeZone, formatOffset, listTimeZones, offsetAt, wallFromUtc, type ZonedInstant } from '../../core/time/zones';
+import { browserTimeZone, formatOffset, offsetAt, wallFromUtc, type ZonedInstant } from '../../core/time/zones';
 import type { ToolMeta, ToolServices } from '../../app/registry';
-import { button, emptyState, notice, panel, resultTable, segmented, selectField, textField, toolPage, type OptionGroup, type ResultRow } from '../../ui/components';
+import { button, emptyState, notice, panel, resultTable, segmented, selectField, textField, toolPage, type ResultRow } from '../../ui/components';
 import { h, replaceChildren } from '../../ui/dom';
+import { DEVICE_ZONE, zoneGroups } from '../../ui/zone-select';
 
-const DEVICE = '';
-
-function zoneGroups(device: string): OptionGroup[] {
-  const byRegion = new Map<string, { value: string; label: string }[]>();
-  for (const zone of listTimeZones()) {
-    if (zone === 'UTC') continue;
-    const region = zone.includes('/') ? zone.slice(0, zone.indexOf('/')) : 'Other';
-    if (!byRegion.has(region)) byRegion.set(region, []);
-    byRegion.get(region)!.push({ value: zone, label: zone.replaceAll('_', ' ') });
-  }
-  return [
-    { label: null, options: [{ value: DEVICE, label: `This device (${device})` }, { value: 'UTC', label: 'UTC' }] },
-    ...[...byRegion.entries()].map(([label, options]) => ({ label, options })),
-  ];
-}
+const DEVICE = DEVICE_ZONE;
 
 /** Clock time of a wall reading, for describing DST transitions: 02:00, or 02:00:30 when seconds matter. */
 function clockTime(epochMsAsWall: number): string {

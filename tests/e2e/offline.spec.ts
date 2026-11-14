@@ -71,6 +71,22 @@ test('the VLAN planner works offline without having been opened online', async (
   await expect(page.locator('#plan-messages .notice-ok')).toHaveText('Opened offline.json: 1 VLAN at 0 sites.');
 });
 
+test('the ScheduleForge tools work offline without having been opened online', async ({ page, context }) => {
+  await page.goto('./');
+  await waitForController(page);
+  await context.setOffline(true);
+  await page.reload();
+  await page.locator('a[data-tool="cron-explainer"]').click();
+  await page.fill('#cron-from', '2026-11-14 12:00');
+  await page.fill('#cron-input', '0 9 * * 1-5');
+  await expect(page.locator('#cron-summary')).toHaveText('At 09:00, on Monday through Friday.');
+  await expect(page.locator('#cron-runs tbody tr').first().locator('td').nth(3)).toHaveText('2026-11-16T14:00:00Z');
+  await page.locator('a[data-tool="schedule-builder"]').click();
+  await page.selectOption('#builder-frequency', 'weekdays');
+  await expect(page.locator('#builder-text-cron')).toHaveText('0 9 * * 1-5');
+  await expect(page.locator('#builder-outputs article')).toHaveCount(5);
+});
+
 test('works under a subpath such as /netforge/, offline too', async ({ page, context }) => {
   const server = await serveDistCopy({ base: '/netforge/' });
   try {

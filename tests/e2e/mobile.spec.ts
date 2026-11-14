@@ -75,6 +75,44 @@ test('the VLAN planner does not scroll sideways at phone width, on any tab', asy
   expect(errors).toEqual([]);
 });
 
+test('the ScheduleForge tools do not scroll sideways at phone width, even with wide results', async ({ page }) => {
+  const errors = watchErrors(page);
+  await page.goto('./#/cron-explainer');
+  await page.fill('#cron-from', '2026-03-08 00:00');
+  await page.fill('#cron-input', '*/20 2 * * *');
+  await expect(page.locator('#cron-runs tr[data-status="nonexistent"]')).toBeVisible();
+  await expectNoHorizontalScroll(page);
+  // The runs table scrolls inside its own region instead of widening the page.
+  const region = await page.locator('#cron-runs').evaluate(el => ({ scroll: el.scrollWidth, client: el.clientWidth }));
+  expect(region.scroll).toBeGreaterThan(region.client);
+  await page.getByRole('radio', { name: 'systemd calendar', exact: true }).check();
+  await page.fill('#cron-input', 'Mon,Wed,Fri *-01,02,03,04,05,06,07,08,09,10,11,12-01..07 00/2:00,15,30,45:00 America/Argentina/Buenos_Aires');
+  await expect(page.locator('#cron-normalized')).toBeVisible();
+  await expectNoHorizontalScroll(page);
+  await page.fill('#cron-input', '*:*/15');
+  await expect(page.locator('#cron-result .caret-block')).toBeVisible();
+  await expectNoHorizontalScroll(page);
+
+  await page.goto('./#/schedule-builder');
+  await page.selectOption('#builder-frequency', 'minutes');
+  await page.fill('#builder-every-minutes', '7');
+  await page.locator('#builder-details summary').click();
+  await page.fill('#builder-name', 'A rather long task name for a phone screen');
+  await page.fill('#builder-program', 'C:\\Program Files\\Some Vendor\\Some Product\\bin\\a-long-program-name.exe');
+  await page.locator('#builder-timer-unit summary').click();
+  for (const t of ['powershell', 'schtasks']) await page.locator(`[data-target="${t}"] details[data-key="runs-${t}"] summary`).click();
+  await expect(page.locator('#builder-runs-schtasks')).toBeVisible();
+  await expectNoHorizontalScroll(page);
+  // No card spills sideways: long identifiers wrap and code scrolls inside its own box.
+  const spilling = await page.locator('#builder-outputs article').evaluateAll(list => list.filter(a => a.scrollWidth > a.clientWidth + 1).map(a => a.getAttribute('data-target')));
+  expect(spilling).toEqual([]);
+  const field = await page.locator('#builder-program').boundingBox();
+  expect(field!.width).toBeGreaterThan(200);
+  const code = await page.locator('#builder-text-powershell').evaluate(el => ({ scroll: el.scrollWidth, client: el.clientWidth }));
+  expect(code.scroll).toBeGreaterThan(code.client);
+  expect(errors).toEqual([]);
+});
+
 test('the VLSM request editor is usable at phone width', async ({ page }) => {
   await page.goto('./#/vlsm-allocator');
   await page.fill('#vlsm-parent', '192.168.0.0/24');

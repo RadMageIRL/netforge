@@ -83,6 +83,56 @@ const STATES: [string, (page: Page) => Promise<void>][] = [
     await page.locator('#plan-example').click();
     await page.getByRole('tab', { name: 'Issues' }).click();
   }],
+  // Phase 3
+  ['cron explainer result', async page => {
+    await page.goto('./#/cron-explainer');
+    await page.fill('#cron-from', '2026-11-14 12:00');
+    await page.fill('#cron-input', '0 0 1-7 * 1');
+    await expect(page.locator('#cron-warnings')).toBeVisible();
+  }],
+  ['cron explainer skipped and repeated times', async page => {
+    await page.goto('./#/cron-explainer');
+    await page.fill('#cron-from', '2026-10-31 12:00');
+    await page.fill('#cron-input', '*/20 1-2 * * *');
+    await expect(page.locator('#cron-runs tr[data-status="uncertain"]').first()).toBeVisible();
+  }],
+  ['cron explainer systemd with skipped repeats', async page => {
+    await page.goto('./#/cron-explainer');
+    await page.getByRole('radio', { name: 'systemd calendar', exact: true }).check();
+    await page.fill('#cron-from', '2026-10-31 12:00');
+    await page.fill('#cron-input', '*-*-* 01:30:00');
+    await expect(page.locator('#cron-runs tr[data-status="skipped"]')).toBeVisible();
+  }],
+  ['cron explainer error with a dialect switch', async page => {
+    await page.goto('./#/cron-explainer');
+    await page.fill('#cron-input', '0 0 12 * * ?');
+    await expect(page.locator('#cron-switch')).toBeVisible();
+  }],
+  ['schedule builder default', async page => { await page.goto('./#/schedule-builder'); await expect(page.locator('#builder-outputs article')).toHaveCount(5); }],
+  ['schedule builder approximate with everything open', async page => {
+    await page.goto('./#/schedule-builder');
+    await page.selectOption('#builder-frequency', 'minutes');
+    await page.fill('#builder-every-minutes', '7');
+    await page.locator('#builder-details summary').click();
+    await page.fill('#builder-name', 'Backup & Sync');
+    await expect(page.locator('[data-target="schtasks"] .fidelity')).toHaveText('Approximate');
+    await page.locator('#builder-timer-unit summary').click();
+    for (const t of ['cron', 'powershell', 'schtasks']) await page.locator(`[data-target="${t}"] details[data-key="runs-${t}"] summary`).click();
+    await expect(page.locator('#builder-runs-schtasks')).toBeVisible();
+  }],
+  ['schedule builder unsupported outputs', async page => {
+    await page.goto('./#/schedule-builder');
+    await page.selectOption('#builder-frequency', 'monthly');
+    await page.getByRole('radio', { name: 'Weekday of the month', exact: true }).check();
+    await page.selectOption('#builder-nth', 'last');
+    await expect(page.locator('[data-target="cron"] .fidelity')).toHaveText('Unsupported');
+  }],
+  ['schedule builder validation errors', async page => {
+    await page.goto('./#/schedule-builder');
+    await page.selectOption('#builder-frequency', 'days');
+    for (const d of [1, 3, 5]) await page.locator(`#builder-day-${d}`).uncheck();
+    await expect(page.locator('#builder-days-error')).toBeVisible();
+  }],
 ];
 
 for (const theme of ['dark', 'light'] as const) {

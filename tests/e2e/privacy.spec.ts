@@ -167,3 +167,57 @@ test('tool input is never written to storage, cookies or caches', async ({ page 
   expect(state.databases).toBe(0);
   expect(state.caches).toBe(0);
 });
+
+test('the ScheduleForge tools send nothing, store nothing and restore nothing after a reload', async ({ page, context, baseURL }) => {
+  const origin = new URL(baseURL!).origin;
+  const log = await recordRequests(context, origin);
+  const secrets = ['43 21 17 * *', 'nf-sentinel-task', 'nf-sentinel.exe', '--nf-sentinel-arg', '2031-07-04'];
+  await openTool(page, 'cron-explainer', 'Cron Explainer');
+  await page.locator('#cron-zone').selectOption('Europe/Berlin');
+  await page.fill('#cron-from', '2031-07-04 08:00');
+  await page.fill('#cron-input', '43 21 17 * *');
+  await expect(page.locator('#cron-summary')).toHaveText('At 21:43, on the 17th of the month.');
+  await page.getByRole('radio', { name: 'systemd calendar', exact: true }).check();
+  await page.fill('#cron-input', '*-*-17 21:43 Europe/Berlin');
+  await expect(page.locator('#cron-normalized')).toBeVisible();
+  const [csv] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'CSV' }).click()]);
+  expect(csv.suggestedFilename()).toBe('schedule-systemd-runs.csv');
+
+  await page.locator('a[data-tool="schedule-builder"]').click();
+  await page.locator('#builder-zone').selectOption('Asia/Tokyo');
+  await page.fill('#builder-start', '2031-07-04');
+  await page.locator('#builder-details summary').click();
+  await page.fill('#builder-name', 'nf-sentinel-task');
+  await page.fill('#builder-program', 'C:\\Secret\\nf-sentinel.exe');
+  await page.fill('#builder-arguments', '--nf-sentinel-arg');
+  await expect(page.locator('#builder-text-schtasks')).toContainText('nf-sentinel-task');
+  const [json] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'JSON', exact: true }).click()]);
+  expect(json.suggestedFilename()).toBe('schedule-builder.json');
+
+  expect(log.blockedExternal).toEqual([]);
+  expect(log.all.filter(r => r.method !== 'GET')).toEqual([]);
+  for (const r of log.all) {
+    expect(new URL(r.url).pathname).toMatch(/^\/(index\.html|theme-boot\.js|favicon\.svg|assets\/[A-Za-z0-9_-]+\.(js|css))?$/);
+    for (const s of secrets) expect(decodeURIComponent(r.url)).not.toContain(s);
+  }
+  const state = await page.evaluate(async () => ({
+    stored: JSON.stringify({ ...localStorage }) + JSON.stringify({ ...sessionStorage }) + document.cookie,
+    keys: Object.keys(localStorage).sort(),
+    databases: (await indexedDB.databases()).length,
+    caches: (await caches.keys()).length,
+  }));
+  for (const s of secrets) expect(state.stored).not.toContain(s);
+  // No new preference: the schedule tools do not even remember the chosen zone.
+  expect(state.keys).toEqual(['netforge.lastTool']);
+  expect([state.databases, state.caches]).toEqual([0, 0]);
+
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1, name: 'Schedule Builder' })).toBeVisible();
+  await expect(page.locator('#builder-name')).toHaveValue('');
+  await expect(page.locator('#builder-program')).toHaveValue('');
+  await expect(page.locator('#builder-zone')).toHaveValue('');
+  await page.goto('./#/cron-explainer');
+  await expect(page.locator('#cron-input')).toHaveValue('');
+  await expect(page.locator('#cron-from')).toHaveValue('');
+  await expect(page.getByRole('radio', { name: 'Standard cron', exact: true })).toBeChecked();
+});

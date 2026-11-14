@@ -48,14 +48,16 @@ export function createCatalog(): ToolRegistry {
 
   // Scheduling
   r.add({
-    id: 'cron-explainer', name: 'Cron Explainer', category: 'scheduling', status: 'planned',
-    summary: 'Explain a cron expression in plain English and list its next run times.',
-    keywords: ['cron', 'crontab', 'quartz', 'schedule', 'next run'],
+    id: 'cron-explainer', name: 'Cron Explainer', category: 'scheduling', status: 'available',
+    summary: 'Explain standard cron, Quartz and systemd calendar expressions field by field, with the next runs in any time zone and UTC.',
+    keywords: ['cron', 'crontab', 'quartz', 'systemd', 'oncalendar', 'calendar', 'schedule', 'next run', 'dst', 'vixie', 'cronie'],
+    load: () => import('../tools/cron-explainer/cron-explainer'),
   });
   r.add({
-    id: 'schedule-builder', name: 'Schedule Builder', category: 'scheduling', status: 'planned',
-    summary: 'Build schedules for cron, systemd timers and Windows Task Scheduler.',
-    keywords: ['systemd', 'timer', 'oncalendar', 'task scheduler', 'schtasks', 'windows', 'cron'],
+    id: 'schedule-builder', name: 'Schedule Builder', category: 'scheduling', status: 'available',
+    summary: 'Build a schedule once and get cron, Quartz, systemd and Windows Task Scheduler versions, each marked exact, approximate or unsupported.',
+    keywords: ['systemd', 'timer', 'oncalendar', 'task scheduler', 'schtasks', 'powershell', 'windows', 'cron', 'quartz', 'schedule'],
+    load: () => import('../tools/schedule-builder/schedule-builder'),
   });
   r.add({
     id: 'timestamp-converter', name: 'Timestamp Converter', category: 'scheduling', status: 'available',
