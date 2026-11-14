@@ -3,6 +3,7 @@
  * registry rows, and Python ipaddress's flags as an independent cross-check.
  */
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -23,6 +24,15 @@ describe('bundled registry data', () => {
   it('is exactly what the generator makes from the files in data/iana', () => {
     const out = execFileSync(process.execPath, [join(ROOT, 'scripts', 'registry', 'build-registry.mjs'), '--check'], { encoding: 'utf8' });
     expect(out).toContain('up to date');
+  });
+
+  it('keeps every registry file byte for byte as downloaded (SHA-256 as recorded in SOURCES.txt)', () => {
+    const sources = readFileSync(join(ROOT, 'data', 'iana', 'SOURCES.txt'), 'utf8');
+    const recorded = [...sources.matchAll(/^(\S+\.(?:csv|xml))\s+https:\S+\s+sha256 ([0-9a-f]{64})/gm)].map(m => [m[1], m[2]]);
+    expect(recorded).toHaveLength(5);
+    for (const [file, hash] of recorded) {
+      expect(createHash('sha256').update(readFileSync(join(ROOT, 'data', 'iana', file))).digest('hex'), file).toBe(hash);
+    }
   });
 
   it('records sources and dates', () => {

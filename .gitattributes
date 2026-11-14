@@ -2,3 +2,6 @@
 * text=auto eol=lf
 *.png binary
 *.ico binary
+# Third-party registry files are kept byte for byte as downloaded, so their recorded SHA-256 hashes verify.
+data/iana/*.csv -text
+data/iana/*.xml -text
