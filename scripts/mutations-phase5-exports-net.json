@@ -1,0 +1,551 @@
+[
+ {
+  "tests": [
+   "tests/unit/export-ios.test.ts",
+   "tests/unit/export-junos.test.ts",
+   "tests/unit/export-devices-grammar.test.ts"
+  ],
+  "mutations": [
+   [
+    "export-dev: unanswered global table ignored",
+    "src/core/infra/devices.ts",
+    "if (context.globalVrfId === GLOBAL_UNSET) return",
+    "if (false) return"
+   ],
+   [
+    "export-dev: chosen global VRF treated as named",
+    "src/core/infra/devices.ts",
+    "if (context.globalVrfId === v.vrf.id) return { kind: 'global' };",
+    "if (false) return { kind: 'global' };"
+   ],
+   [
+    "export-dev: device names read through the prototype chain",
+    "src/core/infra/devices.ts",
+    "Object.hasOwn(context.vrfNames, v.vrf.id)",
+    "(v.vrf.id in context.vrfNames)"
+   ],
+   [
+    "export-dev: device name not trimmed",
+    "src/core/infra/devices.ts",
+    "context.vrfNames[v.vrf.id]!.trim()",
+    "context.vrfNames[v.vrf.id]!"
+   ],
+   [
+    "export-dev: device name length not checked",
+    "src/core/infra/devices.ts",
+    "if (name.length > maxLength || !pattern.test(name)) return",
+    "if (!pattern.test(name)) return"
+   ],
+   [
+    "export-dev: device name characters not checked",
+    "src/core/infra/devices.ts",
+    "if (name.length > maxLength || !pattern.test(name)) return",
+    "if (name.length > maxLength) return"
+   ],
+   [
+    "export-dev: description allows non-ASCII and control characters",
+    "src/core/infra/devices.ts",
+    "if (!isPrintableAscii(text)) return",
+    "if (false) return"
+   ],
+   [
+    "export-dev: description forbidden characters allowed",
+    "src/core/infra/devices.ts",
+    "if (forbidden.test(text)) return",
+    "if (false) return"
+   ],
+   [
+    "export-dev: description limit off by one (low)",
+    "src/core/infra/devices.ts",
+    "if (text.length > DESCRIPTION_MAX) return",
+    "if (text.length >= DESCRIPTION_MAX) return"
+   ],
+   [
+    "export-dev: description limit off by one (high)",
+    "src/core/infra/devices.ts",
+    "if (text.length > DESCRIPTION_MAX) return",
+    "if (text.length > DESCRIPTION_MAX + 1) return"
+   ],
+   [
+    "export-dev: every VLAN ID counted as a duplicate",
+    "src/core/infra/devices.ts",
+    "if (list.length < 2) byNumber.delete(n);",
+    "if (list.length < 1) byNumber.delete(n);"
+   ],
+   [
+    "export-dev: VLANs without an ID grouped as duplicates",
+    "src/core/infra/devices.ts",
+    "    if (v.number === null) continue;\n",
+    ""
+   ],
+   [
+    "export-dev: scope VRF list ignores the site",
+    "src/core/infra/devices.ts",
+    "(scope.siteId === '' || v.siteId === scope.siteId)",
+    "(true)"
+   ],
+   [
+    "export-dev: scope VRF list ignores the namespace",
+    "src/core/infra/devices.ts",
+    "(scope.namespaceId === '' || v.namespaceId === scope.namespaceId)",
+    "(true)"
+   ],
+   [
+    "export-dev: unnamed VRF shown with an empty name",
+    "src/core/infra/devices.ts",
+    "name: v.name.trim() || v.id",
+    "name: v.name.trim()"
+   ],
+   [
+    "export-ios: VLAN 1002 not refused",
+    "src/core/infra/ios.ts",
+    "if (n >= 1002 && n <= 1005) { item.unsupported",
+    "if (n >= 1003 && n <= 1005) { item.unsupported"
+   ],
+   [
+    "export-ios: VLAN 1005 not refused",
+    "src/core/infra/ios.ts",
+    "if (n >= 1002 && n <= 1005) { item.unsupported",
+    "if (n >= 1002 && n <= 1004) { item.unsupported"
+   ],
+   [
+    "export-ios: duplicate VLAN IDs written",
+    "src/core/infra/ios.ts",
+    "if (twins) {",
+    "if (false) {"
+   ],
+   [
+    "export-ios: vlan lines written for VLAN 1",
+    "src/core/infra/ios.ts",
+    "if (n === 1) {",
+    "if (false) {"
+   ],
+   [
+    "export-ios: extended-range step threshold",
+    "src/core/infra/ios.ts",
+    "if (n >= 1006) extended = true;",
+    "if (n >= 1007) extended = true;"
+   ],
+   [
+    "export-ios: shared VLAN names written",
+    "src/core/infra/ios.ts",
+    "(tokenCount.get(t.value.toLowerCase()) ?? 0) > 1) item.unsupported",
+    "(tokenCount.get(t.value.toLowerCase()) ?? 0) > 2) item.unsupported"
+   ],
+   [
+    "export-ios: name uniqueness is case-sensitive",
+    "src/core/infra/ios.ts",
+    "tokenCount.set(t.value.toLowerCase(), (tokenCount.get(t.value.toLowerCase()) ?? 0) + 1);",
+    "tokenCount.set(t.value, (tokenCount.get(t.value) ?? 0) + 1);"
+   ],
+   [
+    "export-ios: unwritten VLANs use up names",
+    "src/core/infra/ios.ts",
+    " || v.number === null || v.number === 1 || (v.number >= 1002 && v.number <= 1005) || duplicates.has(v.number)) continue;",
+    ") continue;"
+   ],
+   [
+    "export-ios: changed name not marked approximate",
+    "src/core/infra/ios.ts",
+    "if (t.kind === 'approximate') item.approximate('Name'",
+    "if (false) item.approximate('Name'"
+   ],
+   [
+    "export-ios: spaces in names joined with a hyphen",
+    "src/core/infra/ios.ts",
+    "nameToken(v.name, IOS_NAME, IOS_VLAN_NAME_MAX, '_')",
+    "nameToken(v.name, IOS_NAME, IOS_VLAN_NAME_MAX, '-')"
+   ],
+   [
+    "export-ios: VLAN name limit raised",
+    "src/core/infra/ios.ts",
+    "export const IOS_VLAN_NAME_MAX = 32;",
+    "export const IOS_VLAN_NAME_MAX = 33;"
+   ],
+   [
+    "export-ios: VLAN name limit lowered",
+    "src/core/infra/ios.ts",
+    "export const IOS_VLAN_NAME_MAX = 32;",
+    "export const IOS_VLAN_NAME_MAX = 31;"
+   ],
+   [
+    "export-ios: VRF name limit raised",
+    "src/core/infra/ios.ts",
+    "export const IOS_VRF_NAME_MAX = 32;",
+    "export const IOS_VRF_NAME_MAX = 33;"
+   ],
+   [
+    "export-ios: VRF name limit lowered",
+    "src/core/infra/ios.ts",
+    "export const IOS_VRF_NAME_MAX = 32;",
+    "export const IOS_VRF_NAME_MAX = 31;"
+   ],
+   [
+    "export-ios: question mark allowed in descriptions",
+    "src/core/infra/ios.ts",
+    "const IOS_DESCRIPTION_FORBIDDEN = /\\?/;",
+    "const IOS_DESCRIPTION_FORBIDDEN = /~~~/;"
+   ],
+   [
+    "export-ios: interface written without knowing its VRF",
+    "src/core/infra/ios.ts",
+    "if (where.kind === 'unknown') item.unsupported('Gateway interface'",
+    "if (false) item.unsupported('Gateway interface'"
+   ],
+   [
+    "export-ios: vrf forwarding left out",
+    "src/core/infra/ios.ts",
+    "          if (where.kind === 'named') { lines.push(` vrf forwarding ${where.name}`); wroteVrf = true; }\n",
+    ""
+   ],
+   [
+    "export-ios: vrf forwarding written after an address",
+    "src/core/infra/ios.ts",
+    "          if (where.kind === 'named') { lines.push(` vrf forwarding ${where.name}`); wroteVrf = true; }\n          const wrote: string[] = [];\n",
+    "          const wrote: string[] = [];\n          if (v.gateway4 !== null && v.net4 !== null && v.net4.length < 32) lines.push(` ip address ${ip4(v.gateway4)} ${mask4(v.net4.length)}`);\n          if (where.kind === 'named') { lines.push(` vrf forwarding ${where.name}`); wroteVrf = true; }\n"
+   ],
+   [
+    "export-ios: /32 interface not refused",
+    "src/core/infra/ios.ts",
+    "v.net4.length === 32 && v.gateway6 === null) item.unsupported('Gateway interface'",
+    "v.net4.length === 33 && v.gateway6 === null) item.unsupported('Gateway interface'"
+   ],
+   [
+    "export-ios: /32 address written on an interface",
+    "src/core/infra/ios.ts",
+    "v.net4.length < 32) { lines.push(` ip address",
+    "v.net4.length <= 32) { lines.push(` ip address"
+   ],
+   [
+    "export-ios: link-local keyword dropped",
+    "src/core/infra/ios.ts",
+    "lines.push(` ipv6 address ${ip6(v.gateway6.value)} link-local`)",
+    "lines.push(` ipv6 address ${ip6(v.gateway6.value)}/64`)"
+   ],
+   [
+    "export-ios: unconfigured IPv6 prefixes not reported",
+    "src/core/infra/ios.ts",
+    "if (v.gateway6 && v.gateway6.home === p) continue;",
+    "if (v.gateway6) continue;"
+   ],
+   [
+    "export-ios: IPv6 routing step missing",
+    "src/core/infra/ios.ts",
+    "wroteIpv6 = true;",
+    "wroteIpv6 = false;"
+   ],
+   [
+    "export-ios: IPv6 routing step always shown",
+    "src/core/infra/ios.ts",
+    "if (wroteIpv6) manualSteps.push",
+    "if (true) manualSteps.push"
+   ],
+   [
+    "export-ios: VLAN section gate",
+    "src/core/infra/ios.ts",
+    "if (sections.vlans) {",
+    "if (true) {"
+   ],
+   [
+    "export-ios: SVI section gate",
+    "src/core/infra/ios.ts",
+    "if (sections.svis) {",
+    "if (true) {"
+   ],
+   [
+    "export-ios: DHCP section gate",
+    "src/core/infra/ios.ts",
+    "if (sections.dhcp && v.pools.length > 0 && v.net4 !== null) {",
+    "if (v.pools.length > 0 && v.net4 !== null) {"
+   ],
+   [
+    "export-ios: only the first pool kept leasable",
+    "src/core/infra/ios.ts",
+    "const excluded = subtractRanges(usable, v.pools);",
+    "const excluded = subtractRanges(usable, v.pools.slice(0, 1));"
+   ],
+   [
+    "export-ios: exclusions computed over the whole network",
+    "src/core/infra/ios.ts",
+    "const excluded = subtractRanges(usable, v.pools);",
+    "const excluded = subtractRanges(net, v.pools);"
+   ],
+   [
+    "export-ios: no exclusions written",
+    "src/core/infra/ios.ts",
+    "const excluded = subtractRanges(usable, v.pools);",
+    "const excluded: typeof v.pools = [];"
+   ],
+   [
+    "export-ios: single excluded address written as a range",
+    "src/core/infra/ios.ts",
+    "e.first === e.last ? '' :",
+    "false ? '' :"
+   ],
+   [
+    "export-ios: excluded-address without its VRF",
+    "src/core/infra/ios.ts",
+    "return p.kind === 'named' ? ` vrf ${p.name}` : '';",
+    "return '';"
+   ],
+   [
+    "export-ios: pool without its VRF",
+    "src/core/infra/ios.ts",
+    "if (where.kind === 'named') { dhcpLines.push(` vrf ${where.name}`); wroteVrf = true; }",
+    "if (false) { dhcpLines.push(` vrf ${where.name}`); wroteVrf = true; }"
+   ],
+   [
+    "export-ios: pool written without knowing its VRF",
+    "src/core/infra/ios.ts",
+    "else if (where.kind === 'unknown') item.unsupported('DHCP pool'",
+    "else if (false) item.unsupported('DHCP pool'"
+   ],
+   [
+    "export-ios: pool written for a network without hosts",
+    "src/core/infra/ios.ts",
+    "if (usable === null) item.unsupported('DHCP pool'",
+    "if (false) item.unsupported('DHCP pool'"
+   ],
+   [
+    "export-ios: default-router left out",
+    "src/core/infra/ios.ts",
+    "if (v.gateway4 !== null) dhcpLines.push(` default-router",
+    "if (false) dhcpLines.push(` default-router"
+   ],
+   [
+    "export-ios: domain-name left out",
+    "src/core/infra/ios.ts",
+    "if (domain !== '') dhcpLines.push(` domain-name",
+    "if (false) dhcpLines.push(` domain-name"
+   ],
+   [
+    "export-ios: DNS servers validated with DHCP off",
+    "src/core/infra/ios.ts",
+    "parseDnsServers(sections.dhcp ? options.dnsServers : '')",
+    "parseDnsServers(options.dnsServers)"
+   ],
+   [
+    "export-ios: unsupported VLANs listed as skipped",
+    "src/core/infra/ios.ts",
+    "if (built.written.length === 0 && built.notes.length === 0) skipped.push",
+    "if (built.written.length === 0) skipped.push"
+   ],
+   [
+    "export-ios: no-section refusal removed",
+    "src/core/infra/ios.ts",
+    "if (!sections.vlans && !sections.svis && !sections.dhcp) refusals.push",
+    "if (false) refusals.push"
+   ],
+   [
+    "export-ios: extended-range step always shown",
+    "src/core/infra/ios.ts",
+    "if (extended) manualSteps.push",
+    "if (true) manualSteps.push"
+   ],
+   [
+    "export-ios: VRF step always shown",
+    "src/core/infra/ios.ts",
+    "if (wroteVrf) manualSteps.push",
+    "if (true) manualSteps.push"
+   ],
+   [
+    "export-junos: VLAN ID 1 written",
+    "src/core/infra/junos.ts",
+    "if (n === 1) {",
+    "if (false) {"
+   ],
+   [
+    "export-junos: duplicate VLAN IDs written",
+    "src/core/infra/junos.ts",
+    "if (twins) {",
+    "if (false) {"
+   ],
+   [
+    "export-junos: reserved names matched case-sensitively",
+    "src/core/infra/junos.ts",
+    "JUNOS_RESERVED_NAMES.has(t.value.toLowerCase())",
+    "JUNOS_RESERVED_NAMES.has(t.value)"
+   ],
+   [
+    "export-junos: reserved names used",
+    "src/core/infra/junos.ts",
+    "else if (JUNOS_RESERVED_NAMES.has(t.value.toLowerCase())) pick",
+    "else if (false) pick"
+   ],
+   [
+    "export-junos: shared names not replaced",
+    "src/core/infra/junos.ts",
+    "(taken.get(pick.name) ?? 0) < 2 ||",
+    "(taken.get(pick.name) ?? 0) < 3 ||"
+   ],
+   [
+    "export-junos: leftover name collision written",
+    "src/core/infra/junos.ts",
+    "if ((finalCount.get(pick.name) ?? 0) > 1) {",
+    "if (false) {"
+   ],
+   [
+    "export-junos: unwritten VLANs use up names",
+    "src/core/infra/junos.ts",
+    " || v.number === 1 || duplicates.has(v.number)) continue;",
+    ") continue;"
+   ],
+   [
+    "export-junos: spaces in names joined with an underscore",
+    "src/core/infra/junos.ts",
+    "nameToken(v.name, JUNOS_NAME, JUNOS_VLAN_NAME_MAX, '-')",
+    "nameToken(v.name, JUNOS_NAME, JUNOS_VLAN_NAME_MAX, '_')"
+   ],
+   [
+    "export-junos: replaced name not marked approximate",
+    "src/core/infra/junos.ts",
+    "if (pick.change) item.approximate('Name'",
+    "if (false) item.approximate('Name'"
+   ],
+   [
+    "export-junos: VLAN name limit lowered",
+    "src/core/infra/junos.ts",
+    "export const JUNOS_VLAN_NAME_MAX = 64;",
+    "export const JUNOS_VLAN_NAME_MAX = 63;"
+   ],
+   [
+    "export-junos: VLAN name limit raised",
+    "src/core/infra/junos.ts",
+    "export const JUNOS_VLAN_NAME_MAX = 64;",
+    "export const JUNOS_VLAN_NAME_MAX = 65;"
+   ],
+   [
+    "export-junos: instance name limit lowered",
+    "src/core/infra/junos.ts",
+    "export const JUNOS_INSTANCE_NAME_MAX = 64;",
+    "export const JUNOS_INSTANCE_NAME_MAX = 63;"
+   ],
+   [
+    "export-junos: instance name limit raised",
+    "src/core/infra/junos.ts",
+    "export const JUNOS_INSTANCE_NAME_MAX = 64;",
+    "export const JUNOS_INSTANCE_NAME_MAX = 65;"
+   ],
+   [
+    "export-junos: instance names allow dots",
+    "src/core/infra/junos.ts",
+    "export const JUNOS_INSTANCE_NAME = /^[A-Za-z0-9_-]+$/;",
+    "export const JUNOS_INSTANCE_NAME = /^[A-Za-z0-9_.-]+$/;"
+   ],
+   [
+    "export-junos: VLAN names may start with a digit",
+    "src/core/infra/junos.ts",
+    "export const JUNOS_NAME = /^[A-Za-z][A-Za-z0-9_-]*$/;",
+    "export const JUNOS_NAME = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;"
+   ],
+   [
+    "export-junos: double quote allowed in descriptions",
+    "src/core/infra/junos.ts",
+    "const JUNOS_DESCRIPTION_FORBIDDEN = /[\"\\\\?]/;",
+    "const JUNOS_DESCRIPTION_FORBIDDEN = /[\\\\?]/;"
+   ],
+   [
+    "export-junos: backslash allowed in descriptions",
+    "src/core/infra/junos.ts",
+    "const JUNOS_DESCRIPTION_FORBIDDEN = /[\"\\\\?]/;",
+    "const JUNOS_DESCRIPTION_FORBIDDEN = /[\"?]/;"
+   ],
+   [
+    "export-junos: question mark allowed in descriptions",
+    "src/core/infra/junos.ts",
+    "const JUNOS_DESCRIPTION_FORBIDDEN = /[\"\\\\?]/;",
+    "const JUNOS_DESCRIPTION_FORBIDDEN = /[\"\\\\]/;"
+   ],
+   [
+    "export-junos: description written without quotes",
+    "src/core/infra/junos.ts",
+    "description \"${text}\"`);",
+    "description ${text}`);"
+   ],
+   [
+    "export-junos: l3-interface for a /32 that has no unit",
+    "src/core/infra/junos.ts",
+    "v.net4.length === 32 && v.gateway6 === null);",
+    "v.net4.length === 33 && v.gateway6 === null);"
+   ],
+   [
+    "export-junos: l3-interface without a written unit",
+    "src/core/infra/junos.ts",
+    "if (writeIrb) vlanLines.push",
+    "if (hasGateway) vlanLines.push"
+   ],
+   [
+    "export-junos: VRF placement evaluated with the IRB section off",
+    "src/core/infra/junos.ts",
+    "const where = sections.irb && hasGateway ? placeVrf",
+    "const where = hasGateway ? placeVrf"
+   ],
+   [
+    "export-junos: link-local length",
+    "src/core/infra/junos.ts",
+    "v.gateway6.linkLocal ? 64 :",
+    "v.gateway6.linkLocal ? 128 :"
+   ],
+   [
+    "export-junos: routing-instance line left out",
+    "src/core/infra/junos.ts",
+    "if (where!.kind === 'named') { instanceLines.push(",
+    "if (false) { instanceLines.push("
+   ],
+   [
+    "export-junos: IRB written without knowing its instance",
+    "src/core/infra/junos.ts",
+    "} else if (where!.kind === 'unknown') item.unsupported('IRB interface'",
+    "} else if (false) item.unsupported('IRB interface'"
+   ],
+   [
+    "export-junos: VLAN section gate",
+    "src/core/infra/junos.ts",
+    "if (sections.vlans) {",
+    "if (true) {"
+   ],
+   [
+    "export-junos: /32 address written on a unit",
+    "src/core/infra/junos.ts",
+    "v.net4.length < 32) { irbLines.push(",
+    "v.net4.length <= 32) { irbLines.push("
+   ],
+   [
+    "export-junos: unconfigured IPv6 prefixes not reported",
+    "src/core/infra/junos.ts",
+    "if (v.gateway6 && v.gateway6.home === p) continue;",
+    "if (v.gateway6) continue;"
+   ],
+   [
+    "export-junos: DHCP pools dropped without a note",
+    "src/core/infra/junos.ts",
+    "if (v.pools.length > 0) item.unsupported('DHCP pools'",
+    "if (false) item.unsupported('DHCP pools'"
+   ],
+   [
+    "export-junos: unsupported VLANs listed as skipped",
+    "src/core/infra/junos.ts",
+    "if (built.written.length === 0 && built.notes.length === 0) skipped.push",
+    "if (built.written.length === 0) skipped.push"
+   ],
+   [
+    "export-junos: no-section refusal removed",
+    "src/core/infra/junos.ts",
+    "if (!sections.vlans && !sections.irb) return refused",
+    "if (false) return refused"
+   ],
+   [
+    "export-junos: instance step always shown",
+    "src/core/infra/junos.ts",
+    "if (wroteInstance) manualSteps.push",
+    "if (true) manualSteps.push"
+   ],
+   [
+    "export-junos: IRB step always shown",
+    "src/core/infra/junos.ts",
+    "if (irbLines.length > 0) manualSteps.push('An IRB",
+    "if (true) manualSteps.push('An IRB"
+   ]
+  ]
+ }
+]

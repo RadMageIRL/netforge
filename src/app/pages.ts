@@ -45,7 +45,7 @@ export function homePage(registry: ToolRegistry): HTMLElement {
         ),
       ))),
     ),
-    h('section', { class: 'home-section', 'aria-labelledby': 'home-planned' },
+    planned.length === 0 ? null : h('section', { class: 'home-section', 'aria-labelledby': 'home-planned' },
       h('h2', { id: 'home-planned', class: 'section-title' }, 'Planned'),
       h('p', { class: 'muted' }, 'These tools are planned and not built yet.'),
       h('div', { class: 'planned-grid' }, registry.listCategories().map(category => {

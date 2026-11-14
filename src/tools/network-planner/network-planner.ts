@@ -9,7 +9,7 @@
 import type { ToolInstance, ToolMeta, ToolServices } from '../../app/registry';
 import { examplePlan } from '../../core/plan/example';
 import { MAX_PLAN_CHARS, parsePlanJson, planToJson } from '../../core/plan/file';
-import { emptyPlan } from '../../core/plan/model';
+import { clonePlan, emptyPlan } from '../../core/plan/model';
 import type { PlanIssue } from '../../core/plan/validate';
 import { button, notice, panel, tabs, textField, toolPage } from '../../ui/components';
 import { h, replaceChildren } from '../../ui/dom';
@@ -17,12 +17,15 @@ import { allocateView } from './allocate-view';
 import { plural } from './common';
 import { issuesView } from './issues-view';
 import { mapView } from './map-view';
+import { setPlanProvider } from '../plan-shared/plan-bridge';
 import { PlanStore } from './store';
 import { structureView } from './structure';
 import { vlanView } from './vlans';
 
 export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta, categoryName: string): ToolInstance {
   const store = new PlanStore(emptyPlan());
+  // The export tools ask for a copy of the plan as it is now. Nothing is stored.
+  setPlanProvider(() => { store.flush(); return clonePlan(store.plan); });
 
   // ---- Plan header: name, file actions, summary --------------------------------------------
   const nameField = textField({ id: 'plan-name', label: 'Plan name', placeholder: 'Campus network 2027' });

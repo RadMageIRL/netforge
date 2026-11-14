@@ -1,4 +1,6 @@
 import { expect, test } from '@playwright/test';
+import { examplePlan } from '../../src/core/plan/example';
+import { planToJson } from '../../src/core/plan/file';
 import { openTool, recordRequests, resultValue } from './helpers';
 
 const SENTINELS = { subnet: '10.77.66.55/27', json: '{"secretToken":"nf-sentinel-7c1e"}', time: '1234567890' };
@@ -325,4 +327,83 @@ test('a worker can only be started from the app\'s own files, and cannot connect
   });
   expect(outcome).toEqual(['blob worker blocked']);
   expect(log.blockedExternal).toEqual([]);
+});
+
+test('the Phase 5 exports and utilities send nothing, store nothing and restore nothing after a reload', async ({ page, context, baseURL }) => {
+  const origin = new URL(baseURL!).origin;
+  const log = await recordRequests(context, origin);
+  const secrets = ['nf-sentinel-vlan', 'nf-sentinel-site', 'nf-sentinel-dhcp-host', 'nf-sentinel-domain', 'nf-sentinel-task', 'nf-sentinel-vrf', 'nf-sentinel-path', '48879'];
+  const plan = examplePlan();
+  plan.name = 'nf-sentinel-site plan';
+  plan.sites[0]!.name = 'nf-sentinel-site';
+  plan.vlans[0]!.name = 'nf-sentinel-vlan';
+  const file = { name: 'private.netforge-plan.json', mimeType: 'application/json', buffer: Buffer.from(planToJson(plan), 'utf8') };
+
+  await openTool(page, 'powershell-generator', 'PowerShell Generator');
+  await page.setInputFiles('#ps-plan-file', file);
+  await page.fill('#ps-computer', 'nf-sentinel-dhcp-host');
+  await page.fill('#ps-domain', 'nf-sentinel-domain.example');
+  await page.fill('#ps-reservations', '10.10.10.5 00-11-22-33-44-55 nf-sentinel-vlan-printer');
+  await expect(page.locator('#ps-code-0')).toContainText("-ComputerName 'nf-sentinel-dhcp-host'");
+  const [ps] = await Promise.all([page.waitForEvent('download'), page.locator('#ps-download-0').click()]);
+  expect(ps.suggestedFilename()).toBe('netforge-dhcp-scopes.ps1');
+  await page.getByRole('radio', { name: 'Scheduled task', exact: true }).check();
+  await page.fill('#ps-task-name', 'nf-sentinel-task');
+  await expect(page.locator('#ps-code-0')).toContainText('nf-sentinel-task');
+
+  await page.locator('a[data-tool="terraform-export"]').click();
+  await page.setInputFiles('#tf-plan-file', file);
+  await expect(page.locator('#tf-code-0')).toContainText('nf-sentinel-vlan');
+  await page.getByRole('radio', { name: 'AWS VPC and subnets', exact: true }).check();
+  await expect(page.locator('#tf-code-0')).toContainText('nf-sentinel-site');
+
+  await page.locator('a[data-tool="network-config-export"]').click();
+  await page.setInputFiles('#nc-plan-file', file);
+  await page.selectOption('#nc-site', { label: 'nf-sentinel-site' });
+  await page.selectOption('#nc-global-vrf', { label: 'Global' });
+  await page.fill('#nc-vrf-name-r2', 'nf-sentinel-vrf');
+  await expect(page.locator('#nc-code-0')).toContainText('vrf forwarding nf-sentinel-vrf');
+  await expect(page.locator('#nc-code-0')).toContainText('name nf-sentinel-vlan');
+
+  await page.locator('a[data-tool="number-bases"]').click();
+  await page.fill('#num-input', '48879');
+  await expect(page.locator('#num-result')).toContainText('beef');
+  await page.locator('a[data-tool="chmod-calculator"]').click();
+  await page.fill('#chmod-path', '/srv/nf-sentinel-path');
+  await page.fill('#chmod-octal', '640');
+  await expect(page.locator('#chmod-ls')).toHaveValue('rw-r-----');
+
+  expect(log.blockedExternal).toEqual([]);
+  expect(log.all.filter(r => r.method !== 'GET')).toEqual([]);
+  for (const r of log.all) {
+    const url = new URL(r.url);
+    expect(url.origin).toBe(origin);
+    expect(url.pathname).toMatch(/^\/(index\.html|theme-boot\.js|favicon\.svg|assets\/[A-Za-z0-9_.-]+\.(js|css))?$/);
+    expect(url.search).toBe('');
+    for (const s of secrets) expect(decodeURIComponent(r.url)).not.toContain(s);
+  }
+  expect(page.url()).toBe(`${origin}/#/chmod-calculator`);
+  const state = await page.evaluate(async () => ({
+    stored: JSON.stringify({ ...localStorage }) + JSON.stringify({ ...sessionStorage }) + document.cookie,
+    keys: Object.keys(localStorage).sort(),
+    databases: (await indexedDB.databases()).length,
+    caches: (await caches.keys()).length,
+  }));
+  for (const s of secrets) expect(state.stored).not.toContain(s);
+  expect(state.keys).toEqual(['netforge.lastTool']);
+  expect([state.databases, state.caches]).toEqual([0, 0]);
+
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1, name: 'chmod Calculator' })).toBeVisible();
+  await expect(page.locator('#chmod-path')).toHaveValue('');
+  for (const [tool, prefix] of [['powershell-generator', 'ps'], ['terraform-export', 'tf'], ['network-config-export', 'nc']]) {
+    await page.goto(`./#/${tool}`);
+    await expect(page.locator(`#${prefix}-plan-summary`)).toHaveText('No plan chosen yet.');
+    await expect(page.locator(`#${prefix}-code-0`)).toHaveCount(0);
+  }
+  await expect(page.locator('#nc-vrf-names input')).toHaveCount(0);
+  await page.goto('./#/powershell-generator');
+  for (const field of ['#ps-computer', '#ps-domain', '#ps-reservations', '#ps-task-name']) await expect(page.locator(field)).toHaveValue('');
+  await page.goto('./#/number-bases');
+  await expect(page.locator('#num-input')).toHaveValue('');
 });

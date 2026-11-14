@@ -1,0 +1,454 @@
+[
+ {
+  "tests": [
+   "tests/unit/export-hcl.test.ts"
+  ],
+  "mutations": [
+   [
+    "export-hcl: backslash not escaped",
+    "src/core/infra/hcl.ts",
+    "if (ch === '\\\\') out += '\\\\\\\\';",
+    "if (ch === '\\\\') out += '\\\\';"
+   ],
+   [
+    "export-hcl: double quote not escaped",
+    "src/core/infra/hcl.ts",
+    "else if (ch === '\"') out += '\\\\\"';",
+    "else if (ch === '\"') out += '\"';"
+   ],
+   [
+    "export-hcl: line feed written raw",
+    "src/core/infra/hcl.ts",
+    "else if (ch === '\\n') out += '\\\\n';",
+    "else if (ch === '\\n') out += '\\n';"
+   ],
+   [
+    "export-hcl: carriage return written raw",
+    "src/core/infra/hcl.ts",
+    "else if (ch === '\\r') out += '\\\\r';",
+    "else if (ch === '\\r') out += '\\r';"
+   ],
+   [
+    "export-hcl: tab written raw",
+    "src/core/infra/hcl.ts",
+    "else if (ch === '\\t') out += '\\\\t';",
+    "else if (ch === '\\t') out += '\\t';"
+   ],
+   [
+    "export-hcl: interpolation opener not doubled",
+    "src/core/infra/hcl.ts",
+    "((ch === '$' || ch",
+    "((ch"
+   ],
+   [
+    "export-hcl: directive opener not doubled",
+    "src/core/infra/hcl.ts",
+    " || ch === '%') && text[i + 1]",
+    ") && text[i + 1]"
+   ],
+   [
+    "export-hcl: template openers left live",
+    "src/core/infra/hcl.ts",
+    "text[i + 1] === '{') out += ch + ch;",
+    "text[i + 1] === '{') out += ch;"
+   ],
+   [
+    "export-hcl: every dollar and percent doubled",
+    "src/core/infra/hcl.ts",
+    " && text[i + 1] === '{') out += ch + ch;",
+    ") out += ch + ch;"
+   ],
+   [
+    "export-hcl: unicode escape two digits wide",
+    "src/core/infra/hcl.ts",
+    ".toString(16).padStart(4, '0')",
+    ".toString(16).padStart(2, '0')"
+   ],
+   [
+    "export-hcl: unicode escape in decimal",
+    "src/core/infra/hcl.ts",
+    "ch.charCodeAt(0).toString(16)",
+    "ch.charCodeAt(0).toString(10)"
+   ],
+   [
+    "export-hcl: DEL written raw",
+    "src/core/infra/hcl.ts",
+    "\\x7f-\\x9f",
+    "\\x80-\\x9f"
+   ],
+   [
+    "export-hcl: right-to-left override written raw",
+    "src/core/infra/hcl.ts",
+    "${ch(0x202a)}-${ch(0x202e)}",
+    "${ch(0x202a)}-${ch(0x202d)}"
+   ],
+   [
+    "export-hcl: byte order mark written raw",
+    "src/core/infra/hcl.ts",
+    "${ch(0x2069)}${ch(0xfeff)}]",
+    "${ch(0x2069)}]"
+   ],
+   [
+    "export-hcl: line separator written raw",
+    "src/core/infra/hcl.ts",
+    "${ch(0x2028)}${ch(0x2029)}",
+    "${ch(0x2029)}"
+   ],
+   [
+    "export-hcl: lone surrogate written",
+    "src/core/infra/hcl.ts",
+    "  if (hasLoneSurrogate(text)) return null;",
+    "  if (false) return null;"
+   ],
+   [
+    "export-hcl: surrogate pair seen as lone",
+    "src/core/infra/hcl.ts",
+    "{ i++; continue; }",
+    "{ continue; }"
+   ],
+   [
+    "export-hcl: lone low surrogate missed",
+    "src/core/infra/hcl.ts",
+    "if (c >= 0xdc00 && c <= 0xdfff) return true;",
+    "if (c >= 0xdc00 && c <= 0xdfff) return false;"
+   ],
+   [
+    "export-hcl: highest high surrogate missed",
+    "src/core/infra/hcl.ts",
+    "if (c >= 0xd800 && c <= 0xdbff) {",
+    "if (c >= 0xd800 && c <= 0xdaff) {"
+   ],
+   [
+    "export-hcl: identifier may start with a digit",
+    "src/core/infra/hcl.ts",
+    "const IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/;",
+    "const IDENTIFIER = /^[A-Za-z0-9_]+$/;"
+   ],
+   [
+    "export-hcl: identifier may hold a colon or hyphen",
+    "src/core/infra/hcl.ts",
+    "const IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/;",
+    "const IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_:-]*$/;"
+   ],
+   [
+    "export-hcl: object keys never quoted",
+    "src/core/infra/hcl.ts",
+    "(isHclIdentifier(k) ? k : hclValue(k))",
+    "(true ? k : hclValue(k))"
+   ],
+   [
+    "export-hcl: fractions and unsafe numbers written",
+    "src/core/infra/hcl.ts",
+    "if (!Number.isSafeInteger(value)) throw",
+    "if (false) throw"
+   ],
+   [
+    "export-hcl: no comma between list elements",
+    "src/core/infra/hcl.ts",
+    "${inner}${hclValue(v, indent + 1)},`).join(",
+    "${inner}${hclValue(v, indent + 1)}`).join("
+   ]
+  ]
+ },
+ {
+  "tests": [
+   "tests/unit/export-terraform.test.ts"
+  ],
+  "mutations": [
+   [
+    "export-tf: VPC block shorter than /16 accepted",
+    "src/core/infra/terraform.ts",
+    "vpcCidr.length < 16 || vpcCidr.length > 28",
+    "vpcCidr.length < 15 || vpcCidr.length > 28"
+   ],
+   [
+    "export-tf: VPC block longer than /28 accepted",
+    "src/core/infra/terraform.ts",
+    "vpcCidr.length < 16 || vpcCidr.length > 28",
+    "vpcCidr.length < 16 || vpcCidr.length > 29"
+   ],
+   [
+    "export-tf: IPv6 VPC block shorter than /44 accepted",
+    "src/core/infra/terraform.ts",
+    "vpc6.length < 44 ||",
+    "vpc6.length < 40 ||"
+   ],
+   [
+    "export-tf: IPv6 VPC block longer than /60 accepted",
+    "src/core/infra/terraform.ts",
+    "vpc6.length > 60 ||",
+    "vpc6.length > 64 ||"
+   ],
+   [
+    "export-tf: IPv6 VPC block step of four not checked",
+    "src/core/infra/terraform.ts",
+    " || vpc6.length % 4 !== 0) {",
+    ") {"
+   ],
+   [
+    "export-tf: subnet longer than /28 written",
+    "src/core/infra/terraform.ts",
+    "v.net4.length < 16 || v.net4.length > 28",
+    "v.net4.length < 16 || v.net4.length > 29"
+   ],
+   [
+    "export-tf: subnet outside the VPC block written",
+    "src/core/infra/terraform.ts",
+    "    if (!inside(vpcCidr, v.net4)) {",
+    "    if (false) {"
+   ],
+   [
+    "export-tf: inside ignores the upper end",
+    "src/core/infra/terraform.ts",
+    "o.first <= i.first && i.last <= o.last;",
+    "o.first <= i.first;"
+   ],
+   [
+    "export-tf: inside ignores the lower end",
+    "src/core/infra/terraform.ts",
+    "o.first <= i.first && i.last <= o.last;",
+    "i.last <= o.last;"
+   ],
+   [
+    "export-tf: AWS router taken to be the second host",
+    "src/core/infra/terraform.ts",
+    "v.gateway4 !== null && v.gateway4 !== net.first + 1n)",
+    "v.gateway4 !== null && v.gateway4 !== net.first + 2n)"
+   ],
+   [
+    "export-tf: only two reserved addresses counted",
+    "src/core/infra/terraform.ts",
+    "prefixSize(4, v.net4.length) - 5n;",
+    "prefixSize(4, v.net4.length) - 2n;"
+   ],
+   [
+    "export-tf: six reserved addresses counted",
+    "src/core/infra/terraform.ts",
+    "prefixSize(4, v.net4.length) - 5n;",
+    "prefixSize(4, v.net4.length) - 6n;"
+   ],
+   [
+    "export-tf: capacity note at exactly the usable count",
+    "src/core/infra/terraform.ts",
+    "hosts !== null && hosts > awsUsable)",
+    "hosts !== null && hosts >= awsUsable)"
+   ],
+   [
+    "export-tf: metadata tags written when turned off",
+    "src/core/infra/terraform.ts",
+    "      if (key !== 'Name' && !options.metadataTags) continue;",
+    "      if (false) continue;"
+   ],
+   [
+    "export-tf: empty tags written",
+    "src/core/infra/terraform.ts",
+    "      if (value === '') continue;",
+    "      if (false) continue;"
+   ],
+   [
+    "export-tf: tag value of 256 characters refused",
+    "src/core/infra/terraform.ts",
+    "if ([...value].length > TAG_VALUE_MAX)",
+    "if ([...value].length >= TAG_VALUE_MAX)"
+   ],
+   [
+    "export-tf: tag length counted in UTF-16 units",
+    "src/core/infra/terraform.ts",
+    "if ([...value].length > TAG_VALUE_MAX)",
+    "if (value.length > TAG_VALUE_MAX)"
+   ],
+   [
+    "export-tf: at sign refused in tags",
+    "src/core/infra/terraform.ts",
+    "+\\-=._:/@]*$/u;",
+    "+\\-=._:/]*$/u;"
+   ],
+   [
+    "export-tf: any character accepted in tags",
+    "src/core/infra/terraform.ts",
+    "  if (!TAG_VALUE.test(value)) return",
+    "  if (false) return"
+   ],
+   [
+    "export-tf: IPv6 prefix that is not a /64 written",
+    "src/core/infra/terraform.ts",
+    "      else if (first.length !== 64) item",
+    "      else if (false) item"
+   ],
+   [
+    "export-tf: IPv6 prefix outside the VPC block written",
+    "src/core/infra/terraform.ts",
+    "      else if (!inside(vpc6, first)) item",
+    "      else if (false) item"
+   ],
+   [
+    "export-tf: second IPv6 prefix dropped silently",
+    "src/core/infra/terraform.ts",
+    "if (vpc6 && v.net6.length > 1) item",
+    "if (vpc6 && v.net6.length > 2) item"
+   ],
+   [
+    "export-tf: IPv6 gateway dropped silently",
+    "src/core/infra/terraform.ts",
+    "      if (v.gateway6) item.unsupported('IPv6 gateway'",
+    "      if (false) item.unsupported('IPv6 gateway'"
+   ],
+   [
+    "export-tf: an Availability Zone invented",
+    "src/core/infra/terraform.ts",
+    "availability_zone: new HclRaw(`var.netforge_availability_zones[\"${key}\"]`),",
+    "availability_zone: 'us-east-1a',"
+   ],
+   [
+    "export-tf: subnet limit off by one",
+    "src/core/infra/terraform.ts",
+    "if (vlans.length > AWS_MAX_SUBNETS) return",
+    "if (vlans.length >= AWS_MAX_SUBNETS) return"
+   ],
+   [
+    "export-tf: route exchange seen from one side only",
+    "src/core/infra/terraform.ts",
+    " || plan.vrfs.some(v => v.exchangesWith.includes(vrf.id))) vpcItem",
+    " || false) vpcItem"
+   ],
+   [
+    "export-tf: resource names reused",
+    "src/core/infra/terraform.ts",
+    "    this.used.add(name);",
+    "    void name;"
+   ],
+   [
+    "export-tf: IPv4 block of another VRF accepted",
+    "src/core/infra/terraform.ts",
+    "b.id === options.blockId && b.vrfId === vrf.id)",
+    "b.id === options.blockId)"
+   ],
+   [
+    "export-tf: IPv6 block of another VRF accepted",
+    "src/core/infra/terraform.ts",
+    "b.id === options.ipv6BlockId && b.vrfId === vrf.id)",
+    "b.id === options.ipv6BlockId)"
+   ],
+   [
+    "export-tf: lone surrogate left in variable values",
+    "src/core/infra/terraform.ts",
+    "    if (hasLoneSurrogate(value)) { dropped.push(path); return null; }",
+    "    if (false) { dropped.push(path); return null; }"
+   ],
+   [
+    "export-tf: VLAN ID note missing",
+    "src/core/infra/terraform.ts",
+    "    if (v.number !== null) item.approximate('VLAN ID'",
+    "    if (false) item.approximate('VLAN ID'"
+   ],
+   [
+    "export-tf: DHCP pools dropped silently",
+    "src/core/infra/terraform.ts",
+    "    if (v.pools.length > 0) item.unsupported('DHCP pools'",
+    "    if (false) item.unsupported('DHCP pools'"
+   ],
+   [
+    "export-tf: reserved addresses dropped silently",
+    "src/core/infra/terraform.ts",
+    "    if (v.reserved4.length > 0) item.unsupported('Reserved addresses'",
+    "    if (false) item.unsupported('Reserved addresses'"
+   ],
+   [
+    "export-tf: description dropped silently",
+    "src/core/infra/terraform.ts",
+    "    if (v.vlan.description.trim() !== '') item.unsupported('Description'",
+    "    if (false) item.unsupported('Description'"
+   ],
+   [
+    "export-tf: VPC meaning note missing",
+    "src/core/infra/terraform.ts",
+    "  vpcItem.approximate('Meaning',",
+    "  vpcItem.remark("
+   ],
+   [
+    "export-tf: subnet does not wait for the IPv6 association",
+    "src/core/infra/terraform.ts",
+    "        body.depends_on = new HclRaw(`[aws_vpc_ipv6_cidr_block_association.${assocName}]`);\n",
+    ""
+   ],
+   [
+    "export-json: every site included in a filtered export",
+    "src/core/infra/neutral.ts",
+    "    if (!whole && !siteIds.has(s.id)) continue;",
+    "    if (false) continue;"
+   ],
+   [
+    "export-json: every VRF included in a filtered export",
+    "src/core/infra/neutral.ts",
+    "    if (!whole && !vrfIds.has(v.id)) continue;",
+    "    if (false) continue;"
+   ],
+   [
+    "export-json: every namespace included in a filtered export",
+    "src/core/infra/neutral.ts",
+    "    if (!whole && !nsIds.has(n.id)) continue;",
+    "    if (false) continue;"
+   ],
+   [
+    "export-json: parent blocks of other VRFs included",
+    "src/core/infra/neutral.ts",
+    "      if (scope.vrfId !== '' && b.vrfId !== scope.vrfId) continue;",
+    "      if (false) continue;"
+   ],
+   [
+    "export-json: named site left out when unused",
+    "src/core/infra/neutral.ts",
+    "  if (scope.siteId !== '') siteIds.add(scope.siteId);",
+    "  if (false) siteIds.add(scope.siteId);"
+   ],
+   [
+    "export-json: named VRF left out when unused",
+    "src/core/infra/neutral.ts",
+    "  if (scope.vrfId !== '') vrfIds.add(scope.vrfId);",
+    "  if (false) vrfIds.add(scope.vrfId);"
+   ],
+   [
+    "export-json: named namespace left out when unused",
+    "src/core/infra/neutral.ts",
+    "  if (scope.namespaceId !== '') nsIds.add(scope.namespaceId);",
+    "  if (false) nsIds.add(scope.namespaceId);"
+   ],
+   [
+    "export-json: scope ignored",
+    "src/core/infra/neutral.ts",
+    "  const whole = scope.siteId === '' && scope.vrfId === '' && scope.namespaceId === '';",
+    "  const whole = true;"
+   ],
+   [
+    "export-json: VRF site written as empty text",
+    "src/core/infra/neutral.ts",
+    "site: v.siteId === '' ? null : v.siteId, exchanges_routes_with",
+    "site: v.siteId, exchanges_routes_with"
+   ],
+   [
+    "export-json: namespace site written as empty text",
+    "src/core/infra/neutral.ts",
+    "site: n.siteId === '' ? null : n.siteId, description",
+    "site: n.siteId, description"
+   ],
+   [
+    "export-json: IPv4 reservation labeled IPv6",
+    "src/core/infra/neutral.ts",
+    "v.reserved4.map(r => reserved(4, r.range, r.label))",
+    "v.reserved4.map(r => reserved(6, r.range, r.label))"
+   ],
+   [
+    "export-json: pool end replaced by its start",
+    "src/core/infra/neutral.ts",
+    "({ first: ip4(p.first), last: ip4(p.last) })",
+    "({ first: ip4(p.first), last: ip4(p.first) })"
+   ],
+   [
+    "export-json: empty selection exported",
+    "src/core/infra/neutral.ts",
+    "  if (count === 0) return refused(['No VLAN is in this selection.']);",
+    "  if (false) return refused(['No VLAN is in this selection.']);"
+   ]
+  ]
+ }
+]

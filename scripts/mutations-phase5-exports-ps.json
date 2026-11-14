@@ -1,0 +1,528 @@
+[
+ {
+  "tests": [
+   "tests/unit/export-model.test.ts",
+   "tests/unit/export-powershell.test.ts"
+  ],
+  "mutations": [
+   [
+    "export-model: nothing written labeled approximate",
+    "src/core/infra/model.ts",
+    "this.written.length === 0 ? 'unsupported'",
+    "this.written.length === 0 ? 'approximate'"
+   ],
+   [
+    "export-model: one field note still exact",
+    "src/core/infra/model.ts",
+    "this.notes.length > 0 ? 'approximate' : 'exact'",
+    "this.notes.length > 1 ? 'approximate' : 'exact'"
+   ],
+   [
+    "export-model: refusal keeps privileges",
+    "src/core/infra/model.ts",
+    "privileges: [], counts: countItems(items),",
+    "privileges: parts.privileges ?? [], counts: countItems(items),"
+   ],
+   [
+    "export-model: refusal marked ok",
+    "src/core/infra/model.ts",
+    "ok: false, refusals, files: [], items",
+    "ok: true, refusals, files: [], items"
+   ],
+   [
+    "export-model: refusal keeps files",
+    "src/core/infra/model.ts",
+    "ok: false, refusals, files: [], items",
+    "ok: false, refusals, files: parts.files ?? [], items"
+   ],
+   [
+    "export-model: every item counted exact",
+    "src/core/infra/model.ts",
+    "for (const item of items) counts[item.fidelity]++;",
+    "for (const item of items) counts.exact += item ? 1 : 0;"
+   ],
+   [
+    "export-model: account drops the first field note",
+    "src/core/infra/model.ts",
+    "for (const n of item.notes) lines.push(",
+    "for (const n of item.notes.slice(1)) lines.push("
+   ],
+   [
+    "export-model: account hides the refusal",
+    "src/core/infra/model.ts",
+    "if (!o.ok) list('Nothing was generated', o.refusals);",
+    "if (o.ok) list('Nothing was generated', o.refusals);"
+   ],
+   [
+    "export-model: plan errors do not stop an export",
+    "src/core/infra/source.ts",
+    "if (errors) return { ok: false, refusals: errors };",
+    "if (errors && false) return { ok: false, refusals: errors };"
+   ],
+   [
+    "export-model: warnings stop an export",
+    "src/core/infra/source.ts",
+    "validation.issues.filter(i => i.severity === 'error')",
+    "validation.issues.filter(i => i.severity !== 'info')"
+   ],
+   [
+    "export-model: one error too many listed",
+    "src/core/infra/source.ts",
+    "errors.slice(0, ERRORS_LISTED)",
+    "errors.slice(0, ERRORS_LISTED + 1)"
+   ],
+   [
+    "export-model: \"more\" line at exactly the limit",
+    "src/core/infra/source.ts",
+    "if (errors.length > ERRORS_LISTED) lines.push",
+    "if (errors.length >= ERRORS_LISTED) lines.push"
+   ],
+   [
+    "export-model: empty plan exported",
+    "src/core/infra/source.ts",
+    "if (plan.vlans.length === 0) return",
+    "if (plan.vlans.length < 0) return"
+   ],
+   [
+    "export-model: site filter ignored",
+    "src/core/infra/source.ts",
+    "return (scope.siteId === '' || v.vlan.siteId === scope.siteId)",
+    "return (scope.siteId === '' || true)"
+   ],
+   [
+    "export-model: VRF filter ignored",
+    "src/core/infra/source.ts",
+    "&& (scope.vrfId === '' || v.vlan.vrfId === scope.vrfId)",
+    "&& (scope.vrfId === '' || true)"
+   ],
+   [
+    "export-model: namespace filter ignored",
+    "src/core/infra/source.ts",
+    "&& (scope.namespaceId === '' || v.vlan.namespaceId === scope.namespaceId);",
+    "&& (scope.namespaceId === '' || true);"
+   ],
+   [
+    "export-model: VLAN order reversed",
+    "src/core/infra/source.ts",
+    "(a.v.number ?? 100_000) - (b.v.number ?? 100_000)",
+    "(b.v.number ?? 100_000) - (a.v.number ?? 100_000)"
+   ],
+   [
+    "export-model: VLANs without an ID sorted first",
+    "src/core/infra/source.ts",
+    "(a.v.number ?? 100_000)",
+    "(a.v.number ?? 0)"
+   ],
+   [
+    "export-model: /31 given a host range",
+    "src/core/infra/source.ts",
+    "if (p.length >= 31) return null;",
+    "if (p.length >= 32) return null;"
+   ],
+   [
+    "export-model: host range includes the network address",
+    "src/core/infra/source.ts",
+    "first: r.first + 1n, last: r.last - 1n",
+    "first: r.first, last: r.last - 1n"
+   ],
+   [
+    "export-model: host range includes the broadcast address",
+    "src/core/infra/source.ts",
+    "first: r.first + 1n, last: r.last - 1n",
+    "first: r.first + 1n, last: r.last"
+   ],
+   [
+    "export-model: mask one bit short",
+    "src/core/infra/source.ts",
+    "((1n << BigInt(32 - length)) - 1n)",
+    "((1n << BigInt(33 - length)) - 1n)"
+   ],
+   [
+    "export-model: overlap reported one way only",
+    "src/core/infra/source.ts",
+    "      add(withNet[j]!.v, withNet[i]!.v);",
+    "      void 0;"
+   ],
+   [
+    "export-model: overlap with the next network missed",
+    "src/core/infra/source.ts",
+    "for (let j = i + 1; j < withNet.length",
+    "for (let j = i + 2; j < withNet.length"
+   ],
+   [
+    "export-model: link-local range cut to fe80::/16",
+    "src/core/infra/source.ts",
+    "const LINK_LOCAL_LAST = (0xfec0n << 112n) - 1n;",
+    "const LINK_LOCAL_LAST = (0xfe81n << 112n) - 1n;"
+   ],
+   [
+    "export-model: pools not merged or sorted",
+    "src/core/infra/source.ts",
+    "pools: mergeRanges(pools), reserved4",
+    "pools, reserved4"
+   ],
+   [
+    "export-model: unknown site in scope accepted",
+    "src/core/infra/source.ts",
+    "if (scope.siteId !== '' && !plan.sites.some(",
+    "if (scope.siteId === '' && !plan.sites.some("
+   ],
+   [
+    "export-model: unknown VRF in scope accepted",
+    "src/core/infra/source.ts",
+    "if (scope.vrfId !== '' && !plan.vrfs.some(",
+    "if (scope.vrfId === '' && !plan.vrfs.some("
+   ],
+   [
+    "export-model: C1 controls not seen as control characters",
+    "src/core/infra/text.ts",
+    "\\x7f-\\x9f${String",
+    "\\x7f${String"
+   ],
+   [
+    "export-model: line separator U+2028 not seen as a control character",
+    "src/core/infra/text.ts",
+    "String.fromCharCode(0x2028, 0x2029)",
+    "String.fromCharCode(0x2029)"
+   ],
+   [
+    "export-model: one DNS server too few allowed",
+    "src/core/infra/text.ts",
+    "if (parts.length > MAX_DNS_SERVERS)",
+    "if (parts.length >= MAX_DNS_SERVERS)"
+   ],
+   [
+    "export-model: duplicate DNS servers accepted",
+    "src/core/infra/text.ts",
+    "if (values.includes(shown)) return",
+    "if (false && values.includes(shown)) return"
+   ],
+   [
+    "export-model: IPv6 DNS servers accepted",
+    "src/core/infra/text.ts",
+    "const a = parseAddress(part, 4);",
+    "const a = parseAddress(part);"
+   ],
+   [
+    "export-model: DNS label may end in a hyphen",
+    "src/core/infra/text.ts",
+    "/^[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/",
+    "/^[A-Za-z0-9]([A-Za-z0-9-]{0,62})?$/"
+   ],
+   [
+    "export-model: DNS label may hold a space",
+    "src/core/infra/text.ts",
+    "/^[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/",
+    "/^[A-Za-z0-9]([A-Za-z0-9 -]{0,61}[A-Za-z0-9])?$/"
+   ],
+   [
+    "export-model: DNS name length limit raised",
+    "src/core/infra/text.ts",
+    "if (name.length > 253)",
+    "if (name.length > 255)"
+   ],
+   [
+    "export-model: MAC with mixed separators accepted",
+    "src/core/infra/text.ts",
+    "/^[0-9A-Fa-f]{2}(-[0-9A-Fa-f]{2}){5}$/",
+    "/^[0-9A-Fa-f]{2}([:-][0-9A-Fa-f]{2}){5}$/"
+   ],
+   [
+    "export-model: MAC longer than six bytes accepted",
+    "src/core/infra/text.ts",
+    "/^[0-9A-Fa-f]{12}$/",
+    "/^[0-9A-Fa-f]{12,}$/"
+   ],
+   [
+    "export-model: MAC case kept",
+    "src/core/infra/text.ts",
+    "return t.replace(/[^0-9A-Fa-f]/g, '').toLowerCase();",
+    "return t.replace(/[^0-9A-Fa-f]/g, '');"
+   ],
+   [
+    "export-model: name one character over the limit accepted",
+    "src/core/infra/text.ts",
+    "if (pattern.test(name) && name.length <= maxLength) return { kind: 'exact'",
+    "if (pattern.test(name) && name.length <= maxLength + 1) return { kind: 'exact'"
+   ],
+   [
+    "export-model: joined name not checked against the pattern",
+    "src/core/infra/text.ts",
+    "if (joined !== name && pattern.test(joined) && joined.length <= maxLength)",
+    "if (joined !== name && joined.length <= maxLength)"
+   ],
+   [
+    "export-model: slug keeps dots",
+    "src/core/infra/text.ts",
+    ".replace(/[^a-z0-9]+/g, '_')",
+    ".replace(/[^a-z0-9.]+/g, '_')"
+   ]
+  ]
+ },
+ {
+  "tests": [
+   "tests/unit/export-powershell.test.ts",
+   "tests/unit/export-powershell-oracle.test.ts"
+  ],
+  "mutations": [
+   [
+    "export-ps: stop-parsing token written as a plain quoted argument",
+    "src/core/infra/powershell.ts",
+    "return text === STOP_PARSING ? `(${q.value})` : q.value;",
+    "return q.value;"
+   ],
+   [
+    "export-ps: C1 control characters written",
+    "src/core/infra/powershell.ts",
+    "if (hasControl(text) || hasLoneSurrogate(text)) return null;",
+    "if (hasLoneSurrogate(text)) return null;"
+   ],
+   [
+    "export-ps: half surrogate pairs written",
+    "src/core/infra/powershell.ts",
+    "if (hasControl(text) || hasLoneSurrogate(text)) return null;",
+    "if (hasControl(text)) return null;"
+   ],
+   [
+    "export-ps: reservation name not quoted by the literal writer",
+    "src/core/infra/powershell.ts",
+    "` -Name ${literal(r.name)}`",
+    "` -Name '${r.name}'`"
+   ],
+   [
+    "export-ps: description not quoted by the literal writer",
+    "src/core/infra/powershell.ts",
+    "else description = ` -Description ${q}`;",
+    "else description = ` -Description '${text}'`;"
+   ],
+   [
+    "export-ps: scopes active unless asked",
+    "src/core/infra/powershell.ts",
+    "-State ${options.activate ? 'Active' : 'InActive'}",
+    "-State ${options.activate ? 'InActive' : 'Active'}"
+   ],
+   [
+    "export-ps: activate on by default",
+    "src/core/infra/powershell.ts",
+    "activate: false, reservations: ''",
+    "activate: true, reservations: ''"
+   ],
+   [
+    "export-ps: scope starts after the first host address",
+    "src/core/infra/powershell.ts",
+    "-StartRange ${ip4(usable.first)} -EndRange ${ip4(usable.last)} -SubnetMask",
+    "-StartRange ${ip4(usable.first + 1n)} -EndRange ${ip4(usable.last)} -SubnetMask"
+   ],
+   [
+    "export-ps: scope ends before the last host address",
+    "src/core/infra/powershell.ts",
+    "-StartRange ${ip4(usable.first)} -EndRange ${ip4(usable.last)} -SubnetMask",
+    "-StartRange ${ip4(usable.first)} -EndRange ${ip4(usable.last - 1n)} -SubnetMask"
+   ],
+   [
+    "export-ps: first pool not kept out of the exclusions",
+    "src/core/infra/powershell.ts",
+    "const excluded = subtractRanges(usable, v.pools);",
+    "const excluded = subtractRanges(usable, v.pools.slice(1));"
+   ],
+   [
+    "export-ps: exclusion runs one address into the pool",
+    "src/core/infra/powershell.ts",
+    "-StartRange ${ip4(e.first)} -EndRange ${ip4(e.last)}`",
+    "-StartRange ${ip4(e.first)} -EndRange ${ip4(e.last + 1n)}`"
+   ],
+   [
+    "export-ps: exclusion starts one address late",
+    "src/core/infra/powershell.ts",
+    "-StartRange ${ip4(e.first)} -EndRange ${ip4(e.last)}`",
+    "-StartRange ${ip4(e.first + 1n)} -EndRange ${ip4(e.last)}`"
+   ],
+   [
+    "export-ps: overlapping scopes written",
+    "src/core/infra/powershell.ts",
+    "const clash = clashes.get(v.vlan.id);",
+    "const clash = clashes.get(`${v.vlan.id}?`);"
+   ],
+   [
+    "export-ps: networks without pools counted as clashes",
+    "src/core/infra/powershell.ts",
+    "overlappingNetworks(vlans.filter(v => v.pools.length > 0))",
+    "overlappingNetworks(vlans)"
+   ],
+   [
+    "export-ps: scope written for a VLAN without pools",
+    "src/core/infra/powershell.ts",
+    "    if (v.pools.length === 0) {",
+    "    if (v.pools.length < 0) {"
+   ],
+   [
+    "export-ps: router option one address off",
+    "src/core/infra/powershell.ts",
+    "`-Router ${ip4(v.gateway4)}`",
+    "`-Router ${ip4(v.gateway4 + 1n)}`"
+   ],
+   [
+    "export-ps: empty DNS option written",
+    "src/core/infra/powershell.ts",
+    "if (dns.values.length > 0) optionParts.push",
+    "if (dns.values.length >= 0) optionParts.push"
+   ],
+   [
+    "export-ps: DHCP server name not checked",
+    "src/core/infra/powershell.ts",
+    "const bad = checkComputerName(computer);",
+    "const bad = null;"
+   ],
+   [
+    "export-ps: DNS domain not checked",
+    "src/core/infra/powershell.ts",
+    "const bad = checkDnsName(domain);",
+    "const bad = null;"
+   ],
+   [
+    "export-ps: reservation put in the first scope",
+    "src/core/infra/powershell.ts",
+    "const home = scopes.find(s => r.address >= s.range.first && r.address <= s.range.last);",
+    "const home = scopes[0];"
+   ],
+   [
+    "export-ps: reservation on the broadcast address accepted",
+    "src/core/infra/powershell.ts",
+    "if (r.address < usable.first || r.address > usable.last) {",
+    "if (r.address < usable.first) {"
+   ],
+   [
+    "export-ps: reservation on the network address accepted",
+    "src/core/infra/powershell.ts",
+    "if (r.address < usable.first || r.address > usable.last) {",
+    "if (r.address > usable.last) {"
+   ],
+   [
+    "export-ps: reservation on the gateway accepted",
+    "src/core/infra/powershell.ts",
+    "if (home.vlan.gateway4 === r.address) {",
+    "if (false) {"
+   ],
+   [
+    "export-ps: address reserved twice accepted",
+    "src/core/infra/powershell.ts",
+    "if (home.taken.has(r.address)) {",
+    "if (false) {"
+   ],
+   [
+    "export-ps: MAC reserved twice in a scope accepted",
+    "src/core/infra/powershell.ts",
+    "if (home.macs.has(r.mac)) {",
+    "if (false) {"
+   ],
+   [
+    "export-ps: a single reservation problem ignored",
+    "src/core/infra/powershell.ts",
+    "if (reservationProblems.length > 0) return refused(reservationProblems);",
+    "if (reservationProblems.length > 1) return refused(reservationProblems);"
+   ],
+   [
+    "export-ps: reservation address with leading zeros accepted",
+    "src/core/infra/powershell.ts",
+    "/^(0|[1-9][0-9]{0,2})$/.test(p)",
+    "/^[0-9]{1,3}$/.test(p)"
+   ],
+   [
+    "export-ps: reservation octet above 255 accepted",
+    "src/core/infra/powershell.ts",
+    "Number(p) <= 255",
+    "Number(p) <= 999"
+   ],
+   [
+    "export-ps: reservation name with a control character accepted",
+    "src/core/infra/powershell.ts",
+    "if (hasControl(name) || hasLoneSurrogate(name)) {",
+    "if (false) {"
+   ],
+   [
+    "export-ps: reservation name limit off by one",
+    "src/core/infra/powershell.ts",
+    "if (name.length > MAX_RESERVATION_NAME) {",
+    "if (name.length >= MAX_RESERVATION_NAME) {"
+   ],
+   [
+    "export-ps: reservation count limit off by one",
+    "src/core/infra/powershell.ts",
+    "if (entries.length > MAX_RESERVATIONS) problems.push",
+    "if (entries.length >= MAX_RESERVATIONS) problems.push"
+   ],
+   [
+    "export-ps: unreadable reservation lines ignored",
+    "src/core/infra/powershell.ts",
+    "if (!reservations.ok) refusals.push(...reservations.problems);",
+    "if (!reservations.ok) refusals.length = 0;"
+   ],
+   [
+    "export-ps: elevation required only for a remote server",
+    "src/core/infra/powershell.ts",
+    "...(computer === '' ? ['#Requires -RunAsAdministrator'] : []),",
+    "...(computer !== '' ? ['#Requires -RunAsAdministrator'] : []),"
+   ],
+   [
+    "export-ps: administrator rights not stated in the output",
+    "src/core/infra/powershell.ts",
+    "    privileges: ['Administrator rights are required: membership in DHCP Administrators on the DHCP server, in an elevated PowerShell session.'],",
+    "    privileges: [],"
+   ],
+   [
+    "export-ps: report text not quoted by the literal writer",
+    "src/core/infra/powershell.ts",
+    "const psValue = (text: string) => literal(text) ?? '$null';",
+    "const psValue = (text: string) => `'${text}'`;"
+   ],
+   [
+    "export-ps: IPv6 left out without a note",
+    "src/core/infra/powershell.ts",
+    "if (v.net6.length > 0) item.unsupported('IPv6',",
+    "if (v.net6.length > 2) item.unsupported('IPv6',"
+   ],
+   [
+    "export-ps: unwritable name not reported",
+    "src/core/infra/powershell.ts",
+    "      item.approximate('Name', `The VLAN name has",
+    "      item.remark(`The VLAN name has"
+   ],
+   [
+    "export-ps: unwritable description not reported",
+    "src/core/infra/powershell.ts",
+    "if (q === null) item.unsupported('Description', 'It has",
+    "if (q === null) item.remark('It has"
+   ],
+   [
+    "export-ps: task accepts the stop-parsing token as the program",
+    "src/core/infra/task.ts",
+    "if (d.name === '--%' || d.program === '--%' || d.arguments === '--%') {",
+    "if (d.name === '--%' || d.arguments === '--%') {"
+   ],
+   [
+    "export-ps: task placeholder step shown when nothing is missing",
+    "src/core/infra/task.ts",
+    "...(ps.template ? ['Replace every value in angle brackets.",
+    "...(!ps.template ? ['Replace every value in angle brackets."
+   ],
+   [
+    "export-ps: task interval not passed for hourly schedules",
+    "src/core/infra/task.ts",
+    "everyMinutes: options.every, everyHours: options.every, minute: '0'",
+    "everyMinutes: options.every, everyHours: '1', minute: '0'"
+   ],
+   [
+    "export-ps: task refusal without the field label",
+    "src/core/infra/task.ts",
+    "`${FIELD_LABEL[i.field] ?? i.field}: ${i.message}`",
+    "`${i.field}: ${i.message}`"
+   ],
+   [
+    "export-ps: task subject keeps the trailing period",
+    "src/core/infra/task.ts",
+    "built.description.replace(/\\.$/, '')",
+    "built.description.replace(/\\.$/, '.')"
+   ]
+  ]
+ }
+]

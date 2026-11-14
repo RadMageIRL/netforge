@@ -18,7 +18,7 @@ const BRIEF_NAVIGATION: [string, string[]][] = [
   ['Encoding', ['Base64 / URL / Hex', 'Hash / HMAC', 'JWT Decoder']],
   ['Text', ['Regex Tester', 'List / Text Tools']],
   ['Generators', ['UUID / Random Tokens', 'chmod Calculator']],
-  ['Automation / DevOps', ['PowerShell Generator', 'Terraform Export']],
+  ['Automation / DevOps', ['PowerShell Generator', 'Terraform Export', 'Cisco / Juniper Export']],
 ];
 
 describe('ToolRegistry', () => {
@@ -56,17 +56,18 @@ describe('ToolRegistry', () => {
 describe('catalog', () => {
   const catalog = createCatalog();
 
-  it('matches the navigation in the brief (plus the Phase 1 VLSM Allocator), category by category and in order', () => {
+  it('matches the navigation in the brief (plus the Phase 1 VLSM Allocator and the Phase 5 Cisco / Juniper Export), category by category and in order', () => {
     const actual = catalog.listCategories().map(c => [c.name, catalog.inCategory(c.id).map(t => t.name)]);
     expect(actual).toEqual(BRIEF_NAVIGATION);
   });
 
-  it('has exactly the Phase 0 to 4 tools built and every other tool planned', () => {
+  it('has every tool built and none planned', () => {
     expect(catalog.list().filter(t => t.status === 'available').map(t => t.id).sort()).toEqual([
-      'base64-url-hex', 'cron-explainer', 'hash-hmac', 'ip-range-analyzer', 'json-formatter', 'jwt-decoder', 'network-planner', 'regex-tester', 'route-summarization', 'schedule-builder',
-      'subnet-calculator', 'text-tools', 'timestamp-converter', 'uuid-tokens', 'vlsm-allocator', 'yaml-xml-tools',
+      'base64-url-hex', 'chmod-calculator', 'cron-explainer', 'hash-hmac', 'ip-range-analyzer', 'json-formatter', 'jwt-decoder', 'network-config-export', 'network-planner', 'number-bases',
+      'powershell-generator', 'regex-tester', 'route-summarization', 'schedule-builder', 'subnet-calculator', 'terraform-export', 'text-tools', 'timestamp-converter', 'uuid-tokens',
+      'vlsm-allocator', 'yaml-xml-tools',
     ]);
-    expect(catalog.list().filter(t => t.status === 'planned').map(t => t.id).sort()).toEqual(['chmod-calculator', 'number-bases', 'powershell-generator', 'terraform-export']);
+    expect(catalog.list().filter(t => t.status === 'planned').map(t => t.id).sort()).toEqual([]);
   });
 
   it('loads a module with a mount function for every built tool', async () => {

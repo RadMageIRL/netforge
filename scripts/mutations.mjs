@@ -5,11 +5,12 @@
 //   node scripts/mutations.mjs            run every mutation
 //   node scripts/mutations.mjs json       only mutations whose label contains "json"
 //
-// Phase 4 mutations live in scripts/mutations-phase4.json. Each names the test files that cover
-// its module, and only those are run for it, which keeps several hundred mutations practical.
+// Later mutations live in scripts/mutations-phase4.json and scripts/mutations-phase5-*.json. Each
+// group names the test files that cover its module, and only those are run for it, which keeps
+// several hundred mutations practical.
 
 import { execFileSync, spawnSync } from 'node:child_process';
-import { cpSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -226,8 +227,10 @@ const MUTATIONS = [
   ['reports: numeric zone names shown as abbreviations', 'src/core/schedule/reports.ts', "return /^[A-Z]{2,5}$/.test(name) ? name : '';", 'return name;'],
 ];
 
-for (const group of JSON.parse(readFileSync(join(ROOT, 'scripts', 'mutations-phase4.json'), 'utf8'))) {
-  for (const [label, file, from, to] of group.mutations) MUTATIONS.push([label, file, from, to, group.tests]);
+for (const name of readdirSync(join(ROOT, 'scripts')).filter(n => /^mutations-phase[0-9].*\.json$/.test(n)).sort()) {
+  for (const group of JSON.parse(readFileSync(join(ROOT, 'scripts', name), 'utf8'))) {
+    for (const [label, file, from, to] of group.mutations) MUTATIONS.push([label, file, from, to, group.tests]);
+  }
 }
 
 function run(cwd, args) {
@@ -262,7 +265,7 @@ try {
       survivors.push(`${label} (setup error)`);
       continue;
     }
-    writeFileSync(path, original.replace(from, to));
+    writeFileSync(path, original.replace(from, () => to));
     const result = run(work, [...tests, '--bail', '1']);
     writeFileSync(path, original);
     const killed = result.status !== 0;

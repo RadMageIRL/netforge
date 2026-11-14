@@ -80,9 +80,10 @@ export function createCatalog(): ToolRegistry {
     load: () => import('../tools/yaml-xml-tools/yaml-xml-tools'),
   });
   r.add({
-    id: 'number-bases', name: 'Number Bases & Bytes', category: 'data', status: 'planned',
-    summary: 'Convert between decimal, hex, binary and octal, and between byte units.',
-    keywords: ['hex', 'hexadecimal', 'binary', 'octal', 'decimal', 'bytes', 'kib', 'mib', 'units', 'base'],
+    id: 'number-bases', name: 'Number Bases & Bytes', category: 'data', status: 'available',
+    summary: 'Convert integers between binary, octal, decimal and hex at any bit width, signed or unsigned, with byte order and storage units.',
+    keywords: ['hex', 'hexadecimal', 'binary', 'octal', 'decimal', 'bytes', 'kib', 'mib', 'units', 'base', 'radix', 'twos complement', 'signed', 'unsigned', 'endian', 'bits', 'bigint'],
+    load: () => import('../tools/number-bases/number-bases'),
   });
 
   // Encoding
@@ -127,21 +128,30 @@ export function createCatalog(): ToolRegistry {
     load: () => import('../tools/uuid-tokens/uuid-tokens'),
   });
   r.add({
-    id: 'chmod-calculator', name: 'chmod Calculator', category: 'generators', status: 'planned',
-    summary: 'Convert Unix permissions between symbolic and octal notation.',
-    keywords: ['chmod', 'permissions', 'unix', 'linux', 'octal', 'rwx', 'umask'],
+    id: 'chmod-calculator', name: 'chmod Calculator', category: 'generators', status: 'available',
+    summary: 'Convert Unix permissions between symbolic and octal notation, with setuid, setgid, the sticky bit and chmod commands to copy.',
+    keywords: ['chmod', 'permissions', 'unix', 'linux', 'octal', 'rwx', 'umask', 'setuid', 'setgid', 'sticky', 'mode', 'symbolic'],
+    load: () => import('../tools/chmod-calculator/chmod-calculator'),
   });
 
   // Automation / DevOps
   r.add({
-    id: 'powershell-generator', name: 'PowerShell Generator', category: 'automation', status: 'planned',
-    summary: 'Generate PowerShell from NetForge plans and schedules, as a reviewed preview.',
-    keywords: ['powershell', 'ps1', 'script', 'windows', 'automation'],
+    id: 'powershell-generator', name: 'PowerShell Generator', category: 'automation', status: 'available',
+    summary: 'Preview PowerShell for a network plan: Windows DHCP scopes, exclusions, reservations and options, a read-only plan report, and a scheduled task. Nothing is run.',
+    keywords: ['powershell', 'ps1', 'script', 'windows', 'automation', 'dhcp', 'scope', 'reservation', 'exclusion', 'dhcpserver', 'scheduled task', 'export'],
+    load: () => import('../tools/powershell-generator/powershell-generator'),
   });
   r.add({
-    id: 'terraform-export', name: 'Terraform Export', category: 'automation', status: 'planned',
-    summary: 'Export NetForge plans as Terraform, as a reviewed preview.',
-    keywords: ['terraform', 'hcl', 'iac', 'infrastructure as code', 'export'],
+    id: 'terraform-export', name: 'Terraform Export', category: 'automation', status: 'available',
+    summary: 'Preview a network plan as provider-neutral JSON, Terraform variables, or AWS VPC and subnet resources, with every incompatibility listed.',
+    keywords: ['terraform', 'hcl', 'iac', 'infrastructure as code', 'export', 'aws', 'vpc', 'subnet', 'tfvars', 'json', 'opentofu'],
+    load: () => import('../tools/terraform-export/terraform-export'),
+  });
+  r.add({
+    id: 'network-config-export', name: 'Cisco / Juniper Export', category: 'automation', status: 'available',
+    summary: 'Preview Cisco IOS / IOS-XE and Juniper Junos configuration snippets for the VLANs, gateway interfaces and DHCP pools in a network plan.',
+    keywords: ['cisco', 'ios', 'ios-xe', 'juniper', 'junos', 'vlan', 'svi', 'irb', 'switch', 'config', 'configuration', 'snippet', 'export', 'routing instance', 'vrf', 'dhcp pool'],
+    load: () => import('../tools/network-config-export/network-config-export'),
   });
 
   return r;

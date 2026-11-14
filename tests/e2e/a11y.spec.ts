@@ -17,7 +17,6 @@ const STATES: [string, (page: Page) => Promise<void>][] = [
   ['timestamp overlap', async page => { await page.goto('./#/timestamp-converter'); await page.fill('#timestamp-input', '2026-11-01 01:30'); }],
   ['timestamp gap', async page => { await page.goto('./#/timestamp-converter'); await page.fill('#timestamp-input', '2026-03-08 02:30'); }],
   ['about', async page => { await page.goto('./#/about'); }],
-  ['planned tool', async page => { await page.goto('./#/number-bases'); }],
   ['search with no match', async page => { await page.goto('./'); await page.fill('#tool-search', 'zzzz'); }],
   // Phase 1
   ['subnet IPv6 with split and supernet open', async page => {
@@ -214,6 +213,26 @@ const STATES: [string, (page: Page) => Promise<void>][] = [
     await page.fill('#data-input', '<a>&nbsp;</a>');
     await expect(page.locator('#data-errors')).toBeVisible();
   }],
+  // Phase 5
+  ['number bases result', async page => { await page.goto('./#/number-bases'); await page.fill('#num-input', '305419896'); await expect(page.locator('#num-result .result-table').first()).toBeVisible(); }],
+  ['number bases error', async page => { await page.goto('./#/number-bases'); await page.selectOption('#num-width', '8'); await page.fill('#num-input', '256'); await expect(page.locator('#num-input-error')).toBeVisible(); }],
+  ['chmod with special bits', async page => { await page.goto('./#/chmod-calculator'); await page.fill('#chmod-octal', '2770'); await expect(page.locator('#chmod-ls')).toHaveValue('rwxrws---'); }],
+  ['chmod error', async page => { await page.goto('./#/chmod-calculator'); await page.fill('#chmod-octal', '79'); await expect(page.locator('#chmod-octal-error')).toBeVisible(); }],
+  ['PowerShell DHCP export', async page => { await page.goto('./#/powershell-generator'); await page.locator('#ps-example').click(); await expect(page.locator('#ps-code-0')).toBeVisible(); }],
+  ['PowerShell export refused', async page => { await page.goto('./#/powershell-generator'); await page.locator('#ps-example').click(); await page.fill('#ps-dns', 'nope'); await expect(page.locator('#ps-refusals')).toBeVisible(); }],
+  ['PowerShell scheduled task', async page => { await page.goto('./#/powershell-generator'); await page.getByRole('radio', { name: 'Scheduled task', exact: true }).check(); await expect(page.locator('#ps-code-0')).toBeVisible(); }],
+  ['Terraform export empty', async page => { await page.goto('./#/terraform-export'); }],
+  ['Terraform AWS export', async page => { await page.goto('./#/terraform-export'); await page.locator('#tf-example').click(); await page.getByRole('radio', { name: 'AWS VPC and subnets', exact: true }).check(); await expect(page.locator('#tf-code-0')).toBeVisible(); }],
+  ['Terraform variables export', async page => { await page.goto('./#/terraform-export'); await page.locator('#tf-example').click(); await page.getByRole('radio', { name: 'Terraform variables', exact: true }).check(); await expect(page.locator('#tf-code-1')).toBeVisible(); }],
+  ['Cisco export with device context', async page => {
+    await page.goto('./#/network-config-export');
+    await page.locator('#nc-example').click();
+    await page.selectOption('#nc-site', { label: 'Headquarters' });
+    await page.selectOption('#nc-global-vrf', { label: 'Global' });
+    await page.check('#nc-dhcp');
+    await expect(page.locator('#nc-code-0')).toContainText('interface Vlan10');
+  }],
+  ['Junos export with unsupported items', async page => { await page.goto('./#/network-config-export'); await page.locator('#nc-example').click(); await page.getByRole('radio', { name: 'Juniper Junos', exact: true }).check(); await expect(page.locator('#nc-items')).toBeVisible(); }],
 ];
 
 for (const theme of ['dark', 'light'] as const) {

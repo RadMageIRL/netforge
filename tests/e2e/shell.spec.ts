@@ -2,18 +2,19 @@ import { expect, test } from '@playwright/test';
 import { openTool, watchErrors } from './helpers';
 
 test.describe('navigation', () => {
-  test('home lists every category and tool, with planned tools labeled', async ({ page }) => {
+  test('home lists every category and tool, all built', async ({ page }) => {
     const errors = watchErrors(page);
     await page.goto('./');
     await expect(page).toHaveTitle('NetForge | Local-first IT and network engineering toolbox');
     await expect(page.getByRole('heading', { level: 1, name: 'NetForge' })).toBeVisible();
     const nav = page.getByRole('navigation', { name: 'Tools' });
     await expect(nav.locator('.nav-heading')).toHaveText(['Network', 'Scheduling', 'Data', 'Encoding', 'Text', 'Generators', 'Automation / DevOps']);
-    await expect(nav.locator('a[data-tool]')).toHaveCount(20);
-    await expect(nav.locator('a[data-tool].planned')).toHaveCount(4);
-    await expect(nav.locator('a[data-tool]:not(.planned)')).toHaveText(['Subnet Calculator', 'VLSM Allocator', 'NetForge Subnet & VLAN Planner', 'IP Range Analyzer', 'Route Summarization', 'Cron Explainer', 'Schedule Builder', 'Timestamp Converter', 'JSON Formatter', 'YAML/XML Tools',
-      'Base64 / URL / Hex', 'Hash / HMAC', 'JWT Decoder', 'Regex Tester', 'List / Text Tools', 'UUID / Random Tokens']);
-    await expect(page.locator('.tool-card')).toHaveCount(16);
+    await expect(nav.locator('a[data-tool]')).toHaveCount(21);
+    await expect(nav.locator('a[data-tool].planned')).toHaveCount(0);
+    await expect(nav.locator('a[data-tool]:not(.planned)')).toHaveText(['Subnet Calculator', 'VLSM Allocator', 'NetForge Subnet & VLAN Planner', 'IP Range Analyzer', 'Route Summarization', 'Cron Explainer', 'Schedule Builder', 'Timestamp Converter', 'JSON Formatter', 'YAML/XML Tools', 'Number Bases & Bytes',
+      'Base64 / URL / Hex', 'Hash / HMAC', 'JWT Decoder', 'Regex Tester', 'List / Text Tools', 'UUID / Random Tokens', 'chmod Calculator', 'PowerShell Generator', 'Terraform Export', 'Cisco / Juniper Export']);
+    await expect(page.locator('.tool-card')).toHaveCount(21);
+    await expect(page.locator('#home-planned')).toHaveCount(0);
     await expect(page.locator('#brand-version')).toHaveText('v0.1.0-dev');
     expect(errors).toEqual([]);
   });
@@ -26,14 +27,6 @@ test.describe('navigation', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'JSON Formatter' })).toBeFocused();
     await expect(page.locator('a[data-tool="json-formatter"]')).toHaveAttribute('aria-current', 'page');
     await expect(page.locator('a[data-tool="subnet-calculator"]')).not.toHaveAttribute('aria-current', 'page');
-  });
-
-  test('a planned tool says it is not built and offers no controls', async ({ page }) => {
-    await page.goto('./#/chmod-calculator');
-    await expect(page.getByRole('heading', { level: 1, name: 'chmod Calculator' })).toBeVisible();
-    await expect(page.locator('.planned-page')).toContainText('This tool is not built yet.');
-    await expect(page.locator('.planned-page').locator('input, textarea, select')).toHaveCount(0);
-    await expect(page).toHaveTitle('chmod Calculator (planned) | NetForge');
   });
 
   test('an unknown route shows a not-found page', async ({ page }) => {
@@ -89,10 +82,10 @@ test.describe('search', () => {
     await expect(page.locator('#tool-nav a[data-tool]:visible')).toHaveCount(0);
     await search.press('Escape');
     await expect(search).toHaveValue('');
-    await expect(page.locator('#tool-nav a[data-tool]:visible')).toHaveCount(20);
+    await expect(page.locator('#tool-nav a[data-tool]:visible')).toHaveCount(21);
   });
 
-  test('finds tools by keyword, including planned ones', async ({ page }) => {
+  test('finds tools by keyword', async ({ page }) => {
     await page.goto('./');
     await page.getByRole('searchbox', { name: 'Search tools' }).fill('epoch');
     await expect(page.locator('#tool-nav a[data-tool]:visible')).toHaveText(['Timestamp Converter']);

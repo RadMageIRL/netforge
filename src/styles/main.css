@@ -854,3 +854,28 @@ kbd {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Phase 5: export tools */
+.export-options { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; }
+.export-files, .export-account { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; min-width: 0; }
+.export-file-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; min-width: 0; }
+.export-file-head .sub-title { margin: 0; overflow-wrap: anywhere; }
+.export-file .code-block { max-height: 30rem; }
+.export-items { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.export-item { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); gap: 4px 12px; align-items: start; font-size: 13.5px; }
+.export-item .badge { justify-self: start; }
+.export-item-body { min-width: 0; overflow-wrap: anywhere; }
+.export-item-body p { margin: 0; }
+.export-notes { margin: 4px 0 0; padding-left: 18px; display: grid; gap: 3px; color: var(--text-2); }
+.export-tag { font-weight: 600; }
+.export-tag-approximate { color: var(--warn); }
+.export-tag-unsupported { color: var(--error); }
+@media (max-width: 560px) {
+  .export-item { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Phase 5: number bases and chmod */
+.perm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr)); gap: 14px 20px; }
+.perm-group { align-content: start; }
+.perm-meaning .badge { margin-right: 6px; }
+.perm-meaning .result-value { font-size: 13.5px; }

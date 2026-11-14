@@ -176,3 +176,28 @@ test('the Phase 4 utilities work offline without having been opened online, work
   await page.fill('#data-input', '<a><b/></a>');
   await expect(page.locator('#data-output')).toHaveValue('<a>\n  <b/>\n</a>\n');
 });
+
+test('the Phase 5 exports and utilities work offline without having been opened online', async ({ page, context }) => {
+  await page.goto('./');
+  await waitForController(page);
+  await context.setOffline(true);
+  await page.reload();
+  await page.locator('a[data-tool="powershell-generator"]').click();
+  await page.locator('#ps-example').click();
+  await expect(page.locator('#ps-code-0')).toContainText('Add-DhcpServerv4Scope');
+  await page.locator('a[data-tool="terraform-export"]').click();
+  await page.locator('#tf-example').click();
+  await page.getByRole('radio', { name: 'AWS VPC and subnets', exact: true }).check();
+  await expect(page.locator('#tf-code-0')).toContainText('resource "aws_subnet" "vlan_10_users"');
+  await page.locator('a[data-tool="network-config-export"]').click();
+  await page.locator('#nc-example').click();
+  await page.getByRole('radio', { name: 'Juniper Junos', exact: true }).check();
+  await page.selectOption('#nc-site', { label: 'Branch office' });
+  await expect(page.locator('#nc-code-0')).toContainText('set vlans Users vlan-id 10');
+  await page.locator('a[data-tool="number-bases"]').click();
+  await page.fill('#num-input', '255');
+  await expect(page.locator('#num-result')).toContainText('ff');
+  await page.locator('a[data-tool="chmod-calculator"]').click();
+  await page.fill('#chmod-octal', '755');
+  await expect(page.locator('#chmod-ls')).toHaveValue('rwxr-xr-x');
+});

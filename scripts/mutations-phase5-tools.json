@@ -1,0 +1,624 @@
+[
+ {
+  "tests": [
+   "tests/unit/numbers.test.ts",
+   "tests/unit/tools5-oracle.test.ts"
+  ],
+  "mutations": [
+   [
+    "numbers: lowercase hex digits off by one",
+    "src/core/numbers/bases.ts",
+    "return code - 87;",
+    "return code - 86;"
+   ],
+   [
+    "numbers: uppercase hex digits off by one",
+    "src/core/numbers/bases.ts",
+    "return code - 55;",
+    "return code - 54;"
+   ],
+   [
+    "numbers: a digit equal to the base accepted",
+    "src/core/numbers/bases.ts",
+    "if (d < 0 || d >= base)",
+    "if (d < 0 || d > base)"
+   ],
+   [
+    "numbers: sign accepted outside decimal",
+    "src/core/numbers/bases.ts",
+    "if (base !== 10) return fail('sign'",
+    "if (base === 99) return fail('sign'"
+   ],
+   [
+    "numbers: minus sign ignored",
+    "src/core/numbers/bases.ts",
+    "negative = first === '-';",
+    "negative = false;"
+   ],
+   [
+    "numbers: 0b in hexadecimal treated as a prefix",
+    "src/core/numbers/bases.ts",
+    "if (prefix !== null && !(base === 16 && prefix === 2)) {",
+    "if (prefix !== null) {"
+   ],
+   [
+    "numbers: prefix for another base not refused",
+    "src/core/numbers/bases.ts",
+    "if (prefix !== base) return fail('prefix-mismatch'",
+    "if (false) return fail('prefix-mismatch'"
+   ],
+   [
+    "numbers: doubled and leading separators accepted",
+    "src/core/numbers/bases.ts",
+    "if (lastWasSeparator) return fail('separator', 'A separator must sit between two digits.', i);",
+    "if (false) return fail('separator', 'A separator must sit between two digits.', i);"
+   ],
+   [
+    "numbers: trailing separator accepted",
+    "src/core/numbers/bases.ts",
+    "if (lastWasSeparator) return fail('separator', 'A separator must sit between two digits.', end - 1);",
+    "if (false) return fail('separator', 'A separator must sit between two digits.', end - 1);"
+   ],
+   [
+    "numbers: minus zero kept negative",
+    "src/core/numbers/bases.ts",
+    "negative: negative && magnitude !== 0n, magnitude, digits",
+    "negative, magnitude, digits"
+   ],
+   [
+    "numbers: input limit off by one",
+    "src/core/numbers/bases.ts",
+    "text.length > NUMBER_LIMITS.inputChars) return fail('too-long'",
+    "text.length >= NUMBER_LIMITS.inputChars) return fail('too-long'"
+   ],
+   [
+    "numbers: width below 1 accepted",
+    "src/core/numbers/bases.ts",
+    "width < NUMBER_LIMITS.minWidth || width > NUMBER_LIMITS.maxWidth) {",
+    "width > NUMBER_LIMITS.maxWidth) {"
+   ],
+   [
+    "numbers: largest width refused",
+    "src/core/numbers/bases.ts",
+    "|| width > NUMBER_LIMITS.maxWidth) {",
+    "|| width >= NUMBER_LIMITS.maxWidth) {"
+   ],
+   [
+    "numbers: signed maximum one too high",
+    "src/core/numbers/bases.ts",
+    "max: (1n << (w - 1n)) - 1n }",
+    "max: (1n << (w - 1n)) }"
+   ],
+   [
+    "numbers: unsigned maximum one too high",
+    "src/core/numbers/bases.ts",
+    ": { min: 0n, max: (1n << w) - 1n };",
+    ": { min: 0n, max: (1n << w) };"
+   ],
+   [
+    "numbers: signed minimum one too high",
+    "src/core/numbers/bases.ts",
+    "{ min: -(1n << (w - 1n)),",
+    "{ min: 1n - (1n << (w - 1n)),"
+   ],
+   [
+    "numbers: bits needed for negative values",
+    "src/core/numbers/bases.ts",
+    "magnitudeBits(-value - 1n)",
+    "magnitudeBits(-value)"
+   ],
+   [
+    "numbers: zero needs no bits",
+    "src/core/numbers/bases.ts",
+    "if (!signed) return Math.max(1, magnitudeBits(value));",
+    "if (!signed) return Math.max(0, magnitudeBits(value));"
+   ],
+   [
+    "numbers: negative accepted as unsigned without a width",
+    "src/core/numbers/bases.ts",
+    "if (negative && !signed) return fail('negative-unsigned', 'A negative value cannot be read as unsigned. Choose signed.');",
+    "if (false) return fail('negative-unsigned', 'A negative value cannot be read as unsigned. Choose signed.');"
+   ],
+   [
+    "numbers: odd hex length padded at the wrong end",
+    "src/core/numbers/bases.ts",
+    "const padded = hex.length % 2 === 0 ? hex : `0${hex}`;",
+    "const padded = hex.length % 2 === 0 ? hex : `${hex}0`;"
+   ],
+   [
+    "numbers: negative unsigned reported as overflow",
+    "src/core/numbers/bases.ts",
+    "if (negative && !signed) return fail('negative-unsigned', `A negative",
+    "if (false) return fail('negative-unsigned', `A negative"
+   ],
+   [
+    "numbers: lower bound not checked",
+    "src/core/numbers/bases.ts",
+    "if (value < range.min || value > range.max) {",
+    "if (value > range.max) {"
+   ],
+   [
+    "numbers: upper bound not checked",
+    "src/core/numbers/bases.ts",
+    "if (value < range.min || value > range.max) {",
+    "if (value < range.min) {"
+   ],
+   [
+    "numbers: negative stored as magnitude",
+    "src/core/numbers/bases.ts",
+    "pattern = value < 0n ? value + modulus : value;",
+    "pattern = value < 0n ? -value : value;"
+   ],
+   [
+    "numbers: pattern one bit too wide accepted",
+    "src/core/numbers/bases.ts",
+    "if (magnitude >= modulus) {",
+    "if (magnitude > modulus) {"
+   ],
+   [
+    "numbers: sign bit alone read as positive",
+    "src/core/numbers/bases.ts",
+    "pattern >= signBit ? pattern - modulus : pattern;",
+    "pattern > signBit ? pattern - modulus : pattern;"
+   ],
+   [
+    "numbers: signed mode ignored",
+    "src/core/numbers/bases.ts",
+    "const value = signed ? signedReading : pattern;",
+    "const value = pattern;"
+   ],
+   [
+    "numbers: bytes shown for widths that are not whole bytes",
+    "src/core/numbers/bases.ts",
+    "if (width % 8 === 0) {",
+    "if (width % 4 === 0) {"
+   ],
+   [
+    "numbers: little-endian not reversed at a width",
+    "src/core/numbers/bases.ts",
+    "\n    bytesBigEndian: bytes, bytesLittleEndian: bytes ? [...bytes].reverse() : null",
+    "\n    bytesBigEndian: bytes, bytesLittleEndian: bytes ? [...bytes] : null"
+   ],
+   [
+    "numbers: little-endian not reversed without a width",
+    "src/core/numbers/bases.ts",
+    "decimal: value.toString(),\n      bytesBigEndian: bytes, bytesLittleEndian: bytes ? [...bytes].reverse() : null",
+    "decimal: value.toString(),\n      bytesBigEndian: bytes, bytesLittleEndian: bytes ? [...bytes] : null"
+   ],
+   [
+    "numbers: binary not padded to the width",
+    "src/core/numbers/bases.ts",
+    "binary: pattern.toString(2).padStart(width, '0'),",
+    "binary: pattern.toString(2),"
+   ],
+   [
+    "numbers: hex padding rounds down",
+    "src/core/numbers/bases.ts",
+    "padStart(Math.ceil(width / 4), '0')",
+    "padStart(Math.floor(width / 4), '0')"
+   ],
+   [
+    "numbers: octal padding rounds down",
+    "src/core/numbers/bases.ts",
+    "padStart(Math.ceil(width / 3), '0')",
+    "padStart(Math.floor(width / 3), '0')"
+   ],
+   [
+    "numbers: digits grouped from the left",
+    "src/core/numbers/bases.ts",
+    "parts.unshift(body.slice(Math.max(0, end - size), end));",
+    "parts.push(body.slice(Math.max(0, end - size), end));"
+   ],
+   [
+    "numbers: bit pattern note shown for decimal input",
+    "src/core/numbers/bases.ts",
+    "if (base !== 10 && signed && signedReading < 0n) notes.push",
+    "if (signed && signedReading < 0n) notes.push"
+   ],
+   [
+    "numbers: decimal unit exponent off by one",
+    "src/core/numbers/units.ts",
+    "bits: 8n * 1000n ** BigInt(i + 1)",
+    "bits: 8n * 1000n ** BigInt(i)"
+   ],
+   [
+    "numbers: binary units use 1000",
+    "src/core/numbers/units.ts",
+    "bits: 8n * 1024n ** BigInt(i + 1)",
+    "bits: 8n * 1000n ** BigInt(i + 1)"
+   ],
+   [
+    "numbers: byte is ten bits",
+    "src/core/numbers/units.ts",
+    "name: 'byte', family: 'base', bits: 8n }",
+    "name: 'byte', family: 'base', bits: 10n }"
+   ],
+   [
+    "numbers: amount limit off by one",
+    "src/core/numbers/units.ts",
+    "t.length > UNIT_LIMITS.amountChars) return fail('too-long'",
+    "t.length >= UNIT_LIMITS.amountChars) return fail('too-long'"
+   ],
+   [
+    "numbers: signed amounts accepted",
+    "src/core/numbers/units.ts",
+    "const m = /^(\\d*)(?:\\.(\\d*))?$/.exec(t);",
+    "const m = /^-?(\\d*)(?:\\.(\\d*))?$/.exec(t);"
+   ],
+   [
+    "numbers: exponent amounts accepted",
+    "src/core/numbers/units.ts",
+    "const m = /^(\\d*)(?:\\.(\\d*))?$/.exec(t);",
+    "const m = /^(\\d*)(?:\\.(\\d*))?(?:e\\d+)?$/.exec(t);"
+   ],
+   [
+    "numbers: a lone decimal point accepted",
+    "src/core/numbers/units.ts",
+    "(m[1] === '' && (m[2] ?? '') === '')",
+    "(false)"
+   ],
+   [
+    "numbers: fraction scaled by one digit too many",
+    "src/core/numbers/units.ts",
+    "10n ** BigInt(fraction.length))",
+    "10n ** BigInt(fraction.length + 1))"
+   ],
+   [
+    "numbers: endless fractions shown as exact",
+    "src/core/numbers/units.ts",
+    "if (den !== 1n) return null;",
+    "if (false) return null;"
+   ],
+   [
+    "numbers: exact decimal uses too few places",
+    "src/core/numbers/units.ts",
+    "const places = Math.max(twos, fives);",
+    "const places = Math.min(twos, fives);"
+   ],
+   [
+    "numbers: rounding truncates",
+    "src/core/numbers/units.ts",
+    "const q = (2n * num + den) / (2n * den);",
+    "const q = num / den;"
+   ],
+   [
+    "numbers: rounded form keeps trailing zeros",
+    "src/core/numbers/units.ts",
+    "digits.slice(-shift).replace(/0+$/, '')",
+    "digits.slice(-shift)"
+   ],
+   [
+    "numbers: source unit size applied twice",
+    "src/core/numbers/units.ts",
+    "reduce(amount.value.num * from.bits, amount.value.den);",
+    "reduce(amount.value.num * from.bits * from.bits, amount.value.den);"
+   ],
+   [
+    "numbers: whole bytes computed from bits",
+    "src/core/numbers/units.ts",
+    "const bytes = reduce(bits.num, bits.den * 8n);",
+    "const bytes = reduce(bits.num, bits.den);"
+   ],
+   [
+    "numbers: rounded form threshold off by one",
+    "src/core/numbers/units.ts",
+    "fractionDigits > UNIT_LIMITS.longFraction ?",
+    "fractionDigits >= UNIT_LIMITS.longFraction ?"
+   ],
+   [
+    "numbers: fractional bits reported as whole",
+    "src/core/numbers/units.ts",
+    "wholeBits: bits.den === 1n ? bits.num : null",
+    "wholeBits: bits.num"
+   ]
+  ]
+ },
+ {
+  "tests": [
+   "tests/unit/chmod.test.ts",
+   "tests/unit/tools5-oracle.test.ts"
+  ],
+  "mutations": [
+   [
+    "chmod: permission bit values swapped",
+    "src/core/perm/chmod.ts",
+    "(perm === 'r' ? 4 : perm === 'w' ? 2 : 1) << CLASS_SHIFT[cls]",
+    "(perm === 'r' ? 4 : perm === 'w' ? 1 : 2) << CLASS_SHIFT[cls]"
+   ],
+   [
+    "chmod: two-digit octal modes accepted",
+    "src/core/perm/chmod.ts",
+    "if (t.length < 3 || t.length > 4) return fail('octal-length'",
+    "if (t.length < 2 || t.length > 4) return fail('octal-length'"
+   ],
+   [
+    "chmod: five-digit octal modes accepted",
+    "src/core/perm/chmod.ts",
+    "if (t.length < 3 || t.length > 4) return fail('octal-length'",
+    "if (t.length < 3 || t.length > 5) return fail('octal-length'"
+   ],
+   [
+    "chmod: umask keeps special bits",
+    "src/core/perm/chmod.ts",
+    "return ok(parseInt(t, 8) & 0o777);",
+    "return ok(parseInt(t, 8));"
+   ],
+   [
+    "chmod: octal always four digits",
+    "src/core/perm/chmod.ts",
+    "padStart(m > 0o777 ? 4 : 3, '0')",
+    "padStart(m > 0o777 ? 4 : 4, '0')"
+   ],
+   [
+    "chmod: file type bits leak into the octal mode",
+    "src/core/perm/chmod.ts",
+    "return (mode & MODE_MASK).toString(8).padStart(4, '0');",
+    "return mode.toString(8).padStart(4, '0');"
+   ],
+   [
+    "chmod: sticky mark shown for the wrong class",
+    "src/core/perm/chmod.ts",
+    "const mark = cls === 'o' ? 't' : 's';",
+    "const mark = cls === 'g' ? 't' : 's';"
+   ],
+   [
+    "chmod: capital S and T never shown",
+    "src/core/perm/chmod.ts",
+    "(special ? (x ? mark : mark.toUpperCase()) : x ? 'x' : '-')",
+    "(special ? mark : x ? 'x' : '-')"
+   ],
+   [
+    "chmod: s accepted for others",
+    "src/core/perm/chmod.ts",
+    "else if (slot === 2 && cls !== 'o' && (ch === 's' || ch === 'S'))",
+    "else if (slot === 2 && (ch === 's' || ch === 'S'))"
+   ],
+   [
+    "chmod: capital S read as execute too",
+    "src/core/perm/chmod.ts",
+    "(ch === 's' ? bit(cls, 'x') : 0)",
+    "bit(cls, 'x')"
+   ],
+   [
+    "chmod: t and T swapped",
+    "src/core/perm/chmod.ts",
+    "(ch === 't' ? bit('o', 'x') : 0)",
+    "(ch === 'T' ? bit('o', 'x') : 0)"
+   ],
+   [
+    "chmod: trailing ACL mark refused",
+    "src/core/perm/chmod.ts",
+    "if (t.length === 11 && /[.+]$/.test(t)) t = t.slice(0, 10);",
+    "if (false) t = t.slice(0, 10);"
+   ],
+   [
+    "chmod: unknown file type accepted",
+    "src/core/perm/chmod.ts",
+    "if (!FILE_TYPES.includes(type)) return fail('ls-char'",
+    "if (false) return fail('ls-char'"
+   ],
+   [
+    "chmod: symbolic form drops special bits",
+    "src/core/perm/chmod.ts",
+    "if (mode & CLASS_SPECIAL[cls]) perms += cls === 'o' ? 't' : 's';",
+    "if (false) perms += cls === 'o' ? 't' : 's';"
+   ],
+   [
+    "chmod: directory form does not clear setuid and setgid",
+    "src/core/perm/chmod.ts",
+    "const clear = (mode & S_ISUID ? '' : 'u') + (mode & S_ISGID ? '' : 'g');",
+    "const clear = '';"
+   ],
+   [
+    "chmod: directory form clears setgid that is wanted",
+    "src/core/perm/chmod.ts",
+    "(mode & S_ISGID ? '' : 'g');",
+    "'g';"
+   ],
+   [
+    "chmod: u does not own setuid",
+    "src/core/perm/chmod.ts",
+    "u: S_ISUID | 0o700,",
+    "u: 0o700,"
+   ],
+   [
+    "chmod: g does not own setgid",
+    "src/core/perm/chmod.ts",
+    "g: S_ISGID | 0o070,",
+    "g: 0o070,"
+   ],
+   [
+    "chmod: o does not own sticky",
+    "src/core/perm/chmod.ts",
+    "o: S_ISVTX | 0o007,",
+    "o: 0o007,"
+   ],
+   [
+    "chmod: s means setuid only",
+    "src/core/perm/chmod.ts",
+    "else if (c === 's') value |= S_ISUID | S_ISGID;",
+    "else if (c === 's') value |= S_ISUID;"
+   ],
+   [
+    "chmod: class copy not spread to the target class",
+    "src/core/perm/chmod.ts",
+    "value = (value & R_ALL ? R_ALL : 0) | (value & W_ALL ? W_ALL : 0) | (value & X_ALL ? X_ALL : 0);",
+    "value = value | 0;"
+   ],
+   [
+    "chmod: X ignores directories",
+    "src/core/perm/chmod.ts",
+    "if ((m & X_ALL) !== 0 || options.directory) value |= X_ALL;",
+    "if ((m & X_ALL) !== 0) value |= X_ALL;"
+   ],
+   [
+    "chmod: X ignores existing execute bits",
+    "src/core/perm/chmod.ts",
+    "if ((m & X_ALL) !== 0 || options.directory) value |= X_ALL;",
+    "if (options.directory) value |= X_ALL;"
+   ],
+   [
+    "chmod: X always adds execute",
+    "src/core/perm/chmod.ts",
+    "if ((m & X_ALL) !== 0 || options.directory) value |= X_ALL;",
+    "value |= X_ALL;"
+   ],
+   [
+    "chmod: umask ignored when who is omitted",
+    "src/core/perm/chmod.ts",
+    "(change.affected ? change.affected : ~options.umask & MODE_MASK)",
+    "(change.affected ? change.affected : MODE_MASK)"
+   ],
+   [
+    "chmod: umask applied when who is given",
+    "src/core/perm/chmod.ts",
+    "(change.affected ? change.affected : ~options.umask & MODE_MASK)",
+    "(change.affected ? change.affected & ~options.umask : ~options.umask & MODE_MASK)"
+   ],
+   [
+    "chmod: directory keeps setuid and setgid even when named",
+    "src/core/perm/chmod.ts",
+    "const keep = (options.directory ? S_ISUID | S_ISGID : 0) & ~change.mentioned;",
+    "const keep = (options.directory ? S_ISUID | S_ISGID : 0);"
+   ],
+   [
+    "chmod: directory does not keep setuid and setgid",
+    "src/core/perm/chmod.ts",
+    "const keep = (options.directory ? S_ISUID | S_ISGID : 0) & ~change.mentioned;",
+    "const keep = 0 & ~change.mentioned;"
+   ],
+   [
+    "chmod: = without who clears kept directory bits",
+    "src/core/perm/chmod.ts",
+    "const preserved = (change.affected ? ~change.affected & MODE_MASK : 0) | keep;",
+    "const preserved = (change.affected ? ~change.affected & MODE_MASK : 0);"
+   ],
+   [
+    "chmod: = clears the classes not named",
+    "src/core/perm/chmod.ts",
+    "const preserved = (change.affected ? ~change.affected & MODE_MASK : 0) | keep;",
+    "const preserved = keep;"
+   ],
+   [
+    "chmod: minus adds",
+    "src/core/perm/chmod.ts",
+    "    } else {\n      m &= ~value;",
+    "    } else {\n      m |= value;"
+   ],
+   [
+    "chmod: five digits do not clear directory bits",
+    "src/core/perm/chmod.ts",
+    "if (!directory || t.length > 4) return ok(value);",
+    "if (!directory || t.length > 5) return ok(value);"
+   ],
+   [
+    "chmod: numeric mode keeps special bits on files",
+    "src/core/perm/chmod.ts",
+    "if (!directory || t.length > 4) return ok(value);",
+    "if (t.length > 4) return ok(value);"
+   ],
+   [
+    "chmod: numeric mode keeps sticky on directories",
+    "src/core/perm/chmod.ts",
+    "return ok(value | (current & (S_ISUID | S_ISGID)));",
+    "return ok(value | (current & (S_ISUID | S_ISGID | S_ISVTX)));"
+   ],
+   [
+    "chmod: numeric modes above 7777 accepted",
+    "src/core/perm/chmod.ts",
+    "if (t.length > 12 || value > MODE_MASK)",
+    "if (t.length > 12)"
+   ],
+   [
+    "chmod: tilde left unquoted",
+    "src/core/perm/chmod.ts",
+    "if (/^[A-Za-z0-9_./-]+$/.test(path)) return ok(path);",
+    "if (/^[A-Za-z0-9_./~-]+$/.test(path)) return ok(path);"
+   ],
+   [
+    "chmod: spaces left unquoted",
+    "src/core/perm/chmod.ts",
+    "if (/^[A-Za-z0-9_./-]+$/.test(path)) return ok(path);",
+    "if (/^[A-Za-z0-9_./ -]+$/.test(path)) return ok(path);"
+   ],
+   [
+    "chmod: dollar left unquoted",
+    "src/core/perm/chmod.ts",
+    "if (/^[A-Za-z0-9_./-]+$/.test(path)) return ok(path);",
+    "if (/^[A-Za-z0-9_./$()-]+$/.test(path)) return ok(path);"
+   ],
+   [
+    "chmod: single quote inside a path not escaped",
+    "src/core/perm/chmod.ts",
+    "return ok(`'${path.replace(/'/g, `'\\\\''`)}'`);",
+    "return ok(`'${path}'`);"
+   ],
+   [
+    "chmod: tab accepted in a path",
+    "src/core/perm/chmod.ts",
+    "if (code < 0x20 || code === 0x7f",
+    "if (code < 0x09 || code === 0x7f"
+   ],
+   [
+    "chmod: DEL accepted in a path",
+    "src/core/perm/chmod.ts",
+    "code < 0x20 || code === 0x7f || code === 0x85",
+    "code < 0x20 || code === 0x85"
+   ],
+   [
+    "chmod: Unicode line separator accepted in a path",
+    "src/core/perm/chmod.ts",
+    "|| code === 0x2028 || code === 0x2029) {",
+    "|| code === 0x2029) {"
+   ],
+   [
+    "chmod: path starting with a dash not guarded",
+    "src/core/perm/chmod.ts",
+    "target = path.startsWith('-') ? `-- ${quoted.value}` : quoted.value;",
+    "target = quoted.value;"
+   ],
+   [
+    "chmod: path limit off by one",
+    "src/core/perm/chmod.ts",
+    "path.length > CHMOD_LIMITS.pathChars) return fail('path-too-long'",
+    "path.length >= CHMOD_LIMITS.pathChars) return fail('path-too-long'"
+   ],
+   [
+    "chmod: expression limit off by one",
+    "src/core/perm/chmod.ts",
+    "text.length > CHMOD_LIMITS.symbolicChars) return fail('too-long'",
+    "text.length >= CHMOD_LIMITS.symbolicChars) return fail('too-long'"
+   ],
+   [
+    "chmod: sticky directory still warned as world-writable",
+    "src/core/perm/chmod.ts",
+    "} else if (!(m & S_ISVTX)) {",
+    "} else if (true) {"
+   ],
+   [
+    "chmod: setuid with group write not warned",
+    "src/core/perm/chmod.ts",
+    "if (!directory && (m & S_ISUID) && (m & 0o022))",
+    "if (!directory && (m & S_ISUID) && (m & 0o002))"
+   ],
+   [
+    "chmod: mode 000 reported as owner locked out",
+    "src/core/perm/chmod.ts",
+    "if (perms !== 0 && !(m & 0o400))",
+    "if (!(m & 0o400))"
+   ],
+   [
+    "chmod: others having more than the owner not warned",
+    "src/core/perm/chmod.ts",
+    "((g & ~u) !== 0 || (o & ~u) !== 0)",
+    "((g & ~u) !== 0)"
+   ],
+   [
+    "chmod: world-writable file not warned",
+    "src/core/perm/chmod.ts",
+    "if (perms !== 0o777) out.push({ code: 'world-writable', message",
+    "if (false) out.push({ code: 'world-writable', message"
+   ]
+  ]
+ }
+]

@@ -6,6 +6,20 @@ All notable changes to NetForge are recorded here. Versions follow [Semantic Ver
 
 ### 0.1.0-dev
 
+Infrastructure exports:
+
+- A shared export model: every target returns files to review plus an account of each item as exact, approximate or unsupported, with assumptions, manual steps and what it never covers. Plans with validation errors are not exported, and nothing is run.
+- PowerShell Generator: Windows DHCP Server scopes with exclusions, the router option, optional DNS options and reservations, created inactive by default and labeled as needing administrator rights; a read-only plan report script; a scheduled task example from the scheduling engine.
+- Terraform Export: provider-neutral JSON, typed Terraform variables with HCL or JSON values, and an AWS VPC with subnets for hashicorp/aws that lists every incompatibility with the plan and writes no Availability Zones, routing or gateways.
+- Cisco / Juniper Export: Cisco IOS / IOS-XE snippets (VLANs, SVIs, VRF membership, DHCP pools) and Juniper Junos `set` commands (VLANs, IRB interfaces, routing-instance membership), with the device context asked for instead of guessed, and no removing, saving or committing commands.
+- The export tools can take a copy of the plan that is open in the planner, in memory only.
+
+Remaining utilities:
+
+- Number Bases & Bytes: exact conversion between binary, octal, decimal and hex, signed and unsigned at fixed, custom or unlimited widths, byte order views and exact storage unit conversion.
+- chmod Calculator: check boxes, octal and symbolic forms with setuid, setgid and sticky, file and directory explanations, safe copyable commands, a preview of symbolic and numeric changes that follows GNU chmod, and a clear statement that NTFS ACLs are a different model.
+- Every tool in the catalog is now built.
+
 Engineering utilities:
 
 - Base64 / URL / Hex: conversion between UTF-8 text, Base64, Base64URL, hex and URL percent-encoding in any direction, strict by default, with positions for malformed input, byte counts, explicit lenient and replacement options, and text or byte downloads.

@@ -250,3 +250,49 @@ test('the regex time limit works on a phone too', async ({ page }) => {
   await page.fill('#regex-pattern', 'a+');
   await expect(page.locator('#regex-status')).toContainText('1 match');
 });
+
+test('the Phase 5 export tools and utilities fit a phone, with code scrolling inside its own box', async ({ page }) => {
+  const errors = watchErrors(page);
+  await page.goto('./#/powershell-generator');
+  await page.locator('#ps-example').click();
+  await page.fill('#ps-reservations', '10.10.10.5 00-11-22-33-44-55 a-rather-long-reservation-name-for-a-phone-screen');
+  await expect(page.locator('#ps-code-0')).toContainText('Add-DhcpServerv4Reservation');
+  await expectNoHorizontalScroll(page);
+  const ps = await page.locator('#ps-code-0').evaluate(el => ({ scroll: el.scrollWidth, client: el.clientWidth }));
+  expect(ps.scroll).toBeGreaterThan(ps.client);
+  await page.getByRole('radio', { name: 'Scheduled task', exact: true }).check();
+  await expect(page.locator('#ps-code-0')).toContainText('Register-ScheduledTask');
+  await expectNoHorizontalScroll(page);
+
+  await page.goto('./#/terraform-export');
+  await page.locator('#tf-example').click();
+  await page.getByRole('radio', { name: 'AWS VPC and subnets', exact: true }).check();
+  await expect(page.locator('#tf-items .export-approximate').first()).toBeVisible();
+  await expectNoHorizontalScroll(page);
+  const badge = await page.locator('#tf-items .export-item .badge').first().boundingBox();
+  const body = await page.locator('#tf-items .export-item-body').first().boundingBox();
+  expect(body!.y).toBeGreaterThan(badge!.y);
+  expect(body!.width).toBeGreaterThan(250);
+
+  await page.goto('./#/network-config-export');
+  await page.locator('#nc-example').click();
+  await page.selectOption('#nc-site', { label: 'Headquarters' });
+  await page.selectOption('#nc-global-vrf', { label: 'Global' });
+  await page.fill('#nc-vrf-name-r2', 'GUEST');
+  await page.check('#nc-dhcp');
+  await expect(page.locator('#nc-code-0')).toContainText('ip dhcp pool VLAN200');
+  await expectNoHorizontalScroll(page);
+  await page.getByRole('radio', { name: 'Juniper Junos', exact: true }).check();
+  await expect(page.locator('#nc-code-0')).toContainText('set vlans');
+  await expectNoHorizontalScroll(page);
+
+  await page.goto('./#/number-bases');
+  await page.selectOption('#num-width', 'none');
+  await page.fill('#num-input', '9'.repeat(300));
+  await expectNoHorizontalScroll(page);
+  await page.goto('./#/chmod-calculator');
+  await page.fill('#chmod-octal', '4755');
+  await page.fill('#chmod-path', '/a/very/long/path/that/keeps/going/and/going/on/a/phone/screen/file name.sh');
+  await expectNoHorizontalScroll(page);
+  expect(errors).toEqual([]);
+});
