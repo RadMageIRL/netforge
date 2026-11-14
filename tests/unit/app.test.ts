@@ -61,11 +61,12 @@ describe('catalog', () => {
     expect(actual).toEqual(BRIEF_NAVIGATION);
   });
 
-  it('has exactly the Phase 0 to 3 tools built and every other tool planned', () => {
+  it('has exactly the Phase 0 to 4 tools built and every other tool planned', () => {
     expect(catalog.list().filter(t => t.status === 'available').map(t => t.id).sort()).toEqual([
-      'cron-explainer', 'ip-range-analyzer', 'json-formatter', 'network-planner', 'route-summarization', 'schedule-builder', 'subnet-calculator', 'timestamp-converter', 'vlsm-allocator',
+      'base64-url-hex', 'cron-explainer', 'hash-hmac', 'ip-range-analyzer', 'json-formatter', 'jwt-decoder', 'network-planner', 'regex-tester', 'route-summarization', 'schedule-builder',
+      'subnet-calculator', 'text-tools', 'timestamp-converter', 'uuid-tokens', 'vlsm-allocator', 'yaml-xml-tools',
     ]);
-    expect(catalog.list().filter(t => t.status === 'planned')).toHaveLength(11);
+    expect(catalog.list().filter(t => t.status === 'planned').map(t => t.id).sort()).toEqual(['chmod-calculator', 'number-bases', 'powershell-generator', 'terraform-export']);
   });
 
   it('loads a module with a mount function for every built tool', async () => {

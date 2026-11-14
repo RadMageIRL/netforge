@@ -40,6 +40,9 @@ const ALLOWED_URLS = new Set([
   'https://www.iana.org/assignments/iana-ipv4-special-registry/',
   'https://www.iana.org/assignments/iana-ipv6-special-registry/',
   'https://www.iana.org/assignments/ipv6-address-space/',
+  // Namespace names fixed by the XML specifications: identifiers the XML parser compares, never addresses it opens.
+  'http://www.w3.org/XML/1998/namespace',
+  'http://www.w3.org/2000/xmlns/',
 ]);
 
 const findEmDash = (text: string) => text.includes(EM_DASH);
@@ -124,10 +127,20 @@ describe('repository rules', () => {
     expect(app.flatMap(f => findUrls(read(f)).map(u => `${f}: ${u}`))).toEqual([]);
   });
 
-  it('ships no runtime dependencies', () => {
+  it('bundles exactly one dependency, the YAML parser, pinned to an exact version', () => {
     const pkg = JSON.parse(read('package.json')) as { dependencies?: Record<string, string>; private?: boolean };
-    expect(pkg.dependencies ?? {}).toEqual({});
+    expect(Object.keys(pkg.dependencies ?? {})).toEqual(['yaml']);
+    expect(pkg.dependencies!.yaml).toMatch(/^[0-9]+[.][0-9]+[.][0-9]+$/);
     expect(pkg.private).toBe(true);
+    // The parser itself has no dependencies, so nothing else is pulled into the app.
+    const yaml = JSON.parse(readFileSync(join(ROOT, 'node_modules', 'yaml', 'package.json'), 'utf8')) as { version: string; dependencies?: Record<string, string> };
+    expect(yaml.dependencies ?? {}).toEqual({});
+    expect(yaml.version).toBe(pkg.dependencies!.yaml);
+  });
+
+  it('never uses Math.random: every random value comes from the secure generator', () => {
+    const needle = ['Math', 'random'].join('.');
+    expect(textFiles.filter(f => f.startsWith('src/') && read(f).includes(needle))).toEqual([]);
   });
 
   it('keeps connect-src none in the production Content-Security-Policy', () => {

@@ -4,6 +4,9 @@
 //
 //   node scripts/mutations.mjs            run every mutation
 //   node scripts/mutations.mjs json       only mutations whose label contains "json"
+//
+// Phase 4 mutations live in scripts/mutations-phase4.json. Each names the test files that cover
+// its module, and only those are run for it, which keeps several hundred mutations practical.
 
 import { execFileSync, spawnSync } from 'node:child_process';
 import { cpSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
@@ -223,6 +226,10 @@ const MUTATIONS = [
   ['reports: numeric zone names shown as abbreviations', 'src/core/schedule/reports.ts', "return /^[A-Z]{2,5}$/.test(name) ? name : '';", 'return name;'],
 ];
 
+for (const group of JSON.parse(readFileSync(join(ROOT, 'scripts', 'mutations-phase4.json'), 'utf8'))) {
+  for (const [label, file, from, to] of group.mutations) MUTATIONS.push([label, file, from, to, group.tests]);
+}
+
 function run(cwd, args) {
   return spawnSync(process.execPath, [join(cwd, 'node_modules', 'vitest', 'vitest.mjs'), 'run', ...args], { cwd, encoding: 'utf8' });
 }
@@ -246,7 +253,7 @@ try {
   }
   console.log(`Baseline passes. Running ${selected.length} mutations.`);
   const survivors = [];
-  for (const [label, file, from, to] of selected) {
+  for (const [label, file, from, to, tests = []] of selected) {
     const path = join(work, file);
     const original = readFileSync(path, 'utf8');
     const count = original.split(from).length - 1;
@@ -256,7 +263,7 @@ try {
       continue;
     }
     writeFileSync(path, original.replace(from, to));
-    const result = run(work, ['--bail', '1']);
+    const result = run(work, [...tests, '--bail', '1']);
     writeFileSync(path, original);
     const killed = result.status !== 0;
     console.log(`${killed ? 'killed  ' : 'SURVIVED'} ${label}`);

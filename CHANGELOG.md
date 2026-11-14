@@ -6,6 +6,18 @@ All notable changes to NetForge are recorded here. Versions follow [Semantic Ver
 
 ### 0.1.0-dev
 
+Engineering utilities:
+
+- Base64 / URL / Hex: conversion between UTF-8 text, Base64, Base64URL, hex and URL percent-encoding in any direction, strict by default, with positions for malformed input, byte counts, explicit lenient and replacement options, and text or byte downloads.
+- Hash / HMAC: SHA-256, SHA-384, SHA-512, legacy SHA-1 and MD5, and HMAC-SHA256/384/512 for text and files, in hex and Base64, with checksum comparison. Web Crypto for SHA and HMAC; a local RFC 1321 implementation for MD5.
+- JWT Decoder: header and claims decoding, registered claim explanations, time claims checked against the device clock, expected issuer and audience checks, and optional signature verification for HS256/384/512, RS256/384/512 and ES256/384/512 with a supplied secret, PEM public key, JWK or pasted JWK Set. Algorithm confusion, `alg: none`, key-type and curve mismatches, malformed signatures, private keys and critical extensions are refused; keys are never fetched.
+- Regex Tester: JavaScript regular expressions with highlighted matches, capture groups, named groups, zero-length matches, a replacement preview, and a two-second limit enforced by terminating and replacing the worker that runs the pattern.
+- List / Text Tools: trim, remove empty and duplicate lines, change case, sort, prefix, suffix, number, list comparison and text statistics.
+- UUID / Random Tokens: UUID versions 4 and 7 (RFC 9562) and random hex or Base64URL tokens in bulk, from the browser's secure generator only.
+- YAML/XML Tools: YAML validation and formatting, YAML to JSON, JSON to YAML, XML validation, formatting and minifying, and XML to JSON with an explicit conversion model. The XML parser loads no external resources and expands no declared entities.
+- One bundled dependency: the `yaml` parser, pinned to an exact version and loaded only in the YAML/XML worker.
+- Input and output size limits for every utility, with oversized input refused rather than cut.
+
 Scheduling (ScheduleForge):
 
 - Cron Explainer for standard five-field cron (Vixie rules, including the day-of-month OR day-of-week rule and the AND case when a day field starts with *), Quartz cron (seconds, ?, L, L-n, LW, nW, nL, n#k, years to 2099) and systemd calendar expressions (weekdays, dates, times, repetitions, "~" end-of-month days, shorthands, time zones), each with its own parser; unsupported syntax is refused with the reason.

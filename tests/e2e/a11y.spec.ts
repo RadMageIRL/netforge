@@ -17,7 +17,7 @@ const STATES: [string, (page: Page) => Promise<void>][] = [
   ['timestamp overlap', async page => { await page.goto('./#/timestamp-converter'); await page.fill('#timestamp-input', '2026-11-01 01:30'); }],
   ['timestamp gap', async page => { await page.goto('./#/timestamp-converter'); await page.fill('#timestamp-input', '2026-03-08 02:30'); }],
   ['about', async page => { await page.goto('./#/about'); }],
-  ['planned tool', async page => { await page.goto('./#/regex-tester'); }],
+  ['planned tool', async page => { await page.goto('./#/number-bases'); }],
   ['search with no match', async page => { await page.goto('./'); await page.fill('#tool-search', 'zzzz'); }],
   // Phase 1
   ['subnet IPv6 with split and supernet open', async page => {
@@ -132,6 +132,87 @@ const STATES: [string, (page: Page) => Promise<void>][] = [
     await page.selectOption('#builder-frequency', 'days');
     for (const d of [1, 3, 5]) await page.locator(`#builder-day-${d}`).uncheck();
     await expect(page.locator('#builder-days-error')).toBeVisible();
+  }],
+  // Phase 4
+  ['encoding result', async page => { await page.goto('./#/base64-url-hex'); await page.getByRole('button', { name: 'Example' }).click(); }],
+  ['encoding error', async page => {
+    await page.goto('./#/base64-url-hex');
+    await page.selectOption('#codec-from', 'hex');
+    await page.selectOption('#codec-to', 'text');
+    await page.fill('#codec-input', '48656c6c6fff');
+    await expect(page.locator('#codec-error')).toBeVisible();
+  }],
+  ['hash results with a comparison', async page => {
+    await page.goto('./#/hash-hmac');
+    await page.fill('#hash-text', 'abc');
+    await page.fill('#hash-expected', '900150983cd24fb0d6963f7d28e17f72');
+    await expect(page.locator('#hash-compare .notice')).toBeVisible();
+  }],
+  ['HMAC with a key error', async page => {
+    await page.goto('./#/hash-hmac');
+    await page.getByRole('radio', { name: 'HMAC', exact: true }).check();
+    await page.getByRole('radio', { name: 'Hex', exact: true }).check();
+    await page.fill('#hash-key', 'xyz');
+    await expect(page.locator('#hash-key-error')).toBeVisible();
+  }],
+  ['hash file input', async page => { await page.goto('./#/hash-hmac'); await page.getByRole('radio', { name: 'File', exact: true }).check(); }],
+  ['JWT verified', async page => {
+    await page.goto('./#/jwt-decoder');
+    await page.getByRole('button', { name: 'Example' }).click();
+    await page.locator('#jwt-verify').click();
+    await expect(page.locator('#jwt-verify-message')).toBeVisible();
+  }],
+  ['JWT failed with claim problems and a public key field', async page => {
+    await page.goto('./#/jwt-decoder');
+    await page.fill('#jwt-input', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjEwMDAsIm5iZiI6IngiLCJhdWQiOjV9.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+    await page.fill('#jwt-secret', 'wrong');
+    await page.locator('#jwt-verify').click();
+    await expect(page.locator('#jwt-verify-message')).toBeVisible();
+    await page.getByRole('radio', { name: 'Public key', exact: true }).check();
+  }],
+  ['JWT malformed', async page => { await page.goto('./#/jwt-decoder'); await page.fill('#jwt-input', 'abc.def'); await expect(page.locator('#jwt-input-error')).toBeVisible(); }],
+  ['regex matches with a replacement', async page => {
+    await page.goto('./#/regex-tester');
+    await page.getByRole('button', { name: 'Example' }).click();
+    await page.locator('#regex-replace-on').check();
+    await expect(page.locator('#regex-replaced')).toBeVisible();
+  }],
+  ['regex pattern error', async page => { await page.goto('./#/regex-tester'); await page.fill('#regex-text', 'abc'); await page.fill('#regex-pattern', '(a'); await expect(page.locator('#regex-pattern-error')).toBeVisible(); }],
+  ['regex zero-length matches', async page => { await page.goto('./#/regex-tester'); await page.fill('#regex-text', 'ab'); await page.fill('#regex-pattern', 'x*'); await expect(page.locator('#regex-matches')).toBeVisible(); }],
+  ['UUIDs generated', async page => { await page.goto('./#/uuid-tokens'); await page.selectOption('#token-kind', 'uuid-v7'); await page.fill('#token-count', '5'); await page.locator('#token-generate').click(); }],
+  ['token count error', async page => { await page.goto('./#/uuid-tokens'); await page.selectOption('#token-kind', 'hex'); await page.fill('#token-count', '0'); await page.locator('#token-generate').click(); }],
+  ['text tools with every operation', async page => {
+    await page.goto('./#/text-tools');
+    await page.getByRole('button', { name: 'Example' }).click();
+    await page.locator('#text-dedupe').check();
+    await page.locator('#text-number').check();
+    await page.selectOption('#text-sort', 'natural');
+  }],
+  ['text tools list comparison', async page => {
+    await page.goto('./#/text-tools');
+    await page.getByRole('tab', { name: 'Compare lists' }).click();
+    await page.fill('#compare-a', 'a\nb\nb');
+    await page.fill('#compare-b', 'b\nc');
+    await expect(page.locator('#compare-repeats')).toBeVisible();
+  }],
+  ['YAML to JSON with notes', async page => {
+    await page.goto('./#/yaml-xml-tools');
+    await page.selectOption('#data-operation', 'yaml-json');
+    await page.getByRole('button', { name: 'Example' }).click();
+    await expect(page.locator('#data-notes')).toBeVisible();
+  }],
+  ['YAML error', async page => { await page.goto('./#/yaml-xml-tools'); await page.fill('#data-input', 'a: [1'); await expect(page.locator('#data-errors')).toBeVisible(); }],
+  ['XML to JSON with the whitespace option', async page => {
+    await page.goto('./#/yaml-xml-tools');
+    await page.selectOption('#data-operation', 'xml-json');
+    await page.getByRole('button', { name: 'Example' }).click();
+    await expect(page.locator('#data-notes')).toBeVisible();
+  }],
+  ['XML entity refusal', async page => {
+    await page.goto('./#/yaml-xml-tools');
+    await page.selectOption('#data-operation', 'xml-format');
+    await page.fill('#data-input', '<a>&nbsp;</a>');
+    await expect(page.locator('#data-errors')).toBeVisible();
   }],
 ];
 

@@ -141,3 +141,38 @@ test('leaves other apps\' caches on the same site alone', async ({ page }) => {
   await page.reload();
   expect(await page.evaluate(async () => (await caches.keys()).includes('other-app-v1'))).toBe(true);
 });
+
+test('the Phase 4 utilities work offline without having been opened online, workers included', async ({ page, context }) => {
+  await page.goto('./');
+  await waitForController(page);
+  await context.setOffline(true);
+  await page.reload();
+  await page.locator('a[data-tool="base64-url-hex"]').click();
+  await page.fill('#codec-input', 'offline');
+  await expect(page.locator('#codec-output')).toHaveValue('b2ZmbGluZQ==');
+  await page.locator('a[data-tool="hash-hmac"]').click();
+  await page.fill('#hash-text', 'abc');
+  await expect(page.locator('#hash-list [data-key="SHA-256-hex"] .hash-value')).toHaveText('ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+  await expect(page.locator('#hash-list [data-key="MD5-hex"] .hash-value')).toHaveText('900150983cd24fb0d6963f7d28e17f72');
+  await page.locator('a[data-tool="jwt-decoder"]').click();
+  await page.getByRole('button', { name: 'Example' }).click();
+  await page.locator('#jwt-verify').click();
+  await expect(page.locator('#jwt-verify-message')).toContainText('Signature verified.');
+  await page.locator('a[data-tool="regex-tester"]').click();
+  await page.getByRole('button', { name: 'Example' }).click();
+  await expect(page.locator('#regex-status')).toContainText('4 matches');
+  await page.locator('a[data-tool="text-tools"]').click();
+  await page.fill('#text-input', 'b\na');
+  await page.selectOption('#text-sort', 'text');
+  await expect(page.locator('#text-output')).toHaveValue('a\nb');
+  await page.locator('a[data-tool="uuid-tokens"]').click();
+  await page.locator('#token-generate').click();
+  await expect(page.locator('#token-output')).toHaveValue(/^[0-9a-f-]{36}$/);
+  await page.locator('a[data-tool="yaml-xml-tools"]').click();
+  await page.selectOption('#data-operation', 'yaml-json');
+  await page.fill('#data-input', 'a: [1, 2]');
+  await expect(page.locator('#data-output')).toHaveValue('{\n  "a": [\n    1,\n    2\n  ]\n}\n');
+  await page.selectOption('#data-operation', 'xml-format');
+  await page.fill('#data-input', '<a><b/></a>');
+  await expect(page.locator('#data-output')).toHaveValue('<a>\n  <b/>\n</a>\n');
+});

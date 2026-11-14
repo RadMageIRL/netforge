@@ -17,3 +17,19 @@ export function downloadText(filename: string, text: string, mime = 'text/plain'
   setTimeout(() => URL.revokeObjectURL(url), 60_000);
   return name;
 }
+
+/** Saving raw bytes as a file, for data that is not text (decoded Base64, for example). */
+export function downloadBytes(filename: string, bytes: Uint8Array, mime = 'application/octet-stream'): string {
+  const name = safeFilename(filename, 'netforge-output.bin');
+  const url = URL.createObjectURL(new Blob([bytes as BlobPart], { type: mime }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  link.rel = 'noopener';
+  link.className = 'visually-hidden';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  return name;
+}

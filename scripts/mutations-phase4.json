@@ -1,0 +1,1649 @@
+[
+ {
+  "tests": [
+   "tests/unit/codec.test.ts",
+   "tests/unit/hash.test.ts",
+   "tests/unit/tokens.test.ts",
+   "tests/unit/textops.test.ts",
+   "tests/unit/utils-oracle.test.ts"
+  ],
+  "mutations": [
+   [
+    "utf8: overlong two-byte forms (C0, C1) accepted",
+    "src/core/codec/codec.ts",
+    "if (b >= 0xc2 && b <= 0xdf) need = 1;",
+    "if (b >= 0xc0 && b <= 0xdf) need = 1;"
+   ],
+   [
+    "utf8: overlong three-byte forms accepted",
+    "src/core/codec/codec.ts",
+    "else if (b === 0xe0) { need = 2; lo = 0xa0; }",
+    "else if (b === 0xe0) { need = 2; lo = 0x80; }"
+   ],
+   [
+    "utf8: encoded surrogates accepted",
+    "src/core/codec/codec.ts",
+    "else if (b === 0xed) { need = 2; hi = 0x9f; }",
+    "else if (b === 0xed) { need = 2; hi = 0xbf; }"
+   ],
+   [
+    "utf8: overlong four-byte forms accepted",
+    "src/core/codec/codec.ts",
+    "else if (b === 0xf0) { need = 3; lo = 0x90; }",
+    "else if (b === 0xf0) { need = 3; lo = 0x80; }"
+   ],
+   [
+    "utf8: code points above U+10FFFF accepted",
+    "src/core/codec/codec.ts",
+    "else if (b === 0xf4) { need = 3; hi = 0x8f; }",
+    "else if (b === 0xf4) { need = 3; hi = 0xbf; }"
+   ],
+   [
+    "utf8: lead bytes F4 to F7 unrestricted",
+    "src/core/codec/codec.ts",
+    "else if (b >= 0xf1 && b <= 0xf3) need = 3;",
+    "else if (b >= 0xf1 && b <= 0xf7) need = 3;"
+   ],
+   [
+    "utf8: truncated sequences accepted",
+    "src/core/codec/codec.ts",
+    "if (i + k >= n) return i;",
+    "if (i + k >= n) return -1;"
+   ],
+   [
+    "utf8: later continuation bytes not range-checked",
+    "src/core/codec/codec.ts",
+    "c < 0x80 || c > 0xbf) return i;",
+    "c < 0x80) return i;"
+   ],
+   [
+    "utf8: invalid bytes replaced without being asked",
+    "src/core/codec/codec.ts",
+    "if (!options.replace) {",
+    "if (false) {"
+   ],
+   [
+    "utf8: lone surrogates replaced without being asked",
+    "src/core/codec/codec.ts",
+    "if (lone >= 0 && !options.replace) {",
+    "if (lone >= 0 && false) {"
+   ],
+   [
+    "utf8: byte order mark dropped on decode",
+    "src/core/codec/codec.ts",
+    "return ok(new TextDecoder('utf-8', { fatal: false, ignoreBOM: true })",
+    "return ok(new TextDecoder('utf-8', { fatal: false, ignoreBOM: false })"
+   ],
+   [
+    "utf8: genuine U+FFFD counted as a replacement",
+    "src/core/codec/codec.ts",
+    "return inText - genuine;",
+    "return inText;"
+   ],
+   [
+    "hex: odd digit count accepted",
+    "src/core/codec/codec.ts",
+    "if (high >= 0) return fail('hex-odd-length'",
+    "if (false) return fail('hex-odd-length'"
+   ],
+   [
+    "hex: g accepted as a digit",
+    "src/core/codec/codec.ts",
+    "if (code >= 0x61 && code <= 0x66) return code - 0x57;",
+    "if (code >= 0x61 && code <= 0x67) return code - 0x57;"
+   ],
+   [
+    "hex: separators ignored in strict mode",
+    "src/core/codec/codec.ts",
+    "if (options.lenient) {",
+    "if (true) {"
+   ],
+   [
+    "hex: percent escapes written in lowercase",
+    "src/core/codec/codec.ts",
+    "return HEX_UPPER[b >> 4] + HEX_UPPER[b & 15];",
+    "return HEX_LOWER[b >> 4] + HEX_LOWER[b & 15];"
+   ],
+   [
+    "base64: whitespace ignored in strict mode",
+    "src/core/codec/codec.ts",
+    "if (lenient && isAsciiSpace(code)) continue;",
+    "if (isAsciiSpace(code)) continue;"
+   ],
+   [
+    "base64: missing padding accepted in the standard alphabet",
+    "src/core/codec/codec.ts",
+    "} else if (expectedPads > 0 && padding === 'required') {",
+    "} else if (expectedPads > 0 && false) {"
+   ],
+   [
+    "base64: wrong amount of padding accepted",
+    "src/core/codec/codec.ts",
+    "if (pads !== expectedPads) {",
+    "if (false) {"
+   ],
+   [
+    "base64: padding accepted where forbidden",
+    "src/core/codec/codec.ts",
+    "if (padding === 'forbidden') return fail(",
+    "if (false) return fail("
+   ],
+   [
+    "base64: nonzero trailing bits accepted",
+    "src/core/codec/codec.ts",
+    "if (!lenient && acc !== 0) {",
+    "if (false) {"
+   ],
+   [
+    "base64: a single leftover character accepted",
+    "src/core/codec/codec.ts",
+    "if (tail === 1) {",
+    "if (tail === 5) {"
+   ],
+   [
+    "base64: data after padding accepted",
+    "src/core/codec/codec.ts",
+    "if (pads > 0) return fail('base64-padding'",
+    "if (false) return fail('base64-padding'"
+   ],
+   [
+    "base64: URL decoding uses the standard alphabet",
+    "src/core/codec/codec.ts",
+    "const table = url ? REV_URL : REV_STANDARD;",
+    "const table = REV_STANDARD;"
+   ],
+   [
+    "base64: other alphabet not named",
+    "src/core/codec/codec.ts",
+    "if (code < 128 && other[code] >= 0) {",
+    "if (false) {"
+   ],
+   [
+    "base64: URL alphabet padded by default",
+    "src/core/codec/codec.ts",
+    "const pad = options.pad ?? options.alphabet !== 'url';",
+    "const pad = options.pad ?? true;"
+   ],
+   [
+    "base64: URL alphabet uses + and /",
+    "src/core/codec/codec.ts",
+    "const alphabet = options.alphabet === 'url' ? B64_URL : B64_STANDARD;",
+    "const alphabet = B64_STANDARD;"
+   ],
+   [
+    "percent: tilde encoded",
+    "src/core/codec/codec.ts",
+    "|| b === 0x2d || b === 0x2e || b === 0x5f || b === 0x7e;",
+    "|| b === 0x2d || b === 0x2e || b === 0x5f;"
+   ],
+   [
+    "percent: asterisk left unencoded",
+    "src/core/codec/codec.ts",
+    "|| b === 0x2d || b === 0x2e || b === 0x5f || b === 0x7e;",
+    "|| b === 0x2d || b === 0x2e || b === 0x5f || b === 0x7e || b === 0x2a;"
+   ],
+   [
+    "percent: escape at the end of the text refused",
+    "src/core/codec/codec.ts",
+    "if (i + 2 >= text.length) return fail('percent-incomplete'",
+    "if (i + 3 >= text.length) return fail('percent-incomplete'"
+   ],
+   [
+    "percent: one bad hex digit accepted",
+    "src/core/codec/codec.ts",
+    "if (hi < 0 || lo < 0) return fail('percent-hex'",
+    "if (hi < 0 && lo < 0) return fail('percent-hex'"
+   ],
+   [
+    "percent: plus always read as a space",
+    "src/core/codec/codec.ts",
+    "} else if (code === 0x2b && options.plusAsSpace) {",
+    "} else if (code === 0x2b) {"
+   ],
+   [
+    "percent: space always written as plus",
+    "src/core/codec/codec.ts",
+    "else if (b === 0x20 && options.spaceAsPlus) chunk",
+    "else if (b === 0x20) chunk"
+   ],
+   [
+    "convert: input limit doubled",
+    "src/core/codec/convert.ts",
+    "if (input.length > MAX_INPUT_CHARS) {",
+    "if (input.length > MAX_INPUT_CHARS * 2) {"
+   ],
+   [
+    "convert: input limit off by one",
+    "src/core/codec/convert.ts",
+    "if (input.length > MAX_INPUT_CHARS) {",
+    "if (input.length >= MAX_INPUT_CHARS) {"
+   ],
+   [
+    "convert: Base64 input always lenient",
+    "src/core/codec/convert.ts",
+    "case 'base64': return base64Decode(input, { alphabet: 'standard', lenient: options.lenient });",
+    "case 'base64': return base64Decode(input, { alphabet: 'standard', lenient: true });"
+   ],
+   [
+    "convert: hex input always lenient",
+    "src/core/codec/convert.ts",
+    "case 'hex': return hexDecode(input, { lenient: options.lenient });",
+    "case 'hex': return hexDecode(input, { lenient: true });"
+   ],
+   [
+    "convert: invalid UTF-8 always replaced in output",
+    "src/core/codec/convert.ts",
+    "case 'text': return utf8Decode(bytes, { replace: options.replaceInvalid });",
+    "case 'text': return utf8Decode(bytes, { replace: true });"
+   ],
+   [
+    "convert: lone surrogates always replaced in input",
+    "src/core/codec/convert.ts",
+    "case 'text': return utf8Encode(input, { replace: options.replaceInvalid });",
+    "case 'text': return utf8Encode(input, { replace: true });"
+   ],
+   [
+    "convert: output failure reported as an input failure",
+    "src/core/codec/convert.ts",
+    "if (!output.ok) return { ok: false, stage: 'output'",
+    "if (!output.ok) return { ok: false, stage: 'input'"
+   ],
+   [
+    "md5: one shift amount changed",
+    "src/core/crypto/md5.ts",
+    "  5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,",
+    "  5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 21,"
+   ],
+   [
+    "md5: last constant changed",
+    "src/core/crypto/md5.ts",
+    "0x2ad7d2bb, 0xeb86d391,",
+    "0x2ad7d2bb, 0xeb86d392,"
+   ],
+   [
+    "md5: round two message index changed",
+    "src/core/crypto/md5.ts",
+    "g = (5 * i + 1) % 16; }",
+    "g = (5 * i + 2) % 16; }"
+   ],
+   [
+    "md5: round four function changed",
+    "src/core/crypto/md5.ts",
+    "else { f = c ^ (b | ~d); g = (7 * i) % 16; }",
+    "else { f = c ^ (b & ~d); g = (7 * i) % 16; }"
+   ],
+   [
+    "md5: padding boundary off by one",
+    "src/core/crypto/md5.ts",
+    "new Uint8Array(rest < 56 ? 64 : 128)",
+    "new Uint8Array(rest < 57 ? 64 : 128)"
+   ],
+   [
+    "md5: length counted in the wrong unit",
+    "src/core/crypto/md5.ts",
+    "const bitsLow = (data.length * 8) >>> 0;",
+    "const bitsLow = (data.length * 4) >>> 0;"
+   ],
+   [
+    "md5: initial state changed",
+    "src/core/crypto/md5.ts",
+    "0x67452301, 0xefcdab89",
+    "0x67452302, 0xefcdab89"
+   ],
+   [
+    "md5: digest written big-endian",
+    "src/core/crypto/md5.ts",
+    "out[i * 4 + k] = (state[i] >>> (8 * k)) & 0xff;",
+    "out[i * 4 + k] = (state[i] >>> (8 * (3 - k))) & 0xff;"
+   ],
+   [
+    "md5: padding marker changed",
+    "src/core/crypto/md5.ts",
+    "tail[rest] = 0x80;",
+    "tail[rest] = 0x40;"
+   ],
+   [
+    "hmac: empty key accepted",
+    "src/core/crypto/digest.ts",
+    "if (key.length === 0) throw new RangeError(",
+    "if (key.length < 0) throw new RangeError("
+   ],
+   [
+    "hmac: empty parsed key accepted",
+    "src/core/crypto/digest.ts",
+    "if (bytes.length === 0) return fail('key-empty'",
+    "if (false) return fail('key-empty'"
+   ],
+   [
+    "hash: MD5 caution removed",
+    "src/core/crypto/digest.ts",
+    "caution: 'Legacy and broken. Not suitable for anything security-sensitive; use it only to check old checksums.' }",
+    "caution: null }"
+   ],
+   [
+    "hash: SHA-1 not labeled legacy",
+    "src/core/crypto/digest.ts",
+    "caution: 'Legacy. Collisions have been produced",
+    "caution: 'Collisions have been produced"
+   ],
+   [
+    "hash: expected hex compared with case",
+    "src/core/crypto/digest.ts",
+    "const lower = want.toLowerCase();",
+    "const lower = want;"
+   ],
+   [
+    "hash: expected Base64 compared without case",
+    "src/core/crypto/digest.ts",
+    "if (digests[i].base64 === want) return",
+    "if (digests[i].base64.toLowerCase() === lower) return"
+   ],
+   [
+    "hmac: text key trimmed",
+    "src/core/crypto/digest.ts",
+    "const encoded = utf8Encode(text);",
+    "const encoded = utf8Encode(text.trim());"
+   ],
+   [
+    "uuid v4: wrong version",
+    "src/core/random/tokens.ts",
+    "bytes[6] = (bytes[6] & 0x0f) | 0x40;",
+    "bytes[6] = (bytes[6] & 0x0f) | 0x30;"
+   ],
+   [
+    "uuid v4: wrong variant",
+    "src/core/random/tokens.ts",
+    "bytes[6] = (bytes[6] & 0x0f) | 0x40;\n  bytes[8] = (bytes[8] & 0x3f) | 0x80;",
+    "bytes[6] = (bytes[6] & 0x0f) | 0x40;\n  bytes[8] = (bytes[8] & 0x3f) | 0xc0;"
+   ],
+   [
+    "uuid v4: variant bits left random",
+    "src/core/random/tokens.ts",
+    "bytes[6] = (bytes[6] & 0x0f) | 0x40;\n  bytes[8] = (bytes[8] & 0x3f) | 0x80;",
+    "bytes[6] = (bytes[6] & 0x0f) | 0x40;\n  bytes[8] = bytes[8] | 0x80;"
+   ],
+   [
+    "uuid v7: wrong version",
+    "src/core/random/tokens.ts",
+    "bytes[6] = 0x70 | (this.counter >> 8);",
+    "bytes[6] = 0x40 | (this.counter >> 8);"
+   ],
+   [
+    "uuid v7: variant not set",
+    "src/core/random/tokens.ts",
+    "bytes[7] = this.counter & 0xff;\n    bytes[8] = (bytes[8] & 0x3f) | 0x80;",
+    "bytes[7] = this.counter & 0xff;\n    bytes[8] = bytes[8] & 0x3f;"
+   ],
+   [
+    "uuid v7: timestamp little-endian",
+    "src/core/random/tokens.ts",
+    "for (let i = 5; i >= 0; i--) {",
+    "for (let i = 0; i <= 5; i++) {"
+   ],
+   [
+    "uuid v7: counter seed uses the top bit",
+    "src/core/random/tokens.ts",
+    "if (ms > this.lastMs) {\n      this.counter = ((bytes[6] & 0x07) << 8) | bytes[7];",
+    "if (ms > this.lastMs) {\n      this.counter = ((bytes[6] & 0x0f) << 8) | bytes[7];"
+   ],
+   [
+    "uuid v7: counter never advances",
+    "src/core/random/tokens.ts",
+    "this.counter++;",
+    "this.counter += 0;"
+   ],
+   [
+    "uuid v7: counter overflow not handled",
+    "src/core/random/tokens.ts",
+    "if (this.counter > 0xfff) {",
+    "if (this.counter > 0xffff) {"
+   ],
+   [
+    "uuid v7: timestamp follows a clock that went back",
+    "src/core/random/tokens.ts",
+    "if (ms > this.lastMs) {",
+    "if (ms !== this.lastMs) {"
+   ],
+   [
+    "uuid v7: timestamps beyond 48 bits accepted",
+    "src/core/random/tokens.ts",
+    "if (!(ms >= 0) || ms > UUID_V7_MAX_MS) throw",
+    "if (!(ms >= 0)) throw"
+   ],
+   [
+    "uuid v7: rollover past the last millisecond accepted",
+    "src/core/random/tokens.ts",
+    "if (ms > UUID_V7_MAX_MS) throw new RangeError",
+    "if (false) throw new RangeError"
+   ],
+   [
+    "uuid: any high bit counts as the RFC variant",
+    "src/core/random/tokens.ts",
+    "(parseInt(hex[16], 16) & 0xc) === 0x8",
+    "(parseInt(hex[16], 16) & 0x8) === 0x8"
+   ],
+   [
+    "uuid: timestamp read for other versions",
+    "src/core/random/tokens.ts",
+    "timestampMs: version === 7 && rfcVariant ?",
+    "timestampMs: rfcVariant ?"
+   ],
+   [
+    "token: one byte short",
+    "src/core/random/tokens.ts",
+    "const bytes = new Uint8Array(byteLength);",
+    "const bytes = new Uint8Array(byteLength - 1);"
+   ],
+   [
+    "token: Base64URL padded",
+    "src/core/random/tokens.ts",
+    "base64Encode(bytes, { alphabet: 'url', pad: false })",
+    "base64Encode(bytes, { alphabet: 'url', pad: true })"
+   ],
+   [
+    "token: count limit doubled",
+    "src/core/random/tokens.ts",
+    "count > TOKEN_LIMITS.maxCount) {",
+    "count > TOKEN_LIMITS.maxCount * 2) {"
+   ],
+   [
+    "token: zero count accepted",
+    "src/core/random/tokens.ts",
+    "count < TOKEN_LIMITS.minCount ||",
+    "count < 0 ||"
+   ],
+   [
+    "token: byte limit doubled",
+    "src/core/random/tokens.ts",
+    "byteLength > TOKEN_LIMITS.maxBytes) {",
+    "byteLength > TOKEN_LIMITS.maxBytes * 2) {"
+   ],
+   [
+    "token: zero bytes accepted",
+    "src/core/random/tokens.ts",
+    "byteLength < TOKEN_LIMITS.minBytes ||",
+    "byteLength < 0 ||"
+   ],
+   [
+    "token: strength overstated for UUID v7",
+    "src/core/random/tokens.ts",
+    "values, randomBits: 62, length: 36,",
+    "values, randomBits: 74, length: 36,"
+   ],
+   [
+    "token: strength overstated for UUID v4",
+    "src/core/random/tokens.ts",
+    "values, randomBits: 122, length: 36,",
+    "values, randomBits: 128, length: 36,"
+   ],
+   [
+    "token: strength overstated for random tokens",
+    "src/core/random/tokens.ts",
+    "return ok({ values, randomBits: byteLength * 8,",
+    "return ok({ values, randomBits: byteLength * 16,"
+   ],
+   [
+    "token: short-token caution dropped",
+    "src/core/random/tokens.ts",
+    "if (byteLength < 16) notes.push(",
+    "if (byteLength < 8) notes.push("
+   ],
+   [
+    "text: character limit not enforced",
+    "src/core/textops/lines.ts",
+    "if (text.length > TEXT_LIMITS.chars) {",
+    "if (text.length > TEXT_LIMITS.chars * 4) {"
+   ],
+   [
+    "text: line limit not enforced",
+    "src/core/textops/lines.ts",
+    "lineCount > TEXT_LIMITS.lines) {",
+    "lineCount > TEXT_LIMITS.lines * 4) {"
+   ],
+   [
+    "text: output limit not enforced",
+    "src/core/textops/lines.ts",
+    "if (output.length > TEXT_LIMITS.chars * 2) {",
+    "if (output.length > TEXT_LIMITS.chars * 20) {"
+   ],
+   [
+    "text: untouched input rebuilt",
+    "src/core/textops/lines.ts",
+    "const output = steps.length === 0 ? text : joinLines(lines, doc);",
+    "const output = joinLines(lines, doc);"
+   ],
+   [
+    "text: ignore case does nothing",
+    "src/core/textops/lines.ts",
+    "(ignoreCase ? line.toLowerCase() : line);",
+    "(ignoreCase ? line : line);"
+   ],
+   [
+    "text: sorts by UTF-16 unit",
+    "src/core/textops/lines.ts",
+    "return unit >= 0xe000 ? unit - 0x800 : unit + 0x2000;",
+    "return unit;"
+   ],
+   [
+    "text: sort not stable",
+    "src/core/textops/lines.ts",
+    "(direction * compare(a.key, b.key)) || (a.index - b.index));",
+    "(direction * compare(a.key, b.key)) || (b.index - a.index));"
+   ],
+   [
+    "text: whitespace-only lines kept",
+    "src/core/textops/lines.ts",
+    "const kept = lines.filter(l => l.trim() !== '');",
+    "const kept = lines.filter(l => l !== '');"
+   ],
+   [
+    "text: lone CR not a line ending",
+    "src/core/textops/lines.ts",
+    "else if (code === 0x0d) found = (text.charCodeAt(i + 1) === 0x0a ? CR + LF : CR) as Eol;",
+    "else if (code === 0x0d && text.charCodeAt(i + 1) === 0x0a) found = (CR + LF) as Eol;"
+   ],
+   [
+    "text: natural sort compares digits as text",
+    "src/core/textops/lines.ts",
+    "if (ie - is !== je - js) return (ie - is) - (je - js);",
+    "if (false) return 0;"
+   ],
+   [
+    "text: non-integer first line number accepted",
+    "src/core/textops/lines.ts",
+    "if (options.number && !Number.isSafeInteger(options.numberStart)) {",
+    "if (false) {"
+   ],
+   [
+    "text: duplicates keep the last",
+    "src/core/textops/lines.ts",
+    "if (seen.has(key)) continue;\n      seen.add(key);\n      kept.push(line);",
+    "if (seen.has(key)) { kept[kept.findIndex(k => foldKey(k, options.ignoreCase) === key)] = line; continue; }\n      seen.add(key);\n      kept.push(line);"
+   ],
+   [
+    "text: list comparison keeps whitespace-only lines",
+    "src/core/textops/lines.ts",
+    "if (options.ignoreEmpty && line.trim() === '') continue;",
+    "if (options.ignoreEmpty && line === '') continue;"
+   ],
+   [
+    "text: list comparison ignores case always",
+    "src/core/textops/lines.ts",
+    "const key = foldKey(line, options.ignoreCase);\n      if (!map.has(key)) map.set(key, line);",
+    "const key = foldKey(line, true);\n      if (!map.has(key)) map.set(key, line);"
+   ],
+   [
+    "text: mixed line endings not reported",
+    "src/core/textops/lines.ts",
+    "mixedEol: doc.mixedEol && steps.length > 0 };",
+    "mixedEol: false };"
+   ],
+   [
+    "text: final line ending dropped",
+    "src/core/textops/lines.ts",
+    "return lines.join(doc.eol) + (doc.finalEol ? doc.eol : '');",
+    "return lines.join(doc.eol);"
+   ],
+   [
+    "text: trim start trims both ends",
+    "src/core/textops/lines.ts",
+    "options.trim === 'start' ? l.trimStart() : l.trimEnd()",
+    "options.trim === 'start' ? l.trim() : l.trimEnd()"
+   ],
+   [
+    "text: numbers not padded",
+    "src/core/textops/lines.ts",
+    "const width = options.numberPad ? Math.max(",
+    "const width = false ? Math.max("
+   ]
+  ]
+ },
+ {
+  "tests": [
+   "tests/unit/jwt.test.ts",
+   "tests/unit/jwt-claims.test.ts",
+   "tests/unit/jwt-keys.test.ts",
+   "tests/unit/jwt-verify.test.ts",
+   "tests/unit/jwt-oracle.test.ts"
+  ],
+  "mutations": [
+   [
+    "jwt: four segments accepted",
+    "src/core/jwt/jwt.ts",
+    "if (segments.length !== 3) {",
+    "if (segments.length < 3) {"
+   ],
+   [
+    "jwt: five segments not reported as encrypted",
+    "src/core/jwt/jwt.ts",
+    "if (segments.length === 5) {",
+    "if (segments.length === 6) {"
+   ],
+   [
+    "jwt: padded segments accepted",
+    "src/core/jwt/jwt.ts",
+    "{ alphabet: 'url', padding: 'forbidden' }",
+    "{ alphabet: 'url', padding: 'optional' }"
+   ],
+   [
+    "jwt: empty payload segment accepted",
+    "src/core/jwt/jwt.ts",
+    "if (i < 2 && segments[i] === '')",
+    "if (i < 1 && segments[i] === '')"
+   ],
+   [
+    "jwt: whitespace inside the token not reported",
+    "src/core/jwt/jwt.ts",
+    "if (space) {",
+    "if (space && false) {"
+   ],
+   [
+    "jwt: size limit doubled",
+    "src/core/jwt/jwt.ts",
+    "if (token.length > MAX_JWT_CHARS) {",
+    "if (token.length > MAX_JWT_CHARS * 2) {"
+   ],
+   [
+    "jwt: byte order mark reaches JSON.parse",
+    "src/core/jwt/jwt.ts",
+    "if (text.charCodeAt(0) === 0xfeff) {",
+    "if (text.charCodeAt(0) === 0xfffe) {"
+   ],
+   [
+    "jwt: duplicate header names accepted",
+    "src/core/jwt/jwt.ts",
+    "if (duplicate) {",
+    "if (duplicate && what === 'payload') {"
+   ],
+   [
+    "jwt: duplicate claim names accepted",
+    "src/core/jwt/jwt.ts",
+    "if (duplicate) {",
+    "if (duplicate && what === 'header') {"
+   ],
+   [
+    "jwt: non-object header not reported",
+    "src/core/jwt/jwt.ts",
+    "if (analysis.stats.rootType !== 'object') {",
+    "if (analysis.stats.rootType === 'string') {"
+   ],
+   [
+    "jwt: alg of any type accepted",
+    "src/core/jwt/jwt.ts",
+    "if (typeof alg !== 'string' || alg === '') {",
+    "if (alg === undefined) {"
+   ],
+   [
+    "jwt: alg looked up through the prototype chain",
+    "src/core/jwt/jwt.ts",
+    "algInfo: Object.hasOwn(SUPPORTED_ALGS, alg) ? SUPPORTED_ALGS[alg] : null,",
+    "algInfo: SUPPORTED_ALGS[alg] ?? null,"
+   ],
+   [
+    "jwt: unsupported reason looked up through the prototype chain",
+    "src/core/jwt/jwt.ts",
+    "if (Object.hasOwn(KNOWN_UNSUPPORTED, alg)) return KNOWN_UNSUPPORTED[alg];",
+    "if (alg in KNOWN_UNSUPPORTED) return KNOWN_UNSUPPORTED[alg];"
+   ],
+   [
+    "jwt: wrong-case alg not pointed out",
+    "src/core/jwt/jwt.ts",
+    "find(name => name.toLowerCase() === alg.toLowerCase())",
+    "find(name => name === alg)"
+   ],
+   [
+    "jwt: typ JWT does not require a claims object",
+    "src/core/jwt/jwt.ts",
+    "} else if (declaredJwt || ",
+    "} else if (false || "
+   ],
+   [
+    "jwt: typ JWT does not require UTF-8",
+    "src/core/jwt/jwt.ts",
+    "if (declaredJwt) return fail('payload-utf8'",
+    "if (false) return fail('payload-utf8'"
+   ],
+   [
+    "jwt: keys named by the token not flagged",
+    "src/core/jwt/jwt.ts",
+    "if (Object.hasOwn(header.value.value, name)) {",
+    "if (false) {"
+   ],
+   [
+    "jwt: Bearer prefix kept",
+    "src/core/jwt/jwt.ts",
+    "if (bearer) {",
+    "if (bearer && false) {"
+   ],
+   [
+    "claims: token valid at exactly exp",
+    "src/core/jwt/claims.ts",
+    "else if (now < exp) checks.push(",
+    "else if (now <= exp) checks.push("
+   ],
+   [
+    "claims: leeway inclusive at exp + leeway",
+    "src/core/jwt/claims.ts",
+    "else if (now < exp + leeway) checks.push(",
+    "else if (now <= exp + leeway) checks.push("
+   ],
+   [
+    "claims: nbf leeway exclusive",
+    "src/core/jwt/claims.ts",
+    "else if (now >= nbf - leeway) checks.push(",
+    "else if (now > nbf - leeway) checks.push("
+   ],
+   [
+    "claims: nbf ignored",
+    "src/core/jwt/claims.ts",
+    "else checks.push({ id: 'nbf', outcome: 'fail'",
+    "else checks.push({ id: 'nbf', outcome: 'pass'"
+   ],
+   [
+    "claims: expired reported as pass",
+    "src/core/jwt/claims.ts",
+    "else checks.push({ id: 'exp', outcome: 'fail'",
+    "else checks.push({ id: 'exp', outcome: 'pass'"
+   ],
+   [
+    "claims: leeway not capped",
+    "src/core/jwt/claims.ts",
+    "Math.min(Math.max(options.leewaySeconds ?? 0, 0), MAX_LEEWAY_SECONDS)",
+    "Math.max(options.leewaySeconds ?? 0, 0)"
+   ],
+   [
+    "claims: negative leeway applied",
+    "src/core/jwt/claims.ts",
+    "Math.min(Math.max(options.leewaySeconds ?? 0, 0), MAX_LEEWAY_SECONDS)",
+    "Math.min(options.leewaySeconds ?? 0, MAX_LEEWAY_SECONDS)"
+   ],
+   [
+    "claims: non-finite times checked as numbers",
+    "src/core/jwt/claims.ts",
+    "return typeof v === 'number' && isoSeconds(v) !== null ? v : 'invalid';",
+    "return typeof v === 'number' ? v : 'invalid';"
+   ],
+   [
+    "claims: inherited claims count as present",
+    "src/core/jwt/claims.ts",
+    "if (!Object.hasOwn(claims, name)) return 'absent';",
+    "if (!(name in claims)) return 'absent';"
+   ],
+   [
+    "claims: issuer compared without case",
+    "src/core/jwt/claims.ts",
+    "else if (iss === wantIssuer) checks.push(",
+    "else if (iss.toLowerCase() === wantIssuer.toLowerCase()) checks.push("
+   ],
+   [
+    "claims: missing issuer passes",
+    "src/core/jwt/claims.ts",
+    "if (!Object.hasOwn(claims, 'iss')) checks.push({ id: 'iss', outcome: 'fail'",
+    "if (!Object.hasOwn(claims, 'iss')) checks.push({ id: 'iss', outcome: 'pass'"
+   ],
+   [
+    "claims: audience matched by prefix",
+    "src/core/jwt/claims.ts",
+    "checks.push(aud === wantAudience",
+    "checks.push(aud.startsWith(wantAudience)"
+   ],
+   [
+    "claims: audience array matched by prefix",
+    "src/core/jwt/claims.ts",
+    "checks.push(aud.includes(wantAudience)",
+    "checks.push(aud.some(a => String(a).startsWith(wantAudience))"
+   ],
+   [
+    "claims: malformed claims do not fail the verdict",
+    "src/core/jwt/claims.ts",
+    "if (checks.some(c => c.outcome === 'fail' || c.outcome === 'invalid')) return 'fail';",
+    "if (checks.some(c => c.outcome === 'fail')) return 'fail';"
+   ],
+   [
+    "claims: string exp not flagged",
+    "src/core/jwt/claims.ts",
+    "if (typeof value !== 'number' || !Number.isFinite(value)) {",
+    "if (typeof value !== 'number' && typeof value !== 'string') {"
+   ],
+   [
+    "keys: PEM hidden in hex or Base64 accepted as a secret",
+    "src/core/jwt/keys.ts",
+    "PEM_BLOCK.test(latin1(bytes)) || ",
+    "false || "
+   ],
+   [
+    "keys: JWK hidden in hex or Base64 accepted as a secret",
+    "src/core/jwt/keys.ts",
+    "|| looksLikeJwk(latin1(bytes, MAX_KEY_CHARS))) {",
+    "|| false) {"
+   ],
+   [
+    "keys: confusion detector returns the key as a secret",
+    "src/core/jwt/keys.ts",
+    "return fail('key-confusion', CONFUSION);",
+    "return ok(bytes);"
+   ],
+   [
+    "keys: only the PKCS#8 private label refused",
+    "src/core/jwt/keys.ts",
+    "if (/PRIVATE KEY$/.test(label)) {",
+    "if (label === 'PRIVATE KEY') {"
+   ],
+   [
+    "keys: private JWK accepted",
+    "src/core/jwt/keys.ts",
+    "if (['d', 'p', 'q', 'dp', 'dq', 'qi', 'oth'].some(name => Object.hasOwn(jwk, name))) {",
+    "if (false) {"
+   ],
+   [
+    "keys: only d marks a private JWK",
+    "src/core/jwt/keys.ts",
+    "['d', 'p', 'q', 'dp', 'dq', 'qi', 'oth']",
+    "['d']"
+   ],
+   [
+    "keys: text after the PEM block ignored",
+    "src/core/jwt/keys.ts",
+    "if (trimmed.length !== whole.length) return fail('key-pem'",
+    "if (false) return fail('key-pem'"
+   ],
+   [
+    "keys: mismatched PEM labels accepted",
+    "src/core/jwt/keys.ts",
+    "if (label !== endLabel) return fail(",
+    "if (false) return fail("
+   ],
+   [
+    "keys: PEM header lines accepted",
+    "src/core/jwt/keys.ts",
+    ".test(body)) return fail('key-format', 'The PEM block has header lines",
+    ".test('')) return fail('key-format', 'The PEM block has header lines"
+   ],
+   [
+    "keys: trailing bytes after the key structure accepted",
+    "src/core/jwt/keys.ts",
+    "if (!outer || outer.tag !== 0x30 || outer.end !== der.length) return malformed();",
+    "if (!outer || outer.tag !== 0x30) return malformed();"
+   ],
+   [
+    "keys: P-384 and P-521 identifiers swapped",
+    "src/core/jwt/keys.ts",
+    "'2b81040022': 'P-384', '2b81040023': 'P-521'",
+    "'2b81040022': 'P-521', '2b81040023': 'P-384'"
+   ],
+   [
+    "keys: PKCS#1 wrapper length off by one",
+    "src/core/jwt/keys.ts",
+    "const bitString = [0x03, ...derLength(pkcs1.length + 1), 0x00];",
+    "const bitString = [0x03, ...derLength(pkcs1.length), 0x00];"
+   ],
+   [
+    "keys: shared-secret JWK not recognized",
+    "src/core/jwt/keys.ts",
+    "if (kty === 'oct') {",
+    "if (kty === 'octet') {"
+   ],
+   [
+    "keys: EC coordinate length not checked",
+    "src/core/jwt/keys.ts",
+    "if (coordinate.value.length !== COORDINATE_BYTES[crv]) {",
+    "if (false) {"
+   ],
+   [
+    "keys: padded Base64URL accepted in a JWK",
+    "src/core/jwt/keys.ts",
+    "{ alphabet: 'url', padding: 'forbidden' }",
+    "{ alphabet: 'url', padding: 'optional' }"
+   ],
+   [
+    "keys: JWK with repeated names accepted",
+    "src/core/jwt/keys.ts",
+    "if (analysis.warnings.some(w => w.code === 'duplicate-key')) return fail('key-jwk'",
+    "if (false) return fail('key-jwk'"
+   ],
+   [
+    "keys: unknown kid falls back to the first key",
+    "src/core/jwt/keys.ts",
+    "if (matches.length === 0) return fail('key-not-found'",
+    "if (matches.length === 0) return parseJwkObject(list[0]);\n  if (false) return fail('key-not-found'"
+   ],
+   [
+    "keys: ambiguous kid uses the first match",
+    "src/core/jwt/keys.ts",
+    "if (matches.length > 1) return fail(",
+    "if (matches.length > 2) return fail("
+   ],
+   [
+    "keys: first key used when the token has no kid",
+    "src/core/jwt/keys.ts",
+    "if (list.length === 1) return parseJwkObject(list[0]);",
+    "if (list.length >= 1) return parseJwkObject(list[0]);"
+   ],
+   [
+    "keys: unsupported curve names accepted in a JWK",
+    "src/core/jwt/keys.ts",
+    "if (crv !== 'P-256' && crv !== 'P-384' && crv !== 'P-521') {",
+    "if (typeof crv !== 'string') {"
+   ],
+   [
+    "verify: alg none not singled out",
+    "src/core/jwt/verify.ts",
+    "if (jwt.alg === 'none') return reject('alg-none'",
+    "if (jwt.alg === 'None') return reject('alg-none'"
+   ],
+   [
+    "verify: unsupported algorithm reported verified",
+    "src/core/jwt/verify.ts",
+    "if (!info) return reject('alg-unsupported', unsupportedAlgReason(jwt.alg));",
+    "if (!info) return { status: 'verified', alg: jwt.alg, keySource: '', warnings: [] };"
+   ],
+   [
+    "verify: crit ignored",
+    "src/core/jwt/verify.ts",
+    "if (Object.hasOwn(jwt.header, 'crit') || jwt.header.b64 === false) {",
+    "if (jwt.header.b64 === false) {"
+   ],
+   [
+    "verify: b64 false ignored",
+    "src/core/jwt/verify.ts",
+    "if (Object.hasOwn(jwt.header, 'crit') || jwt.header.b64 === false) {",
+    "if (Object.hasOwn(jwt.header, 'crit')) {"
+   ],
+   [
+    "verify: missing Web Crypto not reported",
+    "src/core/jwt/verify.ts",
+    "if (!subtle) {",
+    "if (false) {"
+   ],
+   [
+    "verify: HMAC token accepts any key kind",
+    "src/core/jwt/verify.ts",
+    "if (key.kind !== 'secret') {",
+    "if (false) {"
+   ],
+   [
+    "verify: public-key token accepts a secret",
+    "src/core/jwt/verify.ts",
+    "if (key.kind !== 'public') {",
+    "if (false) {"
+   ],
+   [
+    "verify: key family not checked",
+    "src/core/jwt/verify.ts",
+    "if (publicKey.family !== info.family) {",
+    "if (false) {"
+   ],
+   [
+    "verify: curve not checked",
+    "src/core/jwt/verify.ts",
+    "if (publicKey.family === 'EC' && publicKey.curve !== info.curve) {",
+    "if (false) {"
+   ],
+   [
+    "verify: HMAC signature length not checked",
+    "src/core/jwt/verify.ts",
+    "const size = HASH_BYTES[info.hash];\n    if (signature.length !== size) {",
+    "const size = HASH_BYTES[info.hash];\n    if (false) {"
+   ],
+   [
+    "verify: RSA signature length not checked",
+    "src/core/jwt/verify.ts",
+    "const size = Math.ceil(bits / 8);\n    if (signature.length !== size) {",
+    "const size = Math.ceil(bits / 8);\n    if (false) {"
+   ],
+   [
+    "verify: ECDSA signature length not checked",
+    "src/core/jwt/verify.ts",
+    "} else if (signature.length !== info.signatureBytes) {",
+    "} else if (false) {"
+   ],
+   [
+    "verify: failed HMAC reported verified",
+    "src/core/jwt/verify.ts",
+    "return good ? { status: 'verified', alg: info.name, keySource: 'shared secret', warnings }",
+    "return good || true ? { status: 'verified', alg: info.name, keySource: 'shared secret', warnings }"
+   ],
+   [
+    "verify: failed public-key signature reported verified",
+    "src/core/jwt/verify.ts",
+    "  return good\n    ? { status: 'verified'",
+    "  return good || true\n    ? { status: 'verified'"
+   ],
+   [
+    "verify: verified HMAC reported failed",
+    "src/core/jwt/verify.ts",
+    "return good ? { status: 'verified', alg: info.name, keySource: 'shared secret', warnings }",
+    "return !good ? { status: 'verified', alg: info.name, keySource: 'shared secret', warnings }"
+   ],
+   [
+    "verify: JWK use not checked",
+    "src/core/jwt/verify.ts",
+    "if (d.use !== undefined && d.use !== 'sig') return reject('key-use'",
+    "if (false) return reject('key-use'"
+   ],
+   [
+    "verify: JWK key_ops not checked",
+    "src/core/jwt/verify.ts",
+    "if (d.keyOps !== undefined && !d.keyOps.includes('verify')) return reject(",
+    "if (false) return reject("
+   ],
+   [
+    "verify: JWK alg not checked",
+    "src/core/jwt/verify.ts",
+    "if (d.alg !== undefined && d.alg !== info.name) return reject('key-alg'",
+    "if (false) return reject('key-alg'"
+   ],
+   [
+    "verify: short-secret warning off by one",
+    "src/core/jwt/verify.ts",
+    "if (secret.value.length < size) {",
+    "if (secret.value.length <= size) {"
+   ],
+   [
+    "verify: weak RSA threshold lowered",
+    "src/core/jwt/verify.ts",
+    "if (bits < MIN_RSA_BITS) warnings.push(",
+    "if (bits < 1024) warnings.push("
+   ],
+   [
+    "verify: RSA hash fixed to SHA-256",
+    "src/core/jwt/verify.ts",
+    "? { name: 'RSASSA-PKCS1-v1_5', hash: info.hash }",
+    "? { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }"
+   ],
+   [
+    "verify: ECDSA hash fixed to SHA-256",
+    "src/core/jwt/verify.ts",
+    "{ name: 'ECDSA', hash: info.hash }",
+    "{ name: 'ECDSA', hash: 'SHA-256' }"
+   ],
+   [
+    "verify: HMAC hash fixed to SHA-256",
+    "src/core/jwt/verify.ts",
+    "{ name: 'HMAC', hash: info.hash }",
+    "{ name: 'HMAC', hash: 'SHA-256' }"
+   ],
+   [
+    "verify: token kid not passed to key selection",
+    "src/core/jwt/verify.ts",
+    "const kid = typeof jwt.header.kid === 'string' ? jwt.header.kid : undefined;",
+    "const kid = undefined;"
+   ]
+  ]
+ },
+ {
+  "tests": [
+   "tests/unit/regex.test.ts",
+   "tests/unit/task-runner.test.ts",
+   "tests/unit/yaml.test.ts",
+   "tests/unit/xml.test.ts",
+   "tests/unit/data-oracle.test.ts"
+  ],
+  "mutations": [
+   [
+    "regex: zero-length matches skip a position",
+    "src/core/regex/run.ts",
+    "if (!unicode || index + 1 >= text.length) return index + 1;",
+    "if (!unicode || index + 1 >= text.length) return index + 2;"
+   ],
+   [
+    "regex: unicode advance always two units",
+    "src/core/regex/run.ts",
+    "if (first < 0xd800 || first > 0xdbff) return index + 1;",
+    "if (first < 0xd800 || first > 0xdbff) return index + 2;"
+   ],
+   [
+    "regex: non-global pattern reports a second match",
+    "src/core/regex/run.ts",
+    "if (!global) break;",
+    "if (!global && total > 1) break;"
+   ],
+   [
+    "regex: pattern size limit moved",
+    "src/core/regex/run.ts",
+    "if (pattern.length > REGEX_LIMITS.patternChars)",
+    "if (pattern.length > REGEX_LIMITS.patternChars + 1)"
+   ],
+   [
+    "regex: text size limit moved",
+    "src/core/regex/run.ts",
+    "if (text.length > REGEX_LIMITS.textChars)",
+    "if (text.length > REGEX_LIMITS.textChars + 1)"
+   ],
+   [
+    "regex: replacement size limit moved",
+    "src/core/regex/run.ts",
+    "replacement.length > REGEX_LIMITS.replacementChars)",
+    "replacement.length > REGEX_LIMITS.replacementChars + 1)"
+   ],
+   [
+    "regex: one match too many listed",
+    "src/core/regex/run.ts",
+    "if (matches.length >= REGEX_LIMITS.matches) detailLimit",
+    "if (matches.length > REGEX_LIMITS.matches) detailLimit"
+   ],
+   [
+    "regex: capture budget ignored",
+    "src/core/regex/run.ts",
+    "else if (captures + groupCount > REGEX_LIMITS.captures)",
+    "else if (false)"
+   ],
+   [
+    "regex: character budget ignored",
+    "src/core/regex/run.ts",
+    "else if (budget.chars <= 0)",
+    "else if (false)"
+   ],
+   [
+    "regex: long values not cut",
+    "src/core/regex/run.ts",
+    "const text = value.length > REGEX_LIMITS.valueChars ? value.slice(0, REGEX_LIMITS.valueChars) : value;",
+    "const text = value;"
+   ],
+   [
+    "regex: text after the last match not counted toward the limit",
+    "src/core/regex/run.ts",
+    "if (outChars + (text.length - cursor) > REGEX_LIMITS.replacedChars) {",
+    "if (false) {"
+   ],
+   [
+    "regex: highlight spans not capped",
+    "src/core/regex/run.ts",
+    "if (spans.length < MAX_SPANS * 2) spans.push(start, end);",
+    "spans.push(start, end);"
+   ],
+   [
+    "regex: $$ written as two dollars",
+    "src/core/regex/run.ts",
+    "if (next === '$') { literal += '$'; i += 2; continue; }",
+    "if (next === '$') { literal += '$$'; i += 2; continue; }"
+   ],
+   [
+    "regex: $' starts at the match",
+    "src/core/regex/run.ts",
+    "else if (piece.kind === 'after') parts.push(text.slice(end));",
+    "else if (piece.kind === 'after') parts.push(text.slice(start));"
+   ],
+   [
+    "regex: $` ends after the match",
+    "src/core/regex/run.ts",
+    "else if (piece.kind === 'before') parts.push(text.slice(0, start));",
+    "else if (piece.kind === 'before') parts.push(text.slice(0, end));"
+   ],
+   [
+    "regex: two-digit group reference off by one",
+    "src/core/regex/run.ts",
+    "if (two >= 1 && two <= groupCount)",
+    "if (two >= 1 && two < groupCount)"
+   ],
+   [
+    "regex: one-digit reference to a missing group",
+    "src/core/regex/run.ts",
+    "if (one >= 1 && one <= groupCount)",
+    "if (one >= 1)"
+   ],
+   [
+    "regex: $<name> read without named groups",
+    "src/core/regex/run.ts",
+    "if (next === '<' && hasNamedGroups) {",
+    "if (next === '<') {"
+   ],
+   [
+    "regex: unmatched group written as text",
+    "src/core/regex/run.ts",
+    "parts.push(m[piece.number] ?? '');",
+    "parts.push(String(m[piece.number]));"
+   ],
+   [
+    "regex: u with v not caught as a flag error",
+    "src/core/regex/run.ts",
+    "if (seen.has('u') && seen.has('v')) return",
+    "if (false) return"
+   ],
+   [
+    "regex: repeated flag not caught",
+    "src/core/regex/run.ts",
+    "if (seen.has(f)) return",
+    "if (false) return"
+   ],
+   [
+    "regex: lookbehind counted as a named group",
+    "src/core/regex/run.ts",
+    "if (pattern[i + 2] === '<' && pattern[i + 3] !== '=' && pattern[i + 3] !== '!') {",
+    "if (pattern[i + 2] === '<') {"
+   ],
+   [
+    "regex: escaped parenthesis counted as a group",
+    "src/core/regex/run.ts",
+    "if (ch === BACKSLASH) { i++; continue; }",
+    "if (ch === BACKSLASH) { continue; }"
+   ],
+   [
+    "regex: parenthesis in a class counted as a group",
+    "src/core/regex/run.ts",
+    "if (ch === '[') { classDepth = 1; continue; }",
+    "if (ch === '[') { continue; }"
+   ],
+   [
+    "regex: unmatched group reported as empty",
+    "src/core/regex/run.ts",
+    "value: value === undefined ? null : excerpt(value, budget)",
+    "value: excerpt(value ?? '', budget)"
+   ],
+   [
+    "regex: zero-length matches not counted",
+    "src/core/regex/run.ts",
+    "if (m[0] === '') zeroLength++;",
+    "if (m[0] === ' ') zeroLength++;"
+   ],
+   [
+    "runner: stopping a task does not terminate its worker",
+    "src/core/worker/task-runner.ts",
+    "    this.pending = null;\n    this.release();\n    if (pending) {",
+    "    this.pending = null;\n    if (pending) {"
+   ],
+   [
+    "runner: release does not terminate the worker",
+    "src/core/worker/task-runner.ts",
+    "      worker.onerror = null;\n      worker.terminate();",
+    "      worker.onerror = null;"
+   ],
+   [
+    "runner: no replacement worker after a timeout",
+    "src/core/worker/task-runner.ts",
+    "if (!this.disposed) this.ensureWorker();",
+    ""
+   ],
+   [
+    "runner: timeout not counted",
+    "src/core/worker/task-runner.ts",
+    "        this.timeouts++;\n",
+    ""
+   ],
+   [
+    "runner: message from a terminated worker accepted",
+    "src/core/worker/task-runner.ts",
+    "      if (worker !== this.worker) return;\n      const data = event.data",
+    "      const data = event.data"
+   ],
+   [
+    "runner: error from a terminated worker accepted",
+    "src/core/worker/task-runner.ts",
+    "      if (worker !== this.worker) return;\n      const message = typeof",
+    "      const message = typeof"
+   ],
+   [
+    "runner: message with the wrong task id accepted",
+    "src/core/worker/task-runner.ts",
+    "if (!pending || !data || data.id !== pending.id) return;",
+    "if (!pending || !data) return;"
+   ],
+   [
+    "runner: timer left running after a result",
+    "src/core/worker/task-runner.ts",
+    "      this.clock.clearTimeout(pending.timer);\n      this.pending = null;",
+    "      this.pending = null;"
+   ],
+   [
+    "runner: new task does not stop the running one",
+    "src/core/worker/task-runner.ts",
+    "    if (this.pending) this.stop({ status: 'superseded' });\n    const worker = this.ensureWorker();",
+    "    const worker = this.ensureWorker();"
+   ],
+   [
+    "runner: zero time limit accepted",
+    "src/core/worker/task-runner.ts",
+    "if (!(timeoutMs > 0)) throw new RangeError('A task needs a positive time limit.');",
+    "if (timeoutMs < 0) throw new RangeError('A task needs a positive time limit.');"
+   ],
+   [
+    "runner: disposed runner accepts tasks",
+    "src/core/worker/task-runner.ts",
+    "if (this.disposed) return Promise.resolve({ status: 'crashed', message: 'The task runner has been shut down.' });",
+    ""
+   ],
+   [
+    "runner: timeout reported with the wrong limit",
+    "src/core/worker/task-runner.ts",
+    "this.stop({ status: 'timeout', limitMs: timeoutMs });",
+    "this.stop({ status: 'timeout', limitMs: this.defaultTimeoutMs });"
+   ],
+   [
+    "xml: unknown entities accepted",
+    "src/core/data/xml.ts",
+    "} else if (Object.hasOwn(PREDEFINED, body)) {",
+    "} else if (true) {"
+   ],
+   [
+    "xml: &lt; and &gt; swapped",
+    "src/core/data/xml.ts",
+    "{ lt: '<', gt: '>',",
+    "{ lt: '>', gt: '<',"
+   ],
+   [
+    "xml: hexadecimal character references read as decimal",
+    "src/core/data/xml.ts",
+    "const cp = digits.length > 8 ? -1 : parseInt(digits, hex ? 16 : 10);",
+    "const cp = digits.length > 8 ? -1 : parseInt(digits, 10);"
+   ],
+   [
+    "xml: references to forbidden characters accepted",
+    "src/core/data/xml.ts",
+    "if (!isXmlChar(cp)) this.fail('entity',",
+    "if (cp < 0) this.fail('entity',"
+   ],
+   [
+    "xml: U+FFFE and U+FFFF allowed",
+    "src/core/data/xml.ts",
+    "(c >= 0xe000 && c <= 0xfffd)",
+    "(c >= 0xe000 && c <= 0xffff)"
+   ],
+   [
+    "xml: control characters allowed",
+    "src/core/data/xml.ts",
+    "if (c >= 0x20 && c < 0xd800) continue;",
+    "if (c >= 0x01 && c < 0xd800) continue;"
+   ],
+   [
+    "xml: quoted strings in the DOCTYPE subset not skipped",
+    "src/core/data/xml.ts",
+    "      if (c === ']') { this.i++; return; }\n      if (c === '\"' || c === \"'\") {",
+    "      if (c === ']') { this.i++; return; }\n      if (false) {"
+   ],
+   [
+    "xml: comments in the DOCTYPE subset not skipped",
+    "src/core/data/xml.ts",
+    "} else if (this.s.startsWith('<!--', this.i)) {",
+    "} else if (false) {"
+   ],
+   [
+    "xml: entity declarations not noticed",
+    "src/core/data/xml.ts",
+    "if (this.s.startsWith('<!ENTITY', this.i)) this.declaredEntities = true;",
+    "if (this.s.startsWith('<!ENTITY', this.i)) this.declaredEntities = false;"
+   ],
+   [
+    "xml: any prefix counts as bound",
+    "src/core/data/xml.ts",
+    "return prefix === 'xml' ? XML_NS : undefined;",
+    "return XML_NS;"
+   ],
+   [
+    "xml: xml prefix not predeclared",
+    "src/core/data/xml.ts",
+    "return prefix === 'xml' ? XML_NS : undefined;",
+    "return undefined;"
+   ],
+   [
+    "xml: xmlns prefix can be declared",
+    "src/core/data/xml.ts",
+    "if (prefix === 'xmlns') this.fail(",
+    "if (false) this.fail("
+   ],
+   [
+    "xml: xml prefix can be rebound",
+    "src/core/data/xml.ts",
+    "if (prefix === 'xml' && a.value !== XML_NS) this.fail(",
+    "if (false) this.fail("
+   ],
+   [
+    "xml: outer namespace declaration wins over inner",
+    "src/core/data/xml.ts",
+    "for (let k = stack.length - 1; k >= 0; k--) {",
+    "for (let k = 0; k < stack.length; k++) {"
+   ],
+   [
+    "xml: attributes with the same expanded name accepted",
+    "src/core/data/xml.ts",
+    "if (expanded.has(key)) this.fail(",
+    "if (false) this.fail("
+   ],
+   [
+    "xml: default namespace applied to attributes",
+    "src/core/data/xml.ts",
+    "        if (p === '') continue;\n",
+    ""
+   ],
+   [
+    "xml: duplicate attributes accepted",
+    "src/core/data/xml.ts",
+    "if (names.has(name)) this.fail(",
+    "if (false) this.fail("
+   ],
+   [
+    "xml: mismatched closing tag accepted",
+    "src/core/data/xml.ts",
+    "if (top.element.name !== name) {",
+    "if (false) {"
+   ],
+   [
+    "xml: second root element accepted",
+    "src/core/data/xml.ts",
+    "if (root && !top) this.fail('root',",
+    "if (false) this.fail('root',"
+   ],
+   [
+    "xml: double hyphen in a comment accepted",
+    "src/core/data/xml.ts",
+    "if (dashes >= 0) this.fail('comment',",
+    "if (false) this.fail('comment',"
+   ],
+   [
+    "xml: comment ending in a hyphen accepted",
+    "src/core/data/xml.ts",
+    "if (value.endsWith('-')) this.fail('comment',",
+    "if (false) this.fail('comment',"
+   ],
+   [
+    "xml: ]]> in text accepted",
+    "src/core/data/xml.ts",
+    "if (cdataEnd >= 0) this.fail('cdata',",
+    "if (false) this.fail('cdata',"
+   ],
+   [
+    "xml: CDATA outside the root accepted",
+    "src/core/data/xml.ts",
+    "if (!top) this.fail('cdata', 'A CDATA section is only allowed inside an element.');",
+    ""
+   ],
+   [
+    "xml: depth limit off by one",
+    "src/core/data/xml.ts",
+    "if (stack.length > XML_LIMITS.depth) this.fail('depth',",
+    "if (stack.length > XML_LIMITS.depth + 1) this.fail('depth',"
+   ],
+   [
+    "xml: text outside the root accepted",
+    "src/core/data/xml.ts",
+    "          if (bad) {",
+    "          if (false) {"
+   ],
+   [
+    "xml: < in an attribute value accepted",
+    "src/core/data/xml.ts",
+    "if (lt >= 0) this.fail('attribute',",
+    "if (false) this.fail('attribute',"
+   ],
+   [
+    "xml: attribute values not normalized",
+    "src/core/data/xml.ts",
+    "const value = this.resolve(raw.replace(/\\r\\n|[\\t\\n\\r]/g, ' '), valueStart);",
+    "const value = this.resolve(raw, valueStart);"
+   ],
+   [
+    "xml: XML 1.1 accepted",
+    "src/core/data/xml.ts",
+    "if (version !== '1.0') this.fail('version',",
+    "if (false) this.fail('version',"
+   ],
+   [
+    "xml: misplaced XML declaration accepted",
+    "src/core/data/xml.ts",
+    "if (target.toLowerCase() === 'xml') this.fail('pi',",
+    "if (false) this.fail('pi',"
+   ],
+   [
+    "xml: line ends in text not normalized",
+    "src/core/data/xml.ts",
+    "value: this.resolve(raw.replace(/\\r\\n?/g, '\\n'), start), raw });",
+    "value: this.resolve(raw, start), raw });"
+   ],
+   [
+    "xml: size limit doubled",
+    "src/core/data/xml.ts",
+    "if (text.length > XML_LIMITS.inputChars) {",
+    "if (text.length > XML_LIMITS.inputChars * 2) {"
+   ],
+   [
+    "xml format: mixed content treated as layout",
+    "src/core/data/xml-tools.ts",
+    "if (child.type === 'text') { if (!isBlank(child.raw)) return false; }",
+    "if (child.type === 'text') { continue; }"
+   ],
+   [
+    "xml format: CDATA treated as layout",
+    "src/core/data/xml-tools.ts",
+    "if (child.type === 'cdata') return false;",
+    "if (child.type === 'cdata') { markup = true; continue; }"
+   ],
+   [
+    "xml format: xml:space preserve ignored",
+    "src/core/data/xml-tools.ts",
+    "return attr ? attr.value === 'preserve' : inherited;",
+    "return inherited;"
+   ],
+   [
+    "xml format: nodes before the DOCTYPE dropped",
+    "src/core/data/xml-tools.ts",
+    "misc(doc.before.slice(0, doc.doctypeAt), false);",
+    "misc(doc.before.slice(0, 0), false);"
+   ],
+   [
+    "xml to json: all blank text dropped, not only layout",
+    "src/core/data/xml-tools.ts",
+    "if (structural && !options.keepWhitespace) { dropped++; return undefined; }",
+    "if (isBlank(n.raw) && !options.keepWhitespace) { dropped++; return undefined; }"
+   ],
+   [
+    "yaml: duplicate keys accepted",
+    "src/core/data/yaml.ts",
+    "docs = parseAllDocuments(text, { version: '1.2', intAsBigInt: true, prettyErrors: false, customTags: [RAW_NUMBER_TAG], uniqueKeys: true })",
+    "docs = parseAllDocuments(text, { version: '1.2', intAsBigInt: true, prettyErrors: false, customTags: [RAW_NUMBER_TAG], uniqueKeys: false })"
+   ],
+   [
+    "yaml: integers read as floating point",
+    "src/core/data/yaml.ts",
+    "docs = parseAllDocuments(text, { version: '1.2', intAsBigInt: true,",
+    "docs = parseAllDocuments(text, { version: '1.2', intAsBigInt: false,"
+   ],
+   [
+    "yaml: alias to an undefined anchor accepted",
+    "src/core/data/yaml.ts",
+    "if (!node.resolve(doc)) errors.push(",
+    "if (false) errors.push("
+   ],
+   [
+    "yaml: tagged numbers rewritten as raw text",
+    "src/core/data/yaml.ts",
+    "typeof node.source === 'string' && !node.tag) node.value = new RawNumber(node.source);",
+    "typeof node.source === 'string') node.value = new RawNumber(node.source);"
+   ],
+   [
+    "yaml: indented block text kept as a block at any indent",
+    "src/core/data/yaml.ts",
+    "LEADING_SPACE.test(node.value) && (indent !== 2 || node === doc.contents)) {",
+    "LEADING_SPACE.test(node.value) && false) {"
+   ],
+   [
+    "yaml: number text not kept in JSON",
+    "src/core/data/yaml.ts",
+    "Number(source) === value)) return source;",
+    "Number(source) === value)) return String(value);"
+   ],
+   [
+    "yaml: infinity and not-a-number written to JSON",
+    "src/core/data/yaml.ts",
+    "if (!Number.isFinite(value)) {",
+    "if (false) {"
+   ],
+   [
+    "yaml: output limit tripled",
+    "src/core/data/yaml.ts",
+    "if (state.chars > YAML_LIMITS.outputChars) {",
+    "if (state.chars > YAML_LIMITS.outputChars * 3) {"
+   ],
+   [
+    "yaml: depth limit off by one",
+    "src/core/data/yaml.ts",
+    "if (depth > YAML_LIMITS.depth) throw",
+    "if (depth > YAML_LIMITS.depth + 1) throw"
+   ],
+   [
+    "yaml: recursive alias not detected",
+    "src/core/data/yaml.ts",
+    "if (resolving.has(target)) throw new ConversionError(",
+    "if (false) throw new ConversionError("
+   ],
+   [
+    "yaml: colliding keys overwrite each other",
+    "src/core/data/yaml.ts",
+    "if (seen.has(key)) throw new ConversionError(",
+    "if (false) throw new ConversionError("
+   ],
+   [
+    "yaml: several documents not wrapped in an array",
+    "src/core/data/yaml.ts",
+    "const many = docs.length > 1;",
+    "const many = false;"
+   ],
+   [
+    "yaml: dropped comments not reported",
+    "src/core/data/yaml.ts",
+    "if (comments > 0) notes.push(",
+    "if (false) notes.push("
+   ],
+   [
+    "yaml: expanded aliases not reported",
+    "src/core/data/yaml.ts",
+    "if (state.aliases > 0) notes.push(",
+    "if (false) notes.push("
+   ],
+   [
+    "yaml: non-string keys not reported",
+    "src/core/data/yaml.ts",
+    "if (state.nonStringKeys > 0) notes.push(",
+    "if (false) notes.push("
+   ],
+   [
+    "yaml: input size limit doubled",
+    "src/core/data/yaml.ts",
+    "return text.length > YAML_LIMITS.inputChars",
+    "return text.length > YAML_LIMITS.inputChars * 2"
+   ],
+   [
+    "json to yaml: duplicate names accepted",
+    "src/core/data/yaml.ts",
+    "  if (duplicate) {",
+    "  if (false) {"
+   ],
+   [
+    "json to yaml: depth limit off by one",
+    "src/core/data/yaml.ts",
+    "if (analysis.stats.maxDepth > YAML_LIMITS.depth) return",
+    "if (analysis.stats.maxDepth > YAML_LIMITS.depth + 1) return"
+   ],
+   [
+    "json to yaml: fragile multi-line text written as a block",
+    "src/core/data/yaml.ts",
+    "(FRAGILE_BLOCK.test(node.value) || node.value.includes(BOM))) node.type",
+    "(node.value.includes(BOM))) node.type"
+   ],
+   [
+    "json to yaml: byte order mark written plain",
+    "src/core/data/yaml.ts",
+    "(FRAGILE_BLOCK.test(node.value) || node.value.includes(BOM))) node.type",
+    "(FRAGILE_BLOCK.test(node.value))) node.type"
+   ]
+  ]
+ }
+]

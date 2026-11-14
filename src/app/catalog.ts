@@ -74,9 +74,10 @@ export function createCatalog(): ToolRegistry {
     load: () => import('../tools/json-formatter/json-formatter'),
   });
   r.add({
-    id: 'yaml-xml-tools', name: 'YAML/XML Tools', category: 'data', status: 'planned',
-    summary: 'Validate and convert YAML and XML.',
-    keywords: ['yaml', 'yml', 'xml', 'convert', 'validate'],
+    id: 'yaml-xml-tools', name: 'YAML/XML Tools', category: 'data', status: 'available',
+    summary: 'Validate and format YAML and XML, and convert YAML to JSON, JSON to YAML and XML to JSON, saying what each conversion cannot carry over.',
+    keywords: ['yaml', 'yml', 'xml', 'convert', 'validate', 'format', 'json to yaml', 'yaml to json', 'xml to json', 'pretty', 'minify', 'well-formed', 'namespace'],
+    load: () => import('../tools/yaml-xml-tools/yaml-xml-tools'),
   });
   r.add({
     id: 'number-bases', name: 'Number Bases & Bytes', category: 'data', status: 'planned',
@@ -86,38 +87,44 @@ export function createCatalog(): ToolRegistry {
 
   // Encoding
   r.add({
-    id: 'base64-url-hex', name: 'Base64 / URL / Hex', category: 'encoding', status: 'planned',
-    summary: 'Encode and decode Base64, URL percent-encoding and hex.',
-    keywords: ['base64', 'url', 'percent', 'encode', 'decode', 'hex', 'urlencode'],
+    id: 'base64-url-hex', name: 'Base64 / URL / Hex', category: 'encoding', status: 'available',
+    summary: 'Convert between UTF-8 text, Base64, Base64URL, hex and URL percent-encoding, with byte counts and exact errors for malformed input.',
+    keywords: ['base64', 'base64url', 'url', 'percent', 'encode', 'decode', 'hex', 'urlencode', 'utf-8', 'utf8', 'bytes', 'unicode', 'rfc 4648'],
+    load: () => import('../tools/base64-url-hex/base64-url-hex'),
   });
   r.add({
-    id: 'hash-hmac', name: 'Hash / HMAC', category: 'encoding', status: 'planned',
-    summary: 'SHA digests and HMACs computed with the browser\'s Web Crypto API.',
-    keywords: ['hash', 'sha', 'sha256', 'sha512', 'hmac', 'digest', 'checksum'],
+    id: 'hash-hmac', name: 'Hash / HMAC', category: 'encoding', status: 'available',
+    summary: 'SHA-256, SHA-384, SHA-512, legacy SHA-1 and MD5, and HMAC, for text or files, computed on this device.',
+    keywords: ['hash', 'sha', 'sha256', 'sha-256', 'sha384', 'sha512', 'sha1', 'md5', 'hmac', 'digest', 'checksum', 'file hash', 'verify download'],
+    load: () => import('../tools/hash-hmac/hash-hmac'),
   });
   r.add({
-    id: 'jwt-decoder', name: 'JWT Decoder', category: 'encoding', status: 'planned',
-    summary: 'Decode a JSON Web Token\'s header and claims.',
-    keywords: ['jwt', 'token', 'jws', 'claims', 'bearer', 'decode'],
+    id: 'jwt-decoder', name: 'JWT Decoder', category: 'encoding', status: 'available',
+    summary: 'Decode a JSON Web Token, read its claims and expiry, and verify its signature with a key you supply. Nothing is sent or stored.',
+    keywords: ['jwt', 'token', 'jws', 'claims', 'bearer', 'decode', 'verify', 'signature', 'hs256', 'rs256', 'es256', 'exp', 'oauth', 'openid'],
+    load: () => import('../tools/jwt-decoder/jwt-decoder'),
   });
 
   // Text
   r.add({
-    id: 'regex-tester', name: 'Regex Tester', category: 'text', status: 'planned',
-    summary: 'Test regular expressions against sample text and see every match.',
-    keywords: ['regex', 'regexp', 'regular expression', 'pattern', 'match'],
+    id: 'regex-tester', name: 'Regex Tester', category: 'text', status: 'available',
+    summary: 'Test JavaScript regular expressions: highlighted matches, capture groups and a replacement preview, with a time limit that stops runaway patterns.',
+    keywords: ['regex', 'regexp', 'regular expression', 'pattern', 'match', 'capture group', 'named group', 'replace', 'javascript', 'backtracking'],
+    load: () => import('../tools/regex-tester/regex-tester'),
   });
   r.add({
-    id: 'text-tools', name: 'List / Text Tools', category: 'text', status: 'planned',
-    summary: 'Sort, deduplicate, trim and change the case of lines of text.',
-    keywords: ['list', 'sort', 'dedupe', 'deduplicate', 'unique', 'lines', 'case', 'trim'],
+    id: 'text-tools', name: 'List / Text Tools', category: 'text', status: 'available',
+    summary: 'Sort, deduplicate, trim, number and compare lists of lines, with text statistics.',
+    keywords: ['list', 'sort', 'dedupe', 'deduplicate', 'unique', 'lines', 'case', 'trim', 'compare', 'intersection', 'difference', 'union', 'prefix', 'suffix', 'line numbers', 'word count', 'statistics'],
+    load: () => import('../tools/text-tools/text-tools'),
   });
 
   // Generators
   r.add({
-    id: 'uuid-tokens', name: 'UUID / Random Tokens', category: 'generators', status: 'planned',
-    summary: 'Generate UUIDs and random tokens with the browser\'s secure random generator.',
-    keywords: ['uuid', 'guid', 'random', 'token', 'secret', 'generate'],
+    id: 'uuid-tokens', name: 'UUID / Random Tokens', category: 'generators', status: 'available',
+    summary: 'Generate UUIDs (versions 4 and 7) and random hex or Base64URL tokens with the secure random generator built into the browser.',
+    keywords: ['uuid', 'guid', 'uuidv4', 'uuidv7', 'random', 'token', 'secret', 'generate', 'api key', 'entropy', 'bulk'],
+    load: () => import('../tools/uuid-tokens/uuid-tokens'),
   });
   r.add({
     id: 'chmod-calculator', name: 'chmod Calculator', category: 'generators', status: 'planned',

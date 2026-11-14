@@ -221,3 +221,108 @@ test('the ScheduleForge tools send nothing, store nothing and restore nothing af
   await expect(page.locator('#cron-from')).toHaveValue('');
   await expect(page.getByRole('radio', { name: 'Standard cron', exact: true })).toBeChecked();
 });
+
+test('the Phase 4 utilities send nothing, store nothing and restore nothing after a reload', async ({ page, context, baseURL }) => {
+  const origin = new URL(baseURL!).origin;
+  const log = await recordRequests(context, origin);
+  const secrets = ['nf-sentinel-text', 'nf-sentinel-key', 'nf-sentinel-secret', 'nf-sentinel-subject', 'nf-sentinel-pattern', 'nf-sentinel-line', 'nf-sentinel-yaml', 'nf-sentinel-file'];
+
+  await openTool(page, 'base64-url-hex', 'Base64 / URL / Hex');
+  await page.fill('#codec-input', 'nf-sentinel-text');
+  await expect(page.locator('#codec-output')).toHaveValue('bmYtc2VudGluZWwtdGV4dA==');
+  const [bin] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Download bytes' }).click()]);
+  expect(bin.suggestedFilename()).toBe('decoded.bin');
+
+  await page.locator('a[data-tool="hash-hmac"]').click();
+  await page.getByRole('radio', { name: 'HMAC', exact: true }).check();
+  await page.fill('#hash-key', 'nf-sentinel-key');
+  await page.fill('#hash-text', 'nf-sentinel-text');
+  await expect(page.locator('#hash-list [data-key="HMAC-SHA256-hex"] .hash-value')).toBeVisible();
+  await page.getByRole('radio', { name: 'File', exact: true }).check();
+  await page.setInputFiles('#hash-file', { name: 'nf-sentinel-file.txt', mimeType: 'text/plain', buffer: Buffer.from('nf-sentinel-text in a file') });
+  await expect(page.locator('#hash-status')).toContainText('nf-sentinel-file.txt');
+
+  await page.locator('a[data-tool="jwt-decoder"]').click();
+  const b64 = (v: object) => Buffer.from(JSON.stringify(v)).toString('base64url');
+  const token = `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64({ sub: 'nf-sentinel-subject', exp: 4102444800 })}.${'A'.repeat(43)}`;
+  await page.fill('#jwt-input', token);
+  await page.fill('#jwt-secret', 'nf-sentinel-secret-nf-sentinel-secret');
+  await page.locator('#jwt-verify').click();
+  await expect(page.locator('#jwt-verify-message')).toContainText('Verification failed.');
+
+  await page.locator('a[data-tool="regex-tester"]').click();
+  await page.fill('#regex-text', 'find nf-sentinel-text here');
+  await page.fill('#regex-pattern', 'nf-sentinel-pattern|nf-sentinel-text');
+  await expect(page.locator('#regex-status')).toContainText('1 match');
+
+  await page.locator('a[data-tool="text-tools"]').click();
+  await page.fill('#text-input', 'nf-sentinel-line\nb');
+  await page.selectOption('#text-sort', 'text');
+  await expect(page.locator('#text-output')).toHaveValue('b\nnf-sentinel-line');
+
+  await page.locator('a[data-tool="uuid-tokens"]').click();
+  await page.locator('#token-generate').click();
+  const uuid = await page.locator('#token-output').inputValue();
+  expect(uuid).toHaveLength(36);
+
+  await page.locator('a[data-tool="yaml-xml-tools"]').click();
+  await page.fill('#data-input', 'secret: nf-sentinel-yaml\n');
+  await expect(page.locator('#data-output')).toHaveValue('secret: nf-sentinel-yaml\n');
+  await page.selectOption('#data-operation', 'xml-json');
+  await page.fill('#data-input', '<s>nf-sentinel-yaml</s>');
+  await expect(page.locator('#data-output')).toHaveValue(/nf-sentinel-yaml/);
+  const [json] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Download' }).click()]);
+  expect(json.suggestedFilename()).toBe('converted.json');
+
+  expect(log.blockedExternal).toEqual([]);
+  expect(log.all.filter(r => r.method !== 'GET')).toEqual([]);
+  for (const r of log.all) {
+    const url = new URL(r.url);
+    expect(url.origin).toBe(origin);
+    // App files only, workers included; no query string could carry data.
+    expect(url.pathname).toMatch(/^\/(index\.html|theme-boot\.js|favicon\.svg|assets\/[A-Za-z0-9_.-]+\.(js|css))?$/);
+    expect(url.search).toBe('');
+    for (const s of [...secrets, uuid, token.split('.')[1]]) expect(decodeURIComponent(r.url)).not.toContain(s);
+  }
+  expect(page.url()).toBe(`${origin}/#/yaml-xml-tools`);
+  const state = await page.evaluate(async () => ({
+    stored: JSON.stringify({ ...localStorage }) + JSON.stringify({ ...sessionStorage }) + document.cookie,
+    keys: Object.keys(localStorage).sort(),
+    databases: (await indexedDB.databases()).length,
+    caches: (await caches.keys()).length,
+  }));
+  for (const s of [...secrets, uuid]) expect(state.stored).not.toContain(s);
+  expect(state.keys).toEqual(['netforge.lastTool']);
+  expect([state.databases, state.caches]).toEqual([0, 0]);
+
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1, name: 'YAML/XML Tools' })).toBeVisible();
+  await expect(page.locator('#data-input')).toHaveValue('');
+  for (const [tool, field] of [['base64-url-hex', '#codec-input'], ['hash-hmac', '#hash-text'], ['hash-hmac', '#hash-key'], ['jwt-decoder', '#jwt-input'], ['jwt-decoder', '#jwt-secret'],
+    ['regex-tester', '#regex-pattern'], ['regex-tester', '#regex-text'], ['text-tools', '#text-input'], ['uuid-tokens', '#token-output']]) {
+    await page.goto(`./#/${tool}`);
+    await expect(page.locator(field)).toHaveValue('');
+  }
+});
+
+test('a worker can only be started from the app\'s own files, and cannot connect out', async ({ page, context, baseURL }) => {
+  const log = await recordRequests(context, new URL(baseURL!).origin);
+  await page.goto('./#/regex-tester');
+  const outcome = await page.evaluate(async () => {
+    const results: string[] = [];
+    // worker-src 'self': a worker cannot be made from generated code.
+    try {
+      const w = new Worker(URL.createObjectURL(new Blob(['postMessage(1)'], { type: 'text/javascript' })));
+      await new Promise<void>(resolve => {
+        w.onerror = () => { results.push('blob worker blocked'); resolve(); };
+        w.onmessage = () => { results.push('blob worker ran'); resolve(); };
+        setTimeout(resolve, 1000);
+      });
+    } catch {
+      results.push('blob worker blocked');
+    }
+    return results;
+  });
+  expect(outcome).toEqual(['blob worker blocked']);
+  expect(log.blockedExternal).toEqual([]);
+});

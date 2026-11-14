@@ -167,3 +167,86 @@ test('the JSON panes stack vertically', async ({ page }) => {
   const output = await page.locator('#json-output').boundingBox();
   expect(input && output && output.y > input.y + input.height).toBe(true);
 });
+
+test('the Phase 4 utilities do not scroll sideways at phone width, even with long values', async ({ page }) => {
+  const errors = watchErrors(page);
+  await page.goto('./#/base64-url-hex');
+  await page.fill('#codec-input', 'x'.repeat(600));
+  await expect(page.locator('#codec-output')).not.toHaveValue('');
+  await expectNoHorizontalScroll(page);
+  await page.selectOption('#codec-from', 'hex');
+  await page.fill('#codec-input', 'zz');
+  await expect(page.locator('#codec-error')).toBeVisible();
+  await expectNoHorizontalScroll(page);
+
+  await page.goto('./#/hash-hmac');
+  await page.fill('#hash-text', 'abc');
+  await expect(page.locator('#hash-list [data-key="SHA-512-hex"] .hash-value')).toBeVisible();
+  await expectNoHorizontalScroll(page);
+  // Every copy button is on screen, not pushed off to the side.
+  const copy = await page.getByRole('button', { name: 'Copy SHA-512 Hex' }).boundingBox();
+  expect(copy!.x + copy!.width).toBeLessThanOrEqual(412);
+  await page.getByRole('radio', { name: 'HMAC', exact: true }).check();
+  await page.fill('#hash-key', 'k');
+  await expectNoHorizontalScroll(page);
+
+  await page.goto('./#/jwt-decoder');
+  await page.getByRole('button', { name: 'Example' }).click();
+  await page.locator('#jwt-verify').click();
+  await expect(page.locator('#jwt-verify-message')).toBeVisible();
+  await expectNoHorizontalScroll(page);
+  await page.getByRole('radio', { name: 'Public key', exact: true }).check();
+  await page.fill('#jwt-public', `-----BEGIN PUBLIC KEY-----\n${'A'.repeat(64)}\n-----END PUBLIC KEY-----`);
+  await page.locator('#jwt-verify').click();
+  await expect(page.locator('#jwt-verify-message')).toBeVisible();
+  await expectNoHorizontalScroll(page);
+  const tokenBox = await page.locator('#jwt-input').boundingBox();
+  expect(tokenBox!.width).toBeGreaterThan(300);
+
+  await page.goto('./#/regex-tester');
+  await page.getByRole('button', { name: 'Example' }).click();
+  await page.locator('#regex-replace-on').check();
+  await expect(page.locator('#regex-replaced')).toBeVisible();
+  await expectNoHorizontalScroll(page);
+  await page.fill('#regex-text', 'y'.repeat(900));
+  await page.fill('#regex-pattern', 'y{300}');
+  await expect(page.locator('#regex-status')).toContainText('3 matches');
+  await expectNoHorizontalScroll(page);
+
+  await page.goto('./#/uuid-tokens');
+  await page.selectOption('#token-kind', 'hex');
+  await page.fill('#token-bytes', '256');
+  await page.locator('#token-generate').click();
+  await expect(page.locator('#token-output')).not.toHaveValue('');
+  await expectNoHorizontalScroll(page);
+
+  await page.goto('./#/text-tools');
+  await page.getByRole('button', { name: 'Example' }).click();
+  await page.locator('#text-number').check();
+  await expectNoHorizontalScroll(page);
+  await page.getByRole('tab', { name: 'Compare lists' }).click();
+  await page.fill('#compare-a', 'a\nb');
+  await page.fill('#compare-b', 'b\nc');
+  await expectNoHorizontalScroll(page);
+
+  await page.goto('./#/yaml-xml-tools');
+  for (const op of ['yaml-json', 'json-yaml', 'xml-json']) {
+    await page.selectOption('#data-operation', op);
+    await page.getByRole('button', { name: 'Example' }).click();
+    await expect(page.locator('#data-notes')).toBeVisible();
+    await expectNoHorizontalScroll(page);
+  }
+  await page.fill('#data-input', '<a><b></a>');
+  await expect(page.locator('#data-errors')).toBeVisible();
+  await expectNoHorizontalScroll(page);
+  expect(errors).toEqual([]);
+});
+
+test('the regex time limit works on a phone too', async ({ page }) => {
+  await page.goto('./#/regex-tester');
+  await page.fill('#regex-text', `${'a'.repeat(40)}!`);
+  await page.fill('#regex-pattern', '(a+)+$');
+  await expect(page.locator('#regex-error')).toHaveAttribute('data-outcome', 'timeout', { timeout: 10_000 });
+  await page.fill('#regex-pattern', 'a+');
+  await expect(page.locator('#regex-status')).toContainText('1 match');
+});

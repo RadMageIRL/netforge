@@ -770,6 +770,47 @@ kbd {
   .tagline { display: none; }
 }
 
+/* ---- Engineering utilities (Phase 4) ------------------------------------------------------- */
+.tool-stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; min-width: 0; }
+.field-narrow { flex: 0 1 11rem !important; }
+.code-wrap { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 24rem; overflow-y: auto; }
+.break-all { overflow-wrap: anywhere; word-break: break-all; }
+.token-area { word-break: break-all; }
+.file-input { padding: 6px; height: auto; }
+.util-notes { margin: 0; }
+.step-list { margin: 0; list-style: decimal; }
+.state-row { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.state-row:empty { display: none; }
+.state-badge { white-space: normal; font-size: 13px; padding: 3px 10px 3px 8px; }
+.check-results { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.check-results li { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); gap: 10px; align-items: start; font-size: 14px; overflow-wrap: anywhere; }
+.check-results .badge { justify-self: start; }
+.claims-table td, .claims-table th { vertical-align: top; }
+.claims-table .claim-value { max-width: 28rem; overflow-wrap: anywhere; white-space: normal; }
+.claims-table td:last-child { min-width: 14rem; white-space: normal; }
+.claims-table .value-note { display: block; }
+.hash-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; min-width: 0; }
+.hash-item { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 8px 0; border-top: 1px solid var(--border); }
+.hash-item:first-child { border-top: 0; padding-top: 0; }
+.hash-name { display: flex; align-items: center; gap: 8px; margin: 0; }
+.hash-line { display: grid; grid-template-columns: 4.2rem minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.hash-form { color: var(--muted); font-size: 13px; }
+.hash-value { font-size: 13.5px; overflow-wrap: anywhere; word-break: break-all; }
+.claims-table .claim-value { min-width: 9rem; }
+.match-table th.num, .match-table td.num { width: 4.5rem; }
+.match-view mark { color: inherit; border-radius: 2px; }
+.match-view .match-a { background: color-mix(in srgb, var(--accent) 38%, transparent); }
+.match-view .match-b { background: color-mix(in srgb, var(--info) 34%, transparent); }
+.match-view .match-empty { display: inline-block; width: 2px; height: 1.1em; margin: 0 1px; vertical-align: text-bottom; background: var(--error); }
+.match-table-wrap { max-height: 28rem; overflow-y: auto; }
+.match-table td { vertical-align: top; }
+.match-table .match-cell { max-width: 26rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.match-table .value-note { display: block; }
+.group-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.group-list li { display: grid; grid-template-columns: minmax(3rem, max-content) minmax(0, 1fr); gap: 10px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.group-name { color: var(--muted); }
+.codec-controls > .toolbar { flex: 0 0 auto; padding-bottom: 2px; }
+
 @media (max-width: 1000px) {
   .split { grid-template-columns: minmax(0, 1fr); }
   .map-layout { grid-template-columns: minmax(0, 1fr); }

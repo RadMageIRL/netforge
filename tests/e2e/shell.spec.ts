@@ -10,9 +10,10 @@ test.describe('navigation', () => {
     const nav = page.getByRole('navigation', { name: 'Tools' });
     await expect(nav.locator('.nav-heading')).toHaveText(['Network', 'Scheduling', 'Data', 'Encoding', 'Text', 'Generators', 'Automation / DevOps']);
     await expect(nav.locator('a[data-tool]')).toHaveCount(20);
-    await expect(nav.locator('a[data-tool].planned')).toHaveCount(11);
-    await expect(nav.locator('a[data-tool]:not(.planned)')).toHaveText(['Subnet Calculator', 'VLSM Allocator', 'NetForge Subnet & VLAN Planner', 'IP Range Analyzer', 'Route Summarization', 'Cron Explainer', 'Schedule Builder', 'Timestamp Converter', 'JSON Formatter']);
-    await expect(page.locator('.tool-card')).toHaveCount(9);
+    await expect(nav.locator('a[data-tool].planned')).toHaveCount(4);
+    await expect(nav.locator('a[data-tool]:not(.planned)')).toHaveText(['Subnet Calculator', 'VLSM Allocator', 'NetForge Subnet & VLAN Planner', 'IP Range Analyzer', 'Route Summarization', 'Cron Explainer', 'Schedule Builder', 'Timestamp Converter', 'JSON Formatter', 'YAML/XML Tools',
+      'Base64 / URL / Hex', 'Hash / HMAC', 'JWT Decoder', 'Regex Tester', 'List / Text Tools', 'UUID / Random Tokens']);
+    await expect(page.locator('.tool-card')).toHaveCount(16);
     await expect(page.locator('#brand-version')).toHaveText('v0.1.0-dev');
     expect(errors).toEqual([]);
   });
@@ -28,11 +29,11 @@ test.describe('navigation', () => {
   });
 
   test('a planned tool says it is not built and offers no controls', async ({ page }) => {
-    await page.goto('./#/jwt-decoder');
-    await expect(page.getByRole('heading', { level: 1, name: 'JWT Decoder' })).toBeVisible();
+    await page.goto('./#/chmod-calculator');
+    await expect(page.getByRole('heading', { level: 1, name: 'chmod Calculator' })).toBeVisible();
     await expect(page.locator('.planned-page')).toContainText('This tool is not built yet.');
     await expect(page.locator('.planned-page').locator('input, textarea, select')).toHaveCount(0);
-    await expect(page).toHaveTitle('JWT Decoder (planned) | NetForge');
+    await expect(page).toHaveTitle('chmod Calculator (planned) | NetForge');
   });
 
   test('an unknown route shows a not-found page', async ({ page }) => {
