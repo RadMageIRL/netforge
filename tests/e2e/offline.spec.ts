@@ -54,6 +54,23 @@ test('the Phase 1 network tools work offline without having been opened online',
   await expect(page.locator('#class-result .chip-static').first()).toHaveText('Documentation');
 });
 
+test('the VLAN planner works offline without having been opened online', async ({ page, context }) => {
+  await page.goto('./');
+  await waitForController(page);
+  await context.setOffline(true);
+  await page.reload();
+  await page.locator('a[data-tool="network-planner"]').click();
+  await page.locator('#plan-example').click();
+  await expect(page.locator('#vlan-table tbody tr')).toHaveCount(10);
+  await page.getByRole('tab', { name: 'Allocate' }).click();
+  await page.locator('#alloc-preview').click();
+  await expect(page.locator('#alloc-changes tbody tr')).toHaveCount(1);
+  await page.getByRole('tab', { name: 'Address map' }).click();
+  await expect(page.locator('#map-grid button')).toHaveCount(256);
+  await page.setInputFiles('#plan-file', { name: 'offline.json', mimeType: 'application/json', buffer: Buffer.from('{"format":"netforge-plan","version":1,"plan":{"vlans":[{"id":"v1","vlanId":5}]}}') });
+  await expect(page.locator('#plan-messages .notice-ok')).toHaveText('Opened offline.json: 1 VLAN at 0 sites.');
+});
+
 test('works under a subpath such as /netforge/, offline too', async ({ page, context }) => {
   const server = await serveDistCopy({ base: '/netforge/' });
   try {

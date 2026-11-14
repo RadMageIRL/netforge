@@ -48,6 +48,33 @@ test('Phase 1 tools do not scroll sideways at phone width, even with wide result
   expect(errors).toEqual([]);
 });
 
+test('the VLAN planner does not scroll sideways at phone width, on any tab', async ({ page }) => {
+  const errors = watchErrors(page);
+  await page.goto('./#/network-planner');
+  await page.locator('#plan-example').click();
+  await expectNoHorizontalScroll(page);
+  await page.locator('#vlan-table tr[data-vlan="v1"] button').click();
+  await expectNoHorizontalScroll(page);
+  const box = await page.locator('#vlan-edit-ipv4').boundingBox();
+  expect(box!.width).toBeGreaterThan(200);
+  for (const name of ['Sites, VRFs and namespaces', 'Allocate', 'Address map', 'Issues']) {
+    await page.getByRole('tab', { name }).click();
+    await expectNoHorizontalScroll(page);
+  }
+  await page.getByRole('tab', { name: 'Allocate' }).click();
+  await page.locator('#alloc-preview').click();
+  await expectNoHorizontalScroll(page);
+  await page.getByRole('tab', { name: 'Address map' }).click();
+  const grid = await page.locator('#map-grid').boundingBox();
+  expect(grid!.width).toBeLessThanOrEqual(412);
+  const cell = await page.locator('#map-grid button').first().boundingBox();
+  expect(cell!.width).toBeGreaterThan(16);
+  await page.locator('#map-grid button').nth(10).tap();
+  await expect(page.locator('#map-details-title')).toHaveText('VLAN 10 Users at Headquarters');
+  await expectNoHorizontalScroll(page);
+  expect(errors).toEqual([]);
+});
+
 test('the VLSM request editor is usable at phone width', async ({ page }) => {
   await page.goto('./#/vlsm-allocator');
   await page.fill('#vlsm-parent', '192.168.0.0/24');

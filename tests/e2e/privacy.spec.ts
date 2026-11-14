@@ -71,6 +71,47 @@ test('the Phase 1 network tools send nothing and store nothing', async ({ page, 
   expect(await page.evaluate(() => Object.keys(localStorage).sort())).toEqual(['netforge.lastTool']);
 });
 
+test('the VLAN planner sends nothing, stores nothing and does not restore a plan after a reload', async ({ page, context, baseURL }) => {
+  const origin = new URL(baseURL!).origin;
+  const log = await recordRequests(context, origin);
+  const secrets = ['10.66.55', 'SecretLab', 'SecretCampus', 'fd66'];
+  await page.goto('./#/network-planner');
+  await page.fill('#plan-name', 'SecretCampus');
+  await page.locator('#vlan-add').click();
+  await page.fill('#vlan-edit-vlanid', '777');
+  await page.fill('#vlan-edit-name', 'SecretLab');
+  await page.fill('#vlan-edit-ipv4', '10.66.55.0/24');
+  await page.fill('#vlan-edit-ipv6', 'fd66:5544:3322::/64');
+  await expect(page.locator('#vlan-table tr[data-vlan="v1"]')).toContainText('10.66.55.0/24');
+  await page.getByRole('tab', { name: 'Allocate' }).click();
+  await page.locator('#alloc-preview').click();
+  await page.getByRole('tab', { name: 'Address map' }).click();
+  await page.getByRole('tab', { name: 'Issues' }).click();
+  const [file] = await Promise.all([page.waitForEvent('download'), page.locator('#plan-save').click()]);
+  expect(file.suggestedFilename()).toBe('SecretCampus.netforge-plan.json');
+
+  expect(log.blockedExternal).toEqual([]);
+  expect(log.all.filter(r => r.method !== 'GET')).toEqual([]);
+  for (const r of log.all) {
+    expect(new URL(r.url).pathname).toMatch(/^\/(index\.html|theme-boot\.js|favicon\.svg|assets\/[A-Za-z0-9_-]+\.(js|css))?$/);
+    for (const s of secrets) expect(decodeURIComponent(r.url)).not.toContain(s);
+  }
+  const state = await page.evaluate(async () => ({
+    stored: JSON.stringify({ ...localStorage }) + JSON.stringify({ ...sessionStorage }) + document.cookie,
+    keys: Object.keys(localStorage).sort(),
+    databases: (await indexedDB.databases()).length,
+    caches: (await caches.keys()).length,
+  }));
+  for (const s of secrets) expect(state.stored).not.toContain(s);
+  expect(state.keys).toEqual(['netforge.lastTool']);
+  expect([state.databases, state.caches]).toEqual([0, 0]);
+  // Nothing comes back on its own.
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1, name: 'NetForge Subnet & VLAN Planner' })).toBeVisible();
+  await expect(page.locator('#plan-name')).toHaveValue('');
+  await expect(page.locator('#vlan-empty')).toHaveText('No VLANs yet. Add one, open a plan file or load the example.');
+});
+
 test('the Content-Security-Policy blocks network connections from the page', async ({ page, context, baseURL }) => {
   const log = await recordRequests(context, new URL(baseURL!).origin);
   await page.goto('./');

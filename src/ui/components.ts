@@ -238,7 +238,77 @@ export function summaryTable(caption: string, rows: readonly [string, string][])
   );
 }
 
-export function checkbox(options: { id: string; label: string; checked?: boolean; onChange: (checked: boolean) => void }): { root: HTMLElement; input: HTMLInputElement } {
+export interface Tabs {
+  readonly root: HTMLElement;
+  readonly panels: Readonly<Record<string, HTMLElement>>;
+  select(id: string, focus?: boolean): void;
+  current(): string;
+  /** Changes a tab's visible label (counts, for example). */
+  setLabel(id: string, label: string): void;
+}
+
+/**
+ * Tabs (WAI-ARIA tabs pattern): one tab stop for the tab list, arrow keys and Home/End move and
+ * select, and each panel is labeled by its tab.
+ */
+export function tabs(options: { id: string; label: string; items: readonly { id: string; label: string }[]; onChange?: (id: string) => void }): Tabs {
+  let current = options.items[0].id;
+  const buttons = new Map<string, HTMLButtonElement>();
+  const panels: Record<string, HTMLElement> = {};
+  const list = h('div', { class: 'tab-list', role: 'tablist', 'aria-label': options.label });
+  const body = h('div', { class: 'tab-panels' });
+  for (const item of options.items) {
+    const tabId = `${options.id}-tab-${item.id}`;
+    const panelId = `${options.id}-panel-${item.id}`;
+    const b = h('button', { type: 'button', role: 'tab', id: tabId, class: 'tab', 'aria-controls': panelId, 'aria-selected': 'false', tabindex: '-1' }, item.label);
+    b.addEventListener('click', () => select(item.id, false));
+    buttons.set(item.id, b);
+    list.appendChild(b);
+    const p = h('div', { role: 'tabpanel', id: panelId, class: 'tab-panel', 'aria-labelledby': tabId, hidden: true });
+    panels[item.id] = p;
+    body.appendChild(p);
+  }
+  list.addEventListener('keydown', event => {
+    const ids = options.items.map(i => i.id);
+    const at = ids.indexOf(current);
+    let next = -1;
+    if (event.key === 'ArrowRight') next = (at + 1) % ids.length;
+    else if (event.key === 'ArrowLeft') next = (at - 1 + ids.length) % ids.length;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = ids.length - 1;
+    if (next < 0) return;
+    event.preventDefault();
+    select(ids[next], true);
+  });
+  function select(id: string, focus = false): void {
+    if (!buttons.has(id)) return;
+    const changed = id !== current;
+    current = id;
+    for (const [key, b] of buttons) {
+      const on = key === id;
+      b.setAttribute('aria-selected', String(on));
+      b.tabIndex = on ? 0 : -1;
+      panels[key].hidden = !on;
+    }
+    if (focus) buttons.get(id)!.focus();
+    if (changed) options.onChange?.(id);
+  }
+  const first = options.items[0].id;
+  current = '';
+  select(first);
+  return {
+    root: h('div', { class: 'tabs', id: options.id }, list, body),
+    panels,
+    select,
+    current: () => current,
+    setLabel(id, label) {
+      const b = buttons.get(id);
+      if (b && b.textContent !== label) b.textContent = label;
+    },
+  };
+}
+
+export function checkbox(options:{ id: string; label: string; checked?: boolean; onChange: (checked: boolean) => void }): { root: HTMLElement; input: HTMLInputElement } {
   const input = h('input', { type: 'checkbox', id: options.id, class: 'checkbox' });
   input.checked = options.checked ?? false;
   input.addEventListener('change', () => options.onChange(input.checked));

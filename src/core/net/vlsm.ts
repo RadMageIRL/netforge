@@ -300,11 +300,14 @@ export function allocateVlsm(input: VlsmInput): VlsmResult {
       });
       continue;
     }
+    // `occupied` is sorted and disjoint, so one forward scan finds every clash in order.
     let candidate = parentRange.first;
     let placed: IpRange | null = null;
+    let k = 0;
     while (candidate + size - 1n <= parentRange.last) {
       const end = candidate + size - 1n;
-      const clash = occupied.find(o => o.first <= end && candidate <= o.last);
+      while (k < occupied.length && occupied[k].last < candidate) k++;
+      const clash = k < occupied.length && occupied[k].first <= end ? occupied[k] : null;
       if (!clash) {
         placed = { family: 4, first: candidate, last: end };
         break;

@@ -28,9 +28,10 @@ export function createCatalog(): ToolRegistry {
     load: () => import('../tools/vlsm-allocator/vlsm-allocator'),
   });
   r.add({
-    id: 'network-planner', name: 'NetForge Subnet & VLAN Planner', category: 'network', status: 'planned',
-    summary: 'Plan VLANs, subnets, gateways and DHCP ranges, with VLSM allocation and conflict checks.',
-    keywords: ['vlan', 'vlsm', 'ipam', 'dhcp', 'gateway', 'ipv6', 'subnet plan', 'allocation', 'overlap'],
+    id: 'network-planner', name: 'NetForge Subnet & VLAN Planner', category: 'network', status: 'available',
+    summary: 'Plan sites, VRFs and VLANs with gateways, DHCP pools and reservations: whole-plan validation, IPv4 and IPv6 allocation and an address map.',
+    keywords: ['vlan', 'vlsm', 'ipam', 'dhcp', 'gateway', 'ipv6', 'subnet plan', 'allocation', 'overlap', 'vrf', 'site', 'routing domain', 'address map', 'namespace'],
+    load: () => import('../tools/network-planner/network-planner'),
   });
   r.add({
     id: 'ip-range-analyzer', name: 'IP Range Analyzer', category: 'network', status: 'available',

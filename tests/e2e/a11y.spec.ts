@@ -45,6 +45,44 @@ const STATES: [string, (page: Page) => Promise<void>][] = [
   ['range analyzer example', async page => { await page.goto('./#/ip-range-analyzer'); await page.getByRole('button', { name: 'Example' }).click(); }],
   ['range analyzer line errors', async page => { await page.goto('./#/ip-range-analyzer'); await page.fill('#ranges-input', '10.0.0.0/8\nbad'); }],
   ['route summarization example', async page => { await page.goto('./#/route-summarization'); await page.getByRole('button', { name: 'Example' }).click(); }],
+  // Phase 2
+  ['planner example', async page => { await page.goto('./#/network-planner'); await page.locator('#plan-example').click(); }],
+  ['planner editor with errors and warnings', async page => {
+    await page.goto('./#/network-planner');
+    await page.locator('#plan-example').click();
+    await page.locator('#vlan-table tr[data-vlan="v2"] button').click();
+    await page.fill('#vlan-edit-vlanid', '10');
+    await page.fill('#vlan-edit-gateway4', '10.10.20.255');
+    await page.fill('#vlan-edit-ipv6', '2001:db8:10:20::/80');
+    await expect(page.locator('#vlan-edit-ipv6-warning')).toBeVisible();
+  }],
+  ['planner sites, VRFs and namespaces with editors open', async page => {
+    await page.goto('./#/network-planner');
+    await page.locator('#plan-example').click();
+    await page.getByRole('tab', { name: 'Sites, VRFs and namespaces' }).click();
+    await page.locator('#site-table').getByRole('button', { name: 'Headquarters' }).click();
+    await page.locator('#vrf-table').getByRole('button', { name: 'Guest HQ' }).click();
+  }],
+  ['planner allocation preview needing confirmation', async page => {
+    await page.goto('./#/network-planner');
+    await page.locator('#plan-example').click();
+    await page.getByRole('tab', { name: 'Allocate' }).click();
+    await page.locator('#alloc-reallocate').check();
+    await page.locator('#alloc-preview').click();
+    await expect(page.locator('#alloc-changes')).toBeVisible();
+  }],
+  ['planner address map with a selection', async page => {
+    await page.goto('./#/network-planner');
+    await page.locator('#plan-example').click();
+    await page.getByRole('tab', { name: 'Address map' }).click();
+    await page.locator('#map-grid button').nth(10).click();
+    await expect(page.locator('#map-details-title')).toBeVisible();
+  }],
+  ['planner issues', async page => {
+    await page.goto('./#/network-planner');
+    await page.locator('#plan-example').click();
+    await page.getByRole('tab', { name: 'Issues' }).click();
+  }],
 ];
 
 for (const theme of ['dark', 'light'] as const) {

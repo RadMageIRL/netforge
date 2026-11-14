@@ -61,11 +61,11 @@ describe('catalog', () => {
     expect(actual).toEqual(BRIEF_NAVIGATION);
   });
 
-  it('has exactly the Phase 0 and Phase 1 tools built and every other tool planned', () => {
+  it('has exactly the Phase 0, 1 and 2 tools built and every other tool planned', () => {
     expect(catalog.list().filter(t => t.status === 'available').map(t => t.id).sort()).toEqual([
-      'ip-range-analyzer', 'json-formatter', 'route-summarization', 'subnet-calculator', 'timestamp-converter', 'vlsm-allocator',
+      'ip-range-analyzer', 'json-formatter', 'network-planner', 'route-summarization', 'subnet-calculator', 'timestamp-converter', 'vlsm-allocator',
     ]);
-    expect(catalog.list().filter(t => t.status === 'planned')).toHaveLength(14);
+    expect(catalog.list().filter(t => t.status === 'planned')).toHaveLength(13);
   });
 
   it('loads a module with a mount function for every built tool', async () => {

@@ -6,6 +6,15 @@ All notable changes to NetForge are recorded here. Versions follow [Semantic Ver
 
 ### 0.1.0-dev
 
+Network planning:
+
+- NetForge Subnet & VLAN Planner: sites, VRFs, VLAN namespaces and VLANs in one plan, with IPv4 and IPv6 networks, gateways, DHCP pools, reserved addresses, host targets, descriptions and notes, and optional parent blocks per site.
+- Whole-plan validation with errors, warnings and notes at the affected field: VLAN IDs per namespace, overlaps per routing domain (independent VRFs may reuse networks), gateways, DHCP pools, reservations, capacity, IPv6 prefixes and gateways, parent blocks, and site, VRF and namespace references.
+- Automatic IPv4 allocation from host targets through the VLSM engine, and a separate IPv6 prefix allocator (a /64 per VLAN by default); both previewed first, deterministic, and never replacing existing networks without confirmation.
+- Address map: a zoomable grid for any IPv4 or IPv6 space, showing allocations, reservations, free space and conflicts, usable by keyboard and on phones.
+- Plan files: versioned JSON saved and opened only on request, with clear errors for damaged or newer files; CSV export of VLAN tables and findings.
+- The VLSM Allocator places blocks in one forward pass, so large plans allocate quickly (same placements as before).
+
 Network engine:
 
 - Subnet Calculator for IPv6 alongside IPv4 (IPv4 stays the default): RFC 4291 parsing, RFC 5952 canonical and expanded forms, /0 to /128, exact address counts, equal splits and supernets for both families.
