@@ -31,7 +31,7 @@ export type SubnetInputErrorCode =
 /** Parses a strict dotted-quad IPv4 address: four decimal numbers 0 to 255, no leading zeros. */
 export function parseIPv4(text: string): Result<bigint, IPv4ErrorCode> {
   if (text === '') return fail('empty', 'Enter an IPv4 address.');
-  if (text.includes(':')) return fail('ipv6', 'This looks like an IPv6 address. This calculator handles IPv4 only.');
+  if (text.includes(':')) return fail('ipv6', 'This looks like an IPv6 address, but IPv4 is expected here.');
   const parts = text.split('.');
   if (parts.length !== 4) {
     return fail('octet-count', `An IPv4 address has four numbers separated by dots (found ${parts.length}).`);

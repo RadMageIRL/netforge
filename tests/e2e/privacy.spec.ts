@@ -38,6 +38,39 @@ test('using every tool sends nothing anywhere: only the app files are requested'
   expect(log.all.length).toBe(settled);
 });
 
+test('the Phase 1 network tools send nothing and store nothing', async ({ page, context, baseURL }) => {
+  const origin = new URL(baseURL!).origin;
+  const log = await recordRequests(context, origin);
+  const secretNet = '10.66.55.0/24';
+  await openTool(page, 'subnet-calculator', 'Subnet Calculator');
+  await page.getByRole('radio', { name: 'IPv6' }).check();
+  await page.fill('#subnet-input', 'fd66:5544::/48');
+  await page.locator('#split-panel summary').click();
+  await page.locator('a[data-tool="vlsm-allocator"]').click();
+  await page.fill('#vlsm-parent', secretNet);
+  await page.getByLabel('Name, request 1', { exact: true }).fill('SecretLab');
+  await page.getByLabel('Hosts, request 1', { exact: true }).fill('20');
+  await expect(page.locator('#vlsm-table')).toContainText('10.66.55.0/27');
+  await page.locator('a[data-tool="ip-range-analyzer"]').click();
+  await page.fill('#ranges-input', `${secretNet}\n10.66.55.128/25`);
+  await page.locator('a[data-tool="route-summarization"]').click();
+  await page.fill('#routes-input', '10.66.55.0/25\n10.66.55.128/25');
+  await expect(page.locator('#routes-v4-table')).toContainText('10.66.55.0/24');
+
+  expect(log.blockedExternal).toEqual([]);
+  expect(log.all.filter(r => r.method !== 'GET')).toEqual([]);
+  for (const r of log.all) {
+    expect(new URL(r.url).pathname).toMatch(/^\/(index\.html|theme-boot\.js|favicon\.svg|assets\/[A-Za-z0-9_-]+\.(js|css))?$/);
+    expect(decodeURIComponent(r.url)).not.toContain('10.66.55');
+    expect(decodeURIComponent(r.url)).not.toContain('SecretLab');
+  }
+  const stored = await page.evaluate(() => JSON.stringify({ ...localStorage }) + JSON.stringify({ ...sessionStorage }) + document.cookie);
+  expect(stored).not.toContain('10.66.55');
+  expect(stored).not.toContain('SecretLab');
+  expect(stored).not.toContain('fd66');
+  expect(await page.evaluate(() => Object.keys(localStorage).sort())).toEqual(['netforge.lastTool']);
+});
+
 test('the Content-Security-Policy blocks network connections from the page', async ({ page, context, baseURL }) => {
   const log = await recordRequests(context, new URL(baseURL!).origin);
   await page.goto('./');

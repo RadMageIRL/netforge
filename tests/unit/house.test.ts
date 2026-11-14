@@ -34,7 +34,13 @@ const ATTRIBUTION = new RegExp([
 const UNSAFE_DOM = /\b(innerHTML|outerHTML|insertAdjacentHTML|document\.write|eval\s*\(|new Function\s*\()/;
 const NETWORK_API = /\b(fetch\s*\(|new\s+(XMLHttpRequest|WebSocket|EventSource)\b|sendBeacon\s*\(|importScripts\s*\()/;
 const URL_PATTERN = /https?:\/\/[^\s'"`)<>]+/g;
-const ALLOWED_URLS = new Set(['http://www.w3.org/2000/svg']);
+const ALLOWED_URLS = new Set([
+  'http://www.w3.org/2000/svg',
+  // Source citations for the bundled IANA registry data, shown as text and never fetched.
+  'https://www.iana.org/assignments/iana-ipv4-special-registry/',
+  'https://www.iana.org/assignments/iana-ipv6-special-registry/',
+  'https://www.iana.org/assignments/ipv6-address-space/',
+]);
 
 const findEmDash = (text: string) => text.includes(EM_DASH);
 const findAttribution = (text: string) => ATTRIBUTION.test(text);

@@ -19,6 +19,32 @@ const STATES: [string, (page: Page) => Promise<void>][] = [
   ['about', async page => { await page.goto('./#/about'); }],
   ['planned tool', async page => { await page.goto('./#/regex-tester'); }],
   ['search with no match', async page => { await page.goto('./'); await page.fill('#tool-search', 'zzzz'); }],
+  // Phase 1
+  ['subnet IPv6 with split and supernet open', async page => {
+    await page.goto('./#/subnet-calculator');
+    await page.getByRole('radio', { name: 'IPv6' }).check();
+    await page.fill('#subnet-input', '2001:db8::/48');
+    await page.locator('#split-panel summary').click();
+    await page.locator('#supernet-panel summary').click();
+  }],
+  ['subnet classification with registry tables', async page => { await page.goto('./#/subnet-calculator'); await page.fill('#subnet-input', '192.0.0.9/23'); }],
+  ['subnet family error', async page => { await page.goto('./#/subnet-calculator'); await page.fill('#subnet-input', '2001:db8::/32'); }],
+  ['VLSM example', async page => { await page.goto('./#/vlsm-allocator'); await page.getByRole('button', { name: 'Example' }).click(); }],
+  ['VLSM row errors', async page => {
+    await page.goto('./#/vlsm-allocator');
+    await page.fill('#vlsm-parent', '10.0.0.0/24');
+    await page.getByLabel('Name, request 1', { exact: true }).fill('A');
+    await page.getByLabel('Hosts, request 1', { exact: true }).fill('x');
+  }],
+  ['VLSM failure', async page => {
+    await page.goto('./#/vlsm-allocator');
+    await page.fill('#vlsm-parent', '10.0.0.0/30');
+    await page.getByLabel('Name, request 1', { exact: true }).fill('A');
+    await page.getByLabel('Hosts, request 1', { exact: true }).fill('100');
+  }],
+  ['range analyzer example', async page => { await page.goto('./#/ip-range-analyzer'); await page.getByRole('button', { name: 'Example' }).click(); }],
+  ['range analyzer line errors', async page => { await page.goto('./#/ip-range-analyzer'); await page.fill('#ranges-input', '10.0.0.0/8\nbad'); }],
+  ['route summarization example', async page => { await page.goto('./#/route-summarization'); await page.getByRole('button', { name: 'Example' }).click(); }],
 ];
 
 for (const theme of ['dark', 'light'] as const) {

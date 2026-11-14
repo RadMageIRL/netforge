@@ -20,6 +20,8 @@ const ICONS = {
   clock: [['circle', { cx: '12', cy: '12', r: '9' }], ['path', { d: 'M12 7v5l3.5 2' }]],
   shield: [['path', { d: 'M12 3l7.5 3v5.5c0 4.5-3.2 8-7.5 9.5-4.3-1.5-7.5-5-7.5-9.5V6z' }]],
   arrowUp: [['path', { d: 'M12 19V5M6 11l6-6 6 6' }]],
+  plus: [['path', { d: 'M12 5v14M5 12h14' }]],
+  split: [['path', { d: 'M4 6h16M4 12h7M13 12h7M4 18h4M10 18h4M16 18h4' }]],
   logo: [['path', { d: 'M4 17.5l4-4 3 3 5-6 4 4' }], ['circle', { cx: '4', cy: '17.5', r: '1.6' }], ['circle', { cx: '8', cy: '13.5', r: '1.6' }], ['circle', { cx: '11', cy: '16.5', r: '1.6' }], ['circle', { cx: '16', cy: '10.5', r: '1.6' }], ['circle', { cx: '20', cy: '14.5', r: '1.6' }]],
 } satisfies Record<string, readonly Shape[]>;
 

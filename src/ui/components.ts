@@ -195,3 +195,52 @@ export function notice(kind: NoticeKind, ...content: Child[]): HTMLElement {
 export function emptyState(text: string): HTMLElement {
   return h('p', { class: 'empty-state' }, text);
 }
+
+export interface Column {
+  readonly key: string;
+  readonly label: string;
+  readonly mono?: boolean;
+  readonly numeric?: boolean;
+}
+
+/**
+ * A table of results inside a scroll region of its own, so wide tables never make the page scroll
+ * sideways. The region is focusable so keyboard users can scroll it.
+ */
+export function dataTable(caption: string, columns: readonly Column[], rows: readonly Record<string, string>[], id?: string): HTMLElement {
+  return h('div', { class: 'table-scroll', role: 'region', 'aria-label': caption, tabindex: '0', id },
+    h('table', { class: 'data-table' },
+      h('caption', { class: 'visually-hidden' }, caption),
+      h('thead', null, h('tr', null, columns.map(c => h('th', { scope: 'col', class: c.numeric ? 'num' : undefined }, c.label)))),
+      h('tbody', null, rows.map(row => h('tr', null, columns.map(c => h('td', { class: [c.mono ? 'mono' : '', c.numeric ? 'num' : ''].join(' ').trim() || undefined }, row[c.key] ?? ''))))),
+    ),
+  );
+}
+
+export function chipList(labels: readonly string[], label: string): HTMLElement {
+  return h('ul', { class: 'chips', 'aria-label': label }, labels.map(l => h('li', { class: 'chip-static' }, l)));
+}
+
+/** A list of problems tied to input lines or rows: "Line 3: ...". */
+export function problemList(title: string, items: readonly { where: string; message: string }[], limit = 50): HTMLElement {
+  return notice('error',
+    h('p', null, h('strong', null, title)),
+    h('ul', { class: 'problem-list' }, items.slice(0, limit).map(i => h('li', null, h('strong', null, `${i.where}: `), i.message))),
+    items.length > limit ? h('p', null, `${items.length - limit} more not shown.`) : null,
+  );
+}
+
+/** A small key/value table for summaries. */
+export function summaryTable(caption: string, rows: readonly [string, string][]): HTMLTableElement {
+  return h('table', { class: 'plain-table summary-table' },
+    h('caption', { class: 'visually-hidden' }, caption),
+    h('tbody', null, rows.map(([k, v]) => h('tr', null, h('th', { scope: 'row' }, k), h('td', { class: 'mono' }, v)))),
+  );
+}
+
+export function checkbox(options: { id: string; label: string; checked?: boolean; onChange: (checked: boolean) => void }): { root: HTMLElement; input: HTMLInputElement } {
+  const input = h('input', { type: 'checkbox', id: options.id, class: 'checkbox' });
+  input.checked = options.checked ?? false;
+  input.addEventListener('change', () => options.onChange(input.checked));
+  return { root: h('div', { class: 'check-field' }, input, h('label', { for: options.id }, options.label)), input };
+}

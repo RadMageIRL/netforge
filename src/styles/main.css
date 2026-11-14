@@ -236,7 +236,10 @@ kbd {
 .tool-page { display: grid; gap: 16px; min-width: 0; }
 .tool-page > .page-header { margin-bottom: 4px; }
 .tool-page .panel { margin-bottom: 0; }
-.result-area { display: grid; gap: 12px; min-width: 0; }
+.result-area { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; }
+/* Grid items default to their content's minimum width; let wide tables scroll inside their own region instead. */
+.panel-body { grid-template-columns: minmax(0, 1fr); }
+.result-area > *, .panel-body > * { min-width: 0; }
 .json-status { display: grid; gap: 10px; }
 .json-status:empty { display: none; }
 .empty-state { margin: 0; color: var(--muted); }
@@ -411,6 +414,69 @@ kbd {
 .status-error { color: var(--error); }
 .status-detail { color: var(--muted); }
 .warning-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13.5px; }
+
+/* ---- Data tables, chips, editors ---------------------------------------------------------- */
+.table-scroll { max-width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+.table-scroll:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.data-table th, .data-table td { padding: 7px 10px; text-align: left; vertical-align: top; white-space: nowrap; }
+.data-table thead th { position: sticky; top: 0; background: var(--surface-2); font-weight: 600; color: var(--text-2); border-bottom: 1px solid var(--border); }
+.data-table tbody tr + tr td { border-top: 1px solid var(--border); }
+.data-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.data-table td.mono { font-size: 13px; }
+.sub-title { margin: 6px 0 0; font-size: 14px; font-weight: 600; color: var(--text); }
+.summary-table { table-layout: fixed; }
+.summary-table th { width: 46%; }
+.summary-table td { overflow-wrap: anywhere; }
+.source-note, .reach-note { margin: 0; font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+.reach-note { font-size: 13.5px; color: var(--text-2); }
+.class-address { margin: 0; color: var(--muted); }
+.class-address .mono { color: var(--text); }
+.registry-notes { margin: 0; padding-left: 18px; font-size: 13px; color: var(--text-2); }
+.problem-list { margin: 4px 0 0; padding-left: 18px; display: grid; gap: 3px; }
+.chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.chip-static {
+  padding: 2px 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--text);
+  font-size: 12.5px;
+}
+.check-field { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; }
+.checkbox { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--accent); flex: none; }
+.row-editor { min-width: 0; margin: 0; padding: 0; border: 0; display: grid; gap: 8px; }
+.row-editor .table-scroll { border: 0; }
+.editor-table { width: 100%; border-collapse: collapse; }
+.editor-table th { padding: 0 8px 4px 0; text-align: left; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.editor-table td { padding: 3px 8px 3px 0; vertical-align: top; }
+.editor-table td:first-child { width: 55%; }
+.editor-table .input { min-width: 110px; padding: 7px 9px; }
+.editor-actions { width: 36px; padding-right: 0 !important; }
+.editor-error td { padding-top: 0 !important; }
+.disclosure { padding: 0; }
+.disclosure-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 6px 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+}
+.disclosure-summary::-webkit-details-marker { display: none; }
+.disclosure-summary::before { content: ''; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg); transition: transform 0.15s; }
+.disclosure[open] > .disclosure-summary { border-bottom: 1px solid var(--border); }
+.disclosure[open] > .disclosure-summary::before { transform: rotate(45deg); }
+.disclosure-summary:hover { color: var(--text); }
+.disclosure-summary:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; border-radius: var(--radius); }
+.route-family { display: grid; gap: 10px; }
+.route-family + .route-family { margin-top: 10px; padding-top: 14px; border-top: 1px solid var(--border); }
 
 /* ---- Tool layouts ------------------------------------------------------------------------- */
 .split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }

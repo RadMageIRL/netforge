@@ -1,0 +1,15 @@
+IANA registry files used to build src/core/net/registry-data.ts.
+Retrieved 2026-11-14T14:58:54Z (CSV) and 2026-11-14 (XML) over HTTPS from www.iana.org.
+
+iana-ipv4-special-registry-1.csv  https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry-1.csv
+  sha256 cbc4b7653c8bc640ba1e8e5d4ebbf11e7c7a1d867e7f1593aad001d3f8632aac
+iana-ipv4-special-registry.xml    https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xml
+  sha256 37f334466c842387a8aee8d1ae7a6d5b2208ef27eb8964072538b73ee2f5b21d
+  registry last updated 2025-10-09
+iana-ipv6-special-registry-1.csv  https://www.iana.org/assignments/iana-ipv6-special-registry/iana-ipv6-special-registry-1.csv
+  sha256 bf56772aef97fbf9b4a27c98b8511f2bb1ba96da4b9ccc12ab203a2496faba66
+iana-ipv6-special-registry.xml    https://www.iana.org/assignments/iana-ipv6-special-registry/iana-ipv6-special-registry.xml
+  sha256 660acf0201b462b8d820605ba1cb20c4ed216acd883ee4a55a17453d73d4c3aa
+  registry last updated 2025-10-09
+ipv6-address-space-1.csv          https://www.iana.org/assignments/ipv6-address-space/ipv6-address-space-1.csv
+  sha256 be38eed1731858f5c48b625e4331091d56a9a56bbefc813253a97d36f66bf523

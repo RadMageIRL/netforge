@@ -9,10 +9,10 @@ test.describe('navigation', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'NetForge' })).toBeVisible();
     const nav = page.getByRole('navigation', { name: 'Tools' });
     await expect(nav.locator('.nav-heading')).toHaveText(['Network', 'Scheduling', 'Data', 'Encoding', 'Text', 'Generators', 'Automation / DevOps']);
-    await expect(nav.locator('a[data-tool]')).toHaveCount(19);
-    await expect(nav.locator('a[data-tool].planned')).toHaveCount(16);
-    await expect(nav.locator('a[data-tool]:not(.planned)')).toHaveText(['Subnet Calculator', 'Timestamp Converter', 'JSON Formatter']);
-    await expect(page.locator('.tool-card')).toHaveCount(3);
+    await expect(nav.locator('a[data-tool]')).toHaveCount(20);
+    await expect(nav.locator('a[data-tool].planned')).toHaveCount(14);
+    await expect(nav.locator('a[data-tool]:not(.planned)')).toHaveText(['Subnet Calculator', 'VLSM Allocator', 'IP Range Analyzer', 'Route Summarization', 'Timestamp Converter', 'JSON Formatter']);
+    await expect(page.locator('.tool-card')).toHaveCount(6);
     await expect(page.locator('#brand-version')).toHaveText('v0.1.0-dev');
     expect(errors).toEqual([]);
   });
@@ -73,9 +73,9 @@ test.describe('search', () => {
     await expect(visible).toHaveText(['Subnet Calculator']);
     await expect(page.locator('#search-status')).toHaveText('1 tool found');
     await expect(page.locator('.nav-heading:visible')).toHaveText(['Network']);
-    // "cidr" also matches the planned IP Range Analyzer; the built Subnet Calculator ranks first.
+    // "cidr" also matches the VLSM Allocator, IP Range Analyzer and Route Summarization; the Subnet Calculator ranks first.
     await search.fill('cidr');
-    await expect(page.locator('#search-status')).toHaveText('2 tools found');
+    await expect(page.locator('#search-status')).toHaveText('4 tools found');
     await search.press('Enter');
     await expect(page).toHaveURL(/#\/subnet-calculator$/);
   });
@@ -88,7 +88,7 @@ test.describe('search', () => {
     await expect(page.locator('#tool-nav a[data-tool]:visible')).toHaveCount(0);
     await search.press('Escape');
     await expect(search).toHaveValue('');
-    await expect(page.locator('#tool-nav a[data-tool]:visible')).toHaveCount(19);
+    await expect(page.locator('#tool-nav a[data-tool]:visible')).toHaveCount(20);
   });
 
   test('finds tools by keyword, including planned ones', async ({ page }) => {

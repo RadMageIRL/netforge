@@ -10,9 +10,9 @@ import { safeFilename, toJsonText } from '../../src/core/export/files';
 import { formatByteSize, formatInteger, utf8Length } from '../../src/core/format';
 import { describeCharAt, LineIndex } from '../../src/core/text';
 
-/** The navigation in the Phase 0 brief, in order. */
+/** The navigation in the Phase 0 brief, in order, plus the VLSM Allocator added in Phase 1. */
 const BRIEF_NAVIGATION: [string, string[]][] = [
-  ['Network', ['Subnet Calculator', 'NetForge Subnet & VLAN Planner', 'IP Range Analyzer', 'Route Summarization']],
+  ['Network', ['Subnet Calculator', 'VLSM Allocator', 'NetForge Subnet & VLAN Planner', 'IP Range Analyzer', 'Route Summarization']],
   ['Scheduling', ['Cron Explainer', 'Schedule Builder', 'Timestamp Converter']],
   ['Data', ['JSON Formatter', 'YAML/XML Tools', 'Number Bases & Bytes']],
   ['Encoding', ['Base64 / URL / Hex', 'Hash / HMAC', 'JWT Decoder']],
@@ -56,14 +56,16 @@ describe('ToolRegistry', () => {
 describe('catalog', () => {
   const catalog = createCatalog();
 
-  it('matches the navigation in the brief, category by category and in order', () => {
+  it('matches the navigation in the brief (plus the Phase 1 VLSM Allocator), category by category and in order', () => {
     const actual = catalog.listCategories().map(c => [c.name, catalog.inCategory(c.id).map(t => t.name)]);
     expect(actual).toEqual(BRIEF_NAVIGATION);
   });
 
-  it('has exactly the three Phase 0 tools built and every other tool planned', () => {
-    expect(catalog.list().filter(t => t.status === 'available').map(t => t.id).sort()).toEqual(['json-formatter', 'subnet-calculator', 'timestamp-converter']);
-    expect(catalog.list().filter(t => t.status === 'planned')).toHaveLength(16);
+  it('has exactly the Phase 0 and Phase 1 tools built and every other tool planned', () => {
+    expect(catalog.list().filter(t => t.status === 'available').map(t => t.id).sort()).toEqual([
+      'ip-range-analyzer', 'json-formatter', 'route-summarization', 'subnet-calculator', 'timestamp-converter', 'vlsm-allocator',
+    ]);
+    expect(catalog.list().filter(t => t.status === 'planned')).toHaveLength(14);
   });
 
   it('loads a module with a mount function for every built tool', async () => {

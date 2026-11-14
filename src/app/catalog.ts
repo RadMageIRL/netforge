@@ -17,9 +17,15 @@ export function createCatalog(): ToolRegistry {
   // Network
   r.add({
     id: 'subnet-calculator', name: 'Subnet Calculator', category: 'network', status: 'available',
-    summary: 'Network, broadcast, masks and usable host range for an IPv4 address and prefix.',
-    keywords: ['cidr', 'ipv4', 'ip', 'subnet', 'mask', 'netmask', 'wildcard', 'broadcast', 'prefix', 'hosts', 'network address'],
+    summary: 'IPv4 and IPv6 networks: boundaries, masks, address counts, classification, splits and supernets.',
+    keywords: ['cidr', 'ipv4', 'ipv6', 'ip', 'subnet', 'mask', 'netmask', 'wildcard', 'broadcast', 'prefix', 'hosts', 'network address', 'split', 'supernet', 'classification', 'rfc 5952'],
     load: () => import('../tools/subnet-calculator/subnet-calculator'),
+  });
+  r.add({
+    id: 'vlsm-allocator', name: 'VLSM Allocator', category: 'network', status: 'available',
+    summary: 'Divide an IPv4 network into right-sized subnets for named host counts, around fixed and reserved space.',
+    keywords: ['vlsm', 'variable length', 'allocate', 'allocation', 'hosts', 'subnet plan', 'ipv4', 'cidr', 'addressing plan'],
+    load: () => import('../tools/vlsm-allocator/vlsm-allocator'),
   });
   r.add({
     id: 'network-planner', name: 'NetForge Subnet & VLAN Planner', category: 'network', status: 'planned',
@@ -27,14 +33,16 @@ export function createCatalog(): ToolRegistry {
     keywords: ['vlan', 'vlsm', 'ipam', 'dhcp', 'gateway', 'ipv6', 'subnet plan', 'allocation', 'overlap'],
   });
   r.add({
-    id: 'ip-range-analyzer', name: 'IP Range Analyzer', category: 'network', status: 'planned',
-    summary: 'Turn an address range into the CIDR blocks that cover it, and back.',
-    keywords: ['range', 'ip range', 'start', 'end', 'cidr', 'ipv4', 'ipv6'],
+    id: 'ip-range-analyzer', name: 'IP Range Analyzer', category: 'network', status: 'available',
+    summary: 'Find duplicates, overlaps, containment and gaps in a list of networks and ranges, IPv4 and IPv6.',
+    keywords: ['range', 'ip range', 'overlap', 'duplicate', 'gap', 'conflict', 'start', 'end', 'cidr', 'ipv4', 'ipv6', 'range to cidr'],
+    load: () => import('../tools/ip-range-analyzer/ip-range-analyzer'),
   });
   r.add({
-    id: 'route-summarization', name: 'Route Summarization', category: 'network', status: 'planned',
-    summary: 'Aggregate a list of prefixes into the smallest set of summary routes.',
-    keywords: ['summarize', 'summary', 'supernet', 'aggregate', 'aggregation', 'routes', 'prefix'],
+    id: 'route-summarization', name: 'Route Summarization', category: 'network', status: 'available',
+    summary: 'Combine networks into the fewest exact routes, IPv4 and IPv6 kept apart.',
+    keywords: ['summarize', 'summary', 'supernet', 'aggregate', 'aggregation', 'routes', 'prefix', 'collapse', 'cidr'],
+    load: () => import('../tools/route-summarization/route-summarization'),
   });
 
   // Scheduling

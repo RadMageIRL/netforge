@@ -28,6 +28,36 @@ test('no page scrolls sideways at phone width', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
+test('Phase 1 tools do not scroll sideways at phone width, even with wide results', async ({ page }) => {
+  const errors = watchErrors(page);
+  await page.goto('./#/subnet-calculator');
+  await page.getByRole('radio', { name: 'IPv6' }).check();
+  await page.fill('#subnet-input', '2001:db8:1234::/48');
+  await page.locator('#split-panel summary').click();
+  await page.locator('#supernet-panel summary').click();
+  await expectNoHorizontalScroll(page);
+  await page.getByRole('radio', { name: 'IPv4' }).check();
+  await page.fill('#subnet-input', '0.0.0.0/0');
+  await expectNoHorizontalScroll(page);
+  for (const tool of ['vlsm-allocator', 'ip-range-analyzer', 'route-summarization']) {
+    await page.goto(`./#/${tool}`);
+    await page.getByRole('button', { name: 'Example' }).click();
+    await expect(page.locator('h1:visible')).toHaveCount(1);
+    await expectNoHorizontalScroll(page);
+  }
+  expect(errors).toEqual([]);
+});
+
+test('the VLSM request editor is usable at phone width', async ({ page }) => {
+  await page.goto('./#/vlsm-allocator');
+  await page.fill('#vlsm-parent', '192.168.0.0/24');
+  await page.getByLabel('Name, request 1', { exact: true }).fill('Office');
+  await page.getByLabel('Hosts, request 1', { exact: true }).fill('100');
+  await expect(page.locator('#vlsm-table tbody tr td:nth-child(3)')).toHaveText(['192.168.0.0/25']);
+  const box = await page.getByLabel('Hosts, request 1', { exact: true }).boundingBox();
+  expect(box!.width).toBeGreaterThan(80);
+});
+
 test('the tool list is a drawer: hidden until opened, closed by Escape', async ({ page }) => {
   await page.goto('./');
   const toggle = page.locator('#nav-toggle');

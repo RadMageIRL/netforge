@@ -66,6 +66,49 @@ const MUTATIONS = [
   ['router: ids not lowercased', 'src/app/router.ts', 'id = decodeURIComponent(path).toLowerCase();', 'id = decodeURIComponent(path);'],
   ['csv: formula guard off by default', 'src/core/export/csv.ts', 'if ((options.guardFormulas ?? true)', 'if ((options.guardFormulas ?? false)'],
   ['files: Windows device names allowed', 'src/core/export/files.ts', 'let result = RESERVED_WINDOWS.test(stem) ?', 'let result = false ?'],
+  // Phase 1: IPv6 text
+  ['ipv6: tie goes to the last zero run', 'src/core/net/ipv6.ts', 'if (j - i > bestLength) {', 'if (j - i >= bestLength) {'],
+  ['ipv6: single zero group compressed', 'src/core/net/ipv6.ts', 'let bestLength = 1;', 'let bestLength = 0;'],
+  ['ipv6: IPv4-mapped not in mixed notation', 'src/core/net/ipv6.ts', 'if (isIPv4Mapped(value)) return', 'if (false && isIPv4Mapped(value)) return'],
+  ['ipv6: uppercase output', 'src/core/net/ipv6.ts', 'const hex = groups.map(g => g.toString(16));', 'const hex = groups.map(g => g.toString(16).toUpperCase());'],
+  ['ipv6: "::" allowed twice', 'src/core/net/ipv6.ts', 'if (halves.length > 2)', 'if (halves.length > 3)'],
+  ['ipv6: eight groups beside "::"', 'src/core/net/ipv6.ts', 'if (head.length + tail.length > 7)', 'if (head.length + tail.length > 8)'],
+  ['ipv6: five-digit groups accepted', 'src/core/net/ipv6.ts', 'const HEX = /^[0-9a-fA-F]{1,4}$/;', 'const HEX = /^[0-9a-fA-F]{1,5}$/;'],
+  ['ipv6: prefix /129 accepted', 'src/core/net/address.ts', 'Number(suffix) > 128', 'Number(suffix) > 129'],
+  // Phase 1: set operations
+  ['ops: mixed families accepted', 'src/core/net/address.ts', 'for (const item of items) if (item.family !== family) throw new FamilyMismatchError(operation);', 'for (const item of items) if (item.family !== family && false) throw new FamilyMismatchError(operation);'],
+  ['ops: adjacent ranges not merged', 'src/core/net/ops.ts', 'if (top && r.first <= top.last + 1n) {', 'if (top && r.first <= top.last) {'],
+  ['ops: range to CIDR ignores alignment', 'src/core/net/ops.ts', 'let size = trailingZeros(first, bits);', 'let size = bits;'],
+  ['ops: containment misses shared start', 'src/core/net/ops.ts', 'return outer.first <= inner.first && inner.last <= outer.last;', 'return outer.first < inner.first && inner.last <= outer.last;'],
+  ['ops: overlap misses touching ranges', 'src/core/net/ops.ts', 'return a.first <= b.last && b.first <= a.last;', 'return a.first < b.last && b.first < a.last;'],
+  ['ops: split skips the first subnet', 'src/core/net/ops.ts', 'for (let i = offset; i < total && subnets.length < limit; i++) {', 'for (let i = offset + 1n; i < total && subnets.length < limit; i++) {'],
+  ['ops: supernet keeps host bits', 'src/core/net/ops.ts', 'return makePrefix(prefix.family, prefix.network, newLength);', 'return { family: prefix.family, network: prefix.network, length: newLength };'],
+  ['ops: covering prefix one bit too long', 'src/core/net/ops.ts', 'return makePrefix(family, first, bits - differing);', 'return makePrefix(family, first, Math.min(bits, bits - differing + 1));'],
+  ['ops: gap keeps the removed edge', 'src/core/net/ops.ts', 'if (r.first > cursor) out.push({ family: base.family, first: cursor, last: r.first - 1n });', 'if (r.first > cursor) out.push({ family: base.family, first: cursor, last: r.first });'],
+  ['list: reversed range accepted', 'src/core/net/list.ts', 'if (last.value.value < first.value.value) return {', 'if (false) return {'],
+  // Phase 1: classification
+  ['classify: least specific block decides', 'src/core/net/classify.ts', '.sort((a, b) => b.prefix.length - a.prefix.length);', '.sort((a, b) => a.prefix.length - b.prefix.length);'],
+  ['classify: blank (deprecated) rows decide', 'src/core/net/classify.ts', "const decider = matches.find(m => m.globallyReachable !== 'unspecified') ?? null;", 'const decider = matches[0] ?? null;'],
+  ['classify: last address of a block excluded', 'src/core/net/classify.ts', '.filter(b => b.family === family && b.range.first <= value && value <= b.range.last)', '.filter(b => b.family === family && b.range.first <= value && value < b.range.last)'],
+  ['classify: multicast scope read from the wrong nibble', 'src/core/net/classify.ts', 'const scope = Number((value >> 112n) & 0xfn);', 'const scope = Number((value >> 116n) & 0xfn);'],
+  ['registry: data edited by hand', 'src/core/net/registry-data.ts', '"block":"198.18.0.0/15","name":"Benchmarking"', '"block":"198.18.0.0/15","name":"Benchmark"'],
+  // Phase 1: VLSM
+  ['vlsm: smallest block first', 'src/core/net/vlsm.ts', 'a.length - b.length || b.hosts - a.hosts || a.index - b.index', 'b.length - a.length || b.hosts - a.hosts || a.index - b.index'],
+  ['vlsm: equal requests in reverse order', 'src/core/net/vlsm.ts', 'a.length - b.length || b.hosts - a.hosts || a.index - b.index', 'a.length - b.length || b.hosts - a.hosts || b.index - a.index'],
+  ['vlsm: host count tie-break ignored', 'src/core/net/vlsm.ts', 'a.length - b.length || b.hosts - a.hosts || a.index - b.index', 'a.length - b.length || a.index - b.index'],
+  ['vlsm: /31 without the option', 'src/core/net/vlsm.ts', 'if (pointToPoint && hosts === 2) return 31;', 'if (hosts === 2) return 31;'],
+  ['vlsm: capacity keeps network and broadcast', 'src/core/net/vlsm.ts', 'return prefixSize(4, length) - 2n;', 'return prefixSize(4, length);'],
+  ['vlsm: unaligned placement', 'src/core/net/vlsm.ts', 'candidate = alignUp(clash.last + 1n, size);', 'candidate = clash.last + 1n;'],
+  ['vlsm: clash check misses a shared edge', 'src/core/net/vlsm.ts', 'const clash = occupied.find(o => o.first <= end && candidate <= o.last);', 'const clash = occupied.find(o => o.first < end && candidate < o.last);'],
+  ['vlsm: fixed allocation may overlap a reservation', 'src/core/net/vlsm.ts', 'const clashReserved = reservations.find(o => rangesOverlap(o.range, range));', 'const clashReserved = reservations.find(() => false);'],
+  ['vlsm: names compared case-sensitively', 'src/core/net/vlsm.ts', 'const key = name.toLowerCase();', 'const key = name;'],
+  ['vlsm: request larger than parent attempted', 'src/core/net/vlsm.ts', 'if (req.length < parent.length) {', 'if (req.length < parent.length - 1) {'],
+  // Phase 1: analysis and exports
+  ['analysis: containment reported as overlap', 'src/core/net/analysis.ts', "b.last <= a.last ? 'contains' : 'overlap'", "'overlap'"],
+  ['analysis: parent gaps ignore the entries', 'src/core/net/analysis.ts', 'const gapRanges = subtractRanges(pr, overlapping);', 'const gapRanges = subtractRanges(pr, []);'],
+  ['routes: supernet offered for a single route', 'src/core/net/analysis.ts', 'if (routes.length > 1) {', 'if (routes.length > 0) {'],
+  ['routes: duplicates not counted', 'src/core/net/analysis.ts', 'if (keys.has(key)) duplicates++;', 'if (keys.has(key)) duplicates += 0;'],
+  ['reports: CSV leaves out free space', 'src/core/net/reports.ts', 'for (const p of result.free) rows.push(', 'for (const p of result.free.slice(0, 0)) rows.push('],
 ];
 
 function run(cwd, args) {
@@ -76,7 +119,7 @@ const filter = process.argv[2];
 const selected = MUTATIONS.filter(([label]) => !filter || label.includes(filter));
 const work = mkdtempSync(join(tmpdir(), 'netforge-mutations-'));
 try {
-  for (const entry of ['src', 'tests', 'scripts', 'public', 'package.json', 'tsconfig.json', 'vite.config.ts', 'index.html', '.gitignore', '.gitattributes', 'README.md', 'CHANGELOG.md']) {
+  for (const entry of ['src', 'tests', 'scripts', 'public', 'data', 'package.json', 'tsconfig.json', 'vite.config.ts', 'index.html', '.gitignore', '.gitattributes', 'README.md', 'CHANGELOG.md']) {
     cpSync(join(ROOT, entry), join(work, entry), { recursive: true });
   }
   symlinkSync(join(ROOT, 'node_modules'), join(work, 'node_modules'), 'junction');

@@ -33,6 +33,27 @@ test('works fully offline after the first visit, including tools never opened on
   await expect(page.locator('.about-page .notice-ok')).toContainText('works without an internet connection');
 });
 
+test('the Phase 1 network tools work offline without having been opened online', async ({ page, context }) => {
+  await page.goto('./');
+  await waitForController(page);
+  await context.setOffline(true);
+  await page.reload();
+  await page.locator('a[data-tool="vlsm-allocator"]').click();
+  await page.getByRole('button', { name: 'Example' }).click();
+  await expect(page.locator('#vlsm-table tbody tr')).toHaveCount(6);
+  await page.locator('a[data-tool="ip-range-analyzer"]').click();
+  await page.getByRole('button', { name: 'Example' }).click();
+  await expect(page.locator('#ranges-findings tbody tr')).toHaveCount(6);
+  await page.locator('a[data-tool="route-summarization"]').click();
+  await page.fill('#routes-input', '10.0.0.0/25\n10.0.0.128/25');
+  await expect(page.locator('#routes-v4-table tbody tr td').first()).toHaveText('10.0.0.0/24');
+  await page.locator('a[data-tool="subnet-calculator"]').click();
+  await page.getByRole('radio', { name: 'IPv6' }).check();
+  await page.fill('#subnet-input', '2001:db8::/32');
+  await expect(resultValue(page, 'cidr')).toHaveText('2001:db8::/32');
+  await expect(page.locator('#class-result .chip-static').first()).toHaveText('Documentation');
+});
+
 test('works under a subpath such as /netforge/, offline too', async ({ page, context }) => {
   const server = await serveDistCopy({ base: '/netforge/' });
   try {
