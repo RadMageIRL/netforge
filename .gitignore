@@ -1,0 +1,29 @@
+# Dependencies and build output
+node_modules/
+dist/
+
+# Test output
+test-results/
+playwright-report/
+blob-report/
+coverage/
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+.cache/
+
+# Secrets and machine-local settings
+.env
+.env.*
+*.local
+*.pem
+*.key
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
