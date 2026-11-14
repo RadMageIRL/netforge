@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <meta name="referrer" content="no-referrer">
+    <meta name="description" content="NetForge is a local-first IT and network engineering toolbox. Every tool runs in your browser; nothing you enter is sent to a server.">
+    <title>NetForge | Local-first IT and network engineering toolbox</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <script src="./theme-boot.js"></script>
+    <script type="module" src="./src/main.ts"></script>
+  </head>
+  <body>
+    <a class="skip-link" id="skip-link" href="#main">Skip to content</a>
+    <header class="topbar">
+      <button type="button" class="btn btn-ghost btn-icon nav-toggle" id="nav-toggle" aria-controls="sidebar" aria-expanded="false" aria-label="Open tool navigation"></button>
+      <a class="brand" href="#/">
+        <span class="brand-mark" id="brand-mark"></span>
+        <span class="brand-name">NetForge</span>
+        <span class="brand-version" id="brand-version"></span>
+      </a>
+      <p class="tagline">Local-first IT and network engineering toolbox</p>
+      <div class="topbar-actions">
+        <span class="local-badge" title="Every tool runs in your browser. Nothing you enter is sent anywhere.">Runs locally</span>
+        <button type="button" class="btn btn-ghost btn-icon" id="theme-toggle" aria-label="Switch theme"></button>
+        <a class="btn btn-ghost" href="#/about">About</a>
+      </div>
+    </header>
+    <div class="layout">
+      <nav class="sidebar" id="sidebar" aria-label="Tools">
+        <div class="sidebar-search">
+          <label class="visually-hidden" for="tool-search">Search tools</label>
+          <input class="input search-input" id="tool-search" type="search" placeholder="Search tools" autocomplete="off" spellcheck="false" aria-describedby="search-help">
+          <kbd class="search-kbd" aria-hidden="true">/</kbd>
+          <span class="visually-hidden" id="search-help">Press slash or Control K to search from anywhere. Press Enter to open the best match.</span>
+        </div>
+        <p class="search-status" id="search-status" role="status"></p>
+        <div class="tool-nav" id="tool-nav"></div>
+      </nav>
+      <div class="scrim" id="scrim" hidden></div>
+      <main class="main" id="main" tabindex="-1">
+        <div class="view" id="view"></div>
+      </main>
+    </div>
+    <div class="update-bar" id="update-bar" role="status" hidden>
+      <span>A new version of NetForge is ready.</span>
+      <button type="button" class="btn btn-primary" id="update-reload">Reload</button>
+      <button type="button" class="btn btn-ghost" id="update-later">Later</button>
+    </div>
+    <div class="visually-hidden" id="live-region" aria-live="polite" aria-atomic="true"></div>
+    <div class="toasts" id="toasts" aria-hidden="true"></div>
+    <noscript><p class="noscript">NetForge needs JavaScript. Every tool runs in your browser; nothing you enter is sent to a server.</p></noscript>
+  </body>
+</html>

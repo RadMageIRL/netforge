@@ -1,0 +1,27 @@
+{
+  "name": "netforge",
+  "version": "0.1.0-dev",
+  "description": "NetForge - Local-first IT and network engineering toolbox",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 4173 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test --project desktop --project mobile",
+    "test:engines": "playwright test --project firefox --project webkit",
+    "test:all": "npm run test && npm run build && npm run test:e2e"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
+  }
+}
