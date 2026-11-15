@@ -22,7 +22,8 @@ export function setupOffline(): void {
       const incoming = registration.installing;
       incoming?.addEventListener('statechange', () => { if (incoming.state === 'installed') offer(incoming); });
     });
-    // Long-lived sessions still learn about updates.
+    // Long-lived sessions still learn about updates: hourly, and whenever the page is looked at again.
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') registration.update().catch(() => undefined); });
     window.setInterval(() => { registration.update().catch(() => undefined); }, 60 * 60 * 1000);
   });
 }

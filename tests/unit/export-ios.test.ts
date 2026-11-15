@@ -160,6 +160,29 @@ describe('VLAN declarations', () => {
     expect(item(o, `VLAN ${n} Legacy`).fidelity).toBe('unsupported');
   });
 
+  it.each([['A'.repeat(20), false], ['A'.repeat(21), true], ['A'.repeat(32), true]])('a written name of %s gets the VTP name-length step: %s', (name, expected) => {
+    const o = run(makePlan([{ vlanId: '10', name }]), { sections: { vlans: true, svis: false, dhcp: false } });
+    expect(parseIos(text(o)).vlans.get(10)).toEqual({ name });
+    expect(o.manualSteps.some(s => s.includes('VTP versions 1 and 2'))).toBe(expected);
+  });
+
+  it('a name that is not written does not trigger the name-length step', () => {
+    const o = run(makePlan([{ vlanId: '10', name: 'A'.repeat(33) }]), { sections: { vlans: true, svis: false, dhcp: false } });
+    expect(o.manualSteps.some(s => s.includes('VTP versions 1 and 2'))).toBe(false);
+  });
+
+  it('a DHCP pool in a named VRF gets the release-dependent exclusion step, a global pool does not', () => {
+    const pooled = { vlanId: '200', name: 'G', vrfId: 'r2', ipv4: { network: '192.168.0.0/24', gateway: '192.168.0.1', dhcp: ['192.168.0.10 - 192.168.0.20'] } };
+    const named = run(makePlan([pooled], TWO_VRFS), { context: ctx({ vrfNames: { r2: 'GUEST' } }) });
+    expect(text(named)).toContain('ip dhcp excluded-address vrf GUEST ');
+    expect(named.manualSteps.some(s => s.includes('show ip dhcp pool'))).toBe(true);
+    const global = run(makePlan([users]));
+    expect(text(global)).toContain('ip dhcp pool VLAN10');
+    expect(global.manualSteps.some(s => s.includes('show ip dhcp pool'))).toBe(false);
+    const noDhcp = run(makePlan([pooled], TWO_VRFS), { context: ctx({ vrfNames: { r2: 'GUEST' } }), sections: { vlans: true, svis: true, dhcp: false } });
+    expect(noDhcp.manualSteps.some(s => s.includes('show ip dhcp pool'))).toBe(false);
+  });
+
   it.each([[1001, false], [1006, true], [4094, true]])('VLAN %i: extended-range manual step is %s', (n, expected) => {
     const o = run(makePlan([{ vlanId: String(n), name: 'Edge' }]), { sections: { vlans: true, svis: false, dhcp: false } });
     expect(parseIos(text(o)).vlans.has(n)).toBe(true);

@@ -1,0 +1,91 @@
+[
+ {
+  "tests": [
+   "tests/unit/phase6.test.ts",
+   "tests/unit/security-regression.test.ts",
+   "tests/unit/schedule-commands.test.ts",
+   "tests/unit/windows-oracle.test.ts",
+   "tests/unit/app.test.ts"
+  ],
+  "mutations": [
+   [
+    "phase6: stop-parsing token written as a plain quoted argument by the Schedule Builder",
+    "src/core/schedule/commands.ts",
+    "if (value === PS_STOP_PARSING) return ok(\"('--%')\");",
+    "if (value === 'never') return ok(\"('--%')\");"
+   ],
+   [
+    "phase6: stop-parsing token left bare inside the parentheses",
+    "src/core/schedule/commands.ts",
+    "return ok(\"('--%')\");",
+    "return ok(\"(--%)\");"
+   ],
+   [
+    "phase6: schtasks path with spaces ending in a backslash accepted",
+    "src/core/schedule/commands.ts",
+    "else if (details.program.includes(' ') && details.program.endsWith('\\\\')) reasons.push(",
+    "else if (false) reasons.push("
+   ],
+   [
+    "phase6: plan id __proto__ accepted",
+    "src/core/plan/file.ts",
+    "if (v === '__proto__') throw new StructureError(",
+    "if (v === 'never') throw new StructureError("
+   ],
+   [
+    "phase6: direction overrides kept in download names",
+    "src/core/export/files.ts",
+    "|| INVISIBLE.has(code) || FORBIDDEN.has(code)",
+    "|| FORBIDDEN.has(code)"
+   ],
+   [
+    "phase6: C1 controls kept in download names",
+    "src/core/export/files.ts",
+    "(code >= 0x7f && code <= 0x9f)",
+    "(code === 0x7f)"
+   ],
+   [
+    "phase6: device name with several extensions not recognized",
+    "src/core/export/files.ts",
+    "RESERVED_WINDOWS.test(out.split('.')[0]!.trim())",
+    "RESERVED_WINDOWS.test(out.slice(0, Math.max(0, out.lastIndexOf('.'))))"
+   ],
+   [
+    "phase6: worker network interfaces left on the prototype chain",
+    "src/tools/util-shared/worker-lockdown.ts",
+    "try { delete (target as Record<string, unknown>)[name]; } catch { /* not configurable: shadowed below */ }",
+    ""
+   ],
+   [
+    "phase6: worker refusals can be replaced",
+    "src/tools/util-shared/worker-lockdown.ts",
+    "{ value: refuse, writable: false, configurable: false, enumerable: false }",
+    "{ value: refuse, writable: true, configurable: true, enumerable: false }"
+   ],
+   [
+    "phase6: fetch not locked in workers",
+    "src/tools/util-shared/worker-lockdown.ts",
+    "const NAMES = ['fetch', ",
+    "const NAMES = ["
+   ],
+   [
+    "phase6: sendBeacon left usable in workers",
+    "src/tools/util-shared/worker-lockdown.ts",
+    "if (nav && 'sendBeacon' in nav) {",
+    "if (false) {"
+   ],
+   [
+    "phase6: Junos reserved instance names accepted",
+    "src/core/infra/junos.ts",
+    "(?!(?:default|master)$)",
+    ""
+   ],
+   [
+    "phase6: Junos instance name may start with a hyphen",
+    "src/core/infra/junos.ts",
+    "[A-Za-z0-9][A-Za-z0-9_-]*$/i;",
+    "[A-Za-z0-9_-][A-Za-z0-9_-]*$/i;"
+   ]
+  ]
+ }
+]

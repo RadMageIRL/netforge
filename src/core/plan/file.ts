@@ -134,6 +134,9 @@ class Reader {
   id(o: Obj, path: string, seen: Set<string>): string {
     const v = o.id;
     if (typeof v !== 'string' || !ID_PATTERN.test(v)) throw new StructureError(`${path}.id must be 1 to 64 letters, digits, dots, colons, hyphens or underscores.`);
+    // As a key of a plain object this name sets the prototype instead of adding an entry, so an
+    // export keyed by id would silently lose the item.
+    if (v === '__proto__') throw new StructureError(`${path}.id cannot be "__proto__".`);
     if (seen.has(v)) throw new StructureError(`${path}.id "${v}" is used twice.`);
     seen.add(v);
     return v;

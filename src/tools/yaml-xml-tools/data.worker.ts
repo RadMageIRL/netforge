@@ -2,6 +2,7 @@
  * YAML and XML processing off the main thread. The YAML parser is the one bundled dependency; it
  * loads only inside this worker, and only when the YAML/XML tool is used.
  */
+import '../util-shared/worker-lockdown';
 import type { DataResult } from '../../core/data/data-result';
 import { formatXml, validateXml, xmlToJson } from '../../core/data/xml-tools';
 import { formatYaml, jsonToYaml, yamlToJson, type YamlIndent } from '../../core/data/yaml';

@@ -113,7 +113,9 @@ test('copies matches as lines and as JSON', async ({ page, context }) => {
   expect(json.matches[2].groups[1]).toMatchObject({ number: 2, name: 'month', value: { text: '01', length: 2 } });
 });
 
-test('a catastrophic pattern is stopped by terminating its worker, and the page never freezes', async ({ page }) => {
+test('a catastrophic pattern is stopped by terminating its worker, and the page never freezes', async ({ page, browserName }) => {
+  // JavaScriptCore answers this pattern at once (no runaway backtracking), so there is nothing to stop.
+  test.skip(browserName === 'webkit', 'this pattern does not run away in WebKit');
   const errors = watchErrors(page);
   // Count timer ticks on the page thread while the pattern runs: a blocked page would stop ticking.
   await page.evaluate(() => {

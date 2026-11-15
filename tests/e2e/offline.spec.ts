@@ -201,3 +201,109 @@ test('the Phase 5 exports and utilities work offline without having been opened 
   await page.fill('#chmod-octal', '755');
   await expect(page.locator('#chmod-ls')).toHaveValue('rwxr-xr-x');
 });
+
+test('is an installable web app: manifest, icons and a controlling service worker, under a subpath too', async ({ page, browserName }) => {
+  const server = await serveDistCopy({ base: '/netforge/' });
+  try {
+    await page.goto(server.url);
+    await waitForController(page);
+    await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href', './manifest.webmanifest');
+    await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#151b23');
+    const info = await page.evaluate(async () => {
+      const href = (document.querySelector('link[rel="manifest"]') as HTMLLinkElement).href;
+      // The page itself cannot fetch (connect-src 'none'), so read the manifest the way the
+      // browser does: through the service worker's cache.
+      const cached = await caches.match(href);
+      const manifest = JSON.parse(await cached!.text());
+      const icons = [];
+      for (const icon of manifest.icons) {
+        const url = new URL(icon.src, href).href;
+        const hit = await caches.match(url);
+        let width = 0;
+        let height = 0;
+        if (hit && icon.type === 'image/png') {
+          const bitmap = await createImageBitmap(await hit.blob());
+          width = bitmap.width;
+          height = bitmap.height;
+        }
+        icons.push({ src: icon.src, sizes: icon.sizes, purpose: icon.purpose, cached: !!hit, width, height, url });
+      }
+      return { href, manifest, icons, apple: !!(await caches.match(new URL('./apple-touch-icon.png', href).href)) };
+    });
+    expect(info.href).toBe(`${server.url}manifest.webmanifest`);
+    expect(info.manifest).toMatchObject({ name: 'NetForge', short_name: 'NetForge', start_url: './', scope: './', id: './', display: 'standalone' });
+    expect(info.icons.map(i => [i.sizes, i.purpose, i.cached, i.width, i.height])).toEqual([
+      ['192x192', 'any', true, 192, 192], ['512x512', 'any', true, 512, 512], ['512x512', 'maskable', true, 512, 512], ['any', 'any', true, 0, 0],
+    ]);
+    // Every icon stays inside the app's own path.
+    for (const icon of info.icons) expect(icon.url.startsWith(server.url)).toBe(true);
+    expect(info.apple).toBe(true);
+    // Chrome's own verdict: no reason the app could not be installed.
+    if (browserName !== 'chromium') return;
+    const cdp = await page.context().newCDPSession(page);
+    const { installabilityErrors } = await cdp.send('Page.getInstallabilityErrors');
+    // (Playwright's profile is an incognito one, which Chrome reports as the only obstacle.)
+    expect(installabilityErrors.map(e => e.errorId).filter(id => id !== 'in-incognito')).toEqual([]);
+    const shown = await cdp.send('Page.getAppManifest');
+    expect(shown.errors).toEqual([]);
+    expect(shown.url).toBe(`${server.url}manifest.webmanifest`);
+  } finally {
+    await server.close();
+  }
+});
+
+test('the offline cache holds only the app\'s own files, never anything typed, opened or generated', async ({ page }) => {
+  await page.goto('./');
+  await waitForController(page);
+  await page.locator('a[data-tool="jwt-decoder"]').click();
+  await page.fill('#jwt-input', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuZi1jYWNoZS1zZW50aW5lbCJ9.AAAA');
+  await page.fill('#jwt-secret', 'nf-cache-sentinel-secret');
+  await page.locator('a[data-tool="terraform-export"]').click();
+  await page.locator('#tf-example').click();
+  await expect(page.locator('#tf-code-0')).toContainText('netforge-network-export');
+  await page.locator('a[data-tool="base64-url-hex"]').click();
+  await page.fill('#codec-input', 'nf-cache-sentinel-text');
+  const [file] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Download bytes' }).click()]);
+  expect(file.suggestedFilename()).toBe('decoded.bin');
+  const cache = await page.evaluate(async () => {
+    const names = await caches.keys();
+    const entries: string[] = [];
+    let text = '';
+    for (const name of names) {
+      const c = await caches.open(name);
+      for (const request of await c.keys()) {
+        entries.push(new URL(request.url).pathname);
+        const body = await (await c.match(request))!.text();
+        if (body.includes('nf-cache-sentinel') || body.includes('eyJzdWIiOiJuZi1jYWNoZS1zZW50aW5lbCJ9')) text += request.url;
+      }
+    }
+    return { names, entries, text };
+  });
+  expect(cache.names).toHaveLength(1);
+  expect(cache.names[0]).toMatch(/^netforge-0\.1\.0(-dev)?-[0-9a-f]{12}$/);
+  expect(cache.text).toBe('');
+  for (const path of cache.entries) expect(path).toMatch(/^\/(index\.html|theme-boot\.js|favicon\.svg|manifest\.webmanifest|(icon-192|icon-512|icon-maskable-512|apple-touch-icon)\.png|assets\/[A-Za-z0-9_.-]+\.(js|css))?$/);
+});
+
+test('worker scripts served by the service worker carry the policy as a header, so the browser blocks connections inside them', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'reading service worker response headers needs Chromium');
+  await page.goto('./');
+  await waitForController(page);
+  const seen: { url: string; fromServiceWorker: boolean; policy: string | undefined }[] = [];
+  page.on('response', response => {
+    if (/\.worker-[A-Za-z0-9_-]+\.js$/.test(response.url())) seen.push({ url: response.url(), fromServiceWorker: response.fromServiceWorker(), policy: response.headers()['content-security-policy'] });
+  });
+  await page.locator('a[data-tool="hash-hmac"]').click();
+  await page.fill('#hash-text', 'abc');
+  await expect(page.locator('#hash-list [data-key="SHA-256-hex"] .hash-value')).toHaveText('ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+  await page.locator('a[data-tool="yaml-xml-tools"]').click();
+  await page.fill('#data-input', 'a: 1\n');
+  await expect(page.locator('#data-output')).toHaveValue('a: 1\n');
+  expect(seen.length).toBeGreaterThanOrEqual(2);
+  for (const r of seen) {
+    expect([r.url, r.fromServiceWorker]).toEqual([r.url, true]);
+    expect(r.policy).toContain("connect-src 'none'");
+    expect(r.policy).toContain("default-src 'none'");
+    expect(r.policy).toContain("script-src 'self'");
+  }
+});

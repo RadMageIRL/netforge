@@ -69,7 +69,7 @@ const MUTATIONS = [
   ['search: name matches no longer outrank keywords', 'src/app/search.ts', 'if (words(name).some(w => w === term)) return 100;', 'if (words(name).some(w => w === term)) return 1;'],
   ['router: ids not lowercased', 'src/app/router.ts', 'id = decodeURIComponent(path).toLowerCase();', 'id = decodeURIComponent(path);'],
   ['csv: formula guard off by default', 'src/core/export/csv.ts', 'if ((options.guardFormulas ?? true)', 'if ((options.guardFormulas ?? false)'],
-  ['files: Windows device names allowed', 'src/core/export/files.ts', 'let result = RESERVED_WINDOWS.test(stem) ?', 'let result = false ?'],
+  ['files: Windows device names allowed', 'src/core/export/files.ts', "let result = RESERVED_WINDOWS.test(out.split('.')[0]!.trim()) ?", 'let result = false ?'],
   // Phase 1: IPv6 text
   ['ipv6: tie goes to the last zero run', 'src/core/net/ipv6.ts', 'if (j - i > bestLength) {', 'if (j - i >= bestLength) {'],
   ['ipv6: single zero group compressed', 'src/core/net/ipv6.ts', 'let bestLength = 1;', 'let bestLength = 0;'],

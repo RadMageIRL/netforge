@@ -22,9 +22,18 @@ export default defineConfig({
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], channel: 'chrome', viewport: { width: 1400, height: 900 } }, testIgnore: /mobile\.spec\.ts/ },
     { name: 'mobile', use: { ...devices['Pixel 7'], channel: 'chrome' }, testMatch: /mobile\.spec\.ts/ },
-    // Other engines (npm run test:engines; needs `npx playwright install firefox webkit` once).
-    { name: 'firefox', use: { ...devices['Desktop Firefox'], viewport: { width: 1400, height: 900 } }, testIgnore: /mobile\.spec\.ts/ },
-    { name: 'webkit', use: { ...devices['Desktop Safari'], viewport: { width: 1400, height: 900 } }, testIgnore: /mobile\.spec\.ts/ },
+    // Microsoft Edge, as installed on the machine.
+    { name: 'edge', use: { ...devices['Desktop Edge'], channel: 'msedge', viewport: { width: 1400, height: 900 } }, testIgnore: /mobile\.spec\.ts/ },
+    // Other engines (npm run test:engines). Their Playwright builds are kept in a folder of this
+    // project so no other project's browsers are touched: set PLAYWRIGHT_BROWSERS_PATH to
+    // local/tools/pw-browsers for both `npx playwright install firefox webkit` and the test run.
+    // The accessibility scans run in the Chromium engines only: the scanner crashes the content
+    // process of Playwright's Firefox build on some pages, and the rules do not depend on the engine.
+    {
+      name: 'firefox', testIgnore: /(mobile|a11y)\.spec\.ts/,
+      use: { ...devices['Desktop Firefox'], viewport: { width: 1400, height: 900 }, launchOptions: { firefoxUserPrefs: { 'dom.events.asyncClipboard.readText': true, 'dom.events.testing.asyncClipboard': true } } },
+    },
+    { name: 'webkit', use: { ...devices['Desktop Safari'], viewport: { width: 1400, height: 900 } }, testIgnore: /(mobile|a11y)\.spec\.ts/ },
   ],
   webServer: {
     command: `npx vite preview --port ${PORT} --strictPort`,

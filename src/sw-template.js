@@ -5,6 +5,10 @@
 const VERSION = '__VERSION__';
 const CACHE = `netforge-${VERSION}`;
 const PRECACHE = __PRECACHE__;
+// A worker does not inherit the page's policy (a meta element): it takes its own from the HTTP
+// headers of its script. Worker scripts served from this cache get the policy as a header here,
+// so the browser blocks connections inside workers even on a host that sends no headers.
+const WORKER_POLICY = __CSP__;
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(PRECACHE)));
@@ -36,5 +40,11 @@ self.addEventListener('fetch', event => {
   }
   // ignoreVary: servers often send "Vary: Origin", and module scripts carry an Origin header the
   // precache requests did not, which would otherwise make every cached script miss offline.
-  event.respondWith(caches.match(request, { ignoreSearch: true, ignoreVary: true }).then(hit => hit || fetch(request)));
+  event.respondWith(caches.match(request, { ignoreSearch: true, ignoreVary: true }).then(hit => {
+    if (!hit) return fetch(request);
+    if (request.destination !== 'worker' && request.destination !== 'sharedworker') return hit;
+    const headers = new Headers(hit.headers);
+    headers.set('Content-Security-Policy', WORKER_POLICY);
+    return new Response(hit.body, { status: hit.status, statusText: hit.statusText, headers });
+  }));
 });

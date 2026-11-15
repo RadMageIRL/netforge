@@ -2,6 +2,7 @@
  * Hashing off the main thread. The file or text is read and hashed inside this worker, on this
  * device; the page receives only the digests. Nothing is kept after the reply is sent.
  */
+import '../util-shared/worker-lockdown';
 import { digest, digestText, HASHES, hmac, HMAC_HASHES, MAX_HASH_BYTES, type DigestText } from '../../core/crypto/digest';
 import { serve } from '../util-shared/worker-host';
 

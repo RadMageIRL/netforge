@@ -432,3 +432,27 @@ test('nothing is run: the page offers commands as text only', async ({ page }) =
   for (const label of buttons) expect(label).toMatch(/^Copy/);
   await expect(page.getByText('Generated commands are text to review: NetForge never runs them.')).toBeVisible();
 });
+
+test.describe('the PowerShell stop-parsing token', () => {
+  test('--% typed as a name, program or arguments never ends parsing of the command', async ({ page }) => {
+    await page.locator('#builder-details summary').click();
+    await page.fill('#builder-name', 'Report');
+    await page.fill('#builder-program', '--%');
+    await page.fill('#builder-arguments', 'x | Stop-Computer -Force #');
+    await expect(text(page, 'powershell')).toContainText("New-ScheduledTaskAction -Execute ('--%') -Argument 'x | Stop-Computer -Force #'");
+    await page.fill('#builder-program', 'C:\\Tools\\x.exe');
+    await page.fill('#builder-arguments', '--%');
+    await expect(text(page, 'powershell')).toContainText("-Execute 'C:\\Tools\\x.exe' -Argument ('--%')");
+    await page.fill('#builder-name', '--%');
+    await expect(text(page, 'powershell')).toContainText("Register-ScheduledTask -TaskName ('--%') -Trigger $trigger -Action $action");
+    const script = (await text(page, 'powershell').textContent())!;
+    expect(script).not.toMatch(/ '--%'/);
+    expect(script).not.toMatch(/ --%/);
+    // Command Prompt would expand the percent sign, so schtasks keeps its placeholders and says why.
+    await expect(text(page, 'schtasks')).toContainText('"<TASK NAME>"');
+    await expect(card(page, 'schtasks')).toContainText('cannot be passed safely through Command Prompt');
+    // Longer values that merely contain the token are ordinary strings.
+    await page.fill('#builder-arguments', '--% | calc');
+    await expect(text(page, 'powershell')).toContainText("-Argument '--% | calc'");
+  });
+});

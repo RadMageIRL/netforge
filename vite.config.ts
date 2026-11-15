@@ -9,7 +9,12 @@ const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as { version: strin
 /**
  * The Content-Security-Policy added to the built page. connect-src 'none' means the page itself
  * cannot send anything anywhere: no fetch, XHR, WebSocket, EventSource or beacon. Scripts and
- * styles load only from the app's own files. Dev builds skip it because Vite's HMR client needs
+ * styles load only from the app's own files, and so does the web app manifest.
+ *
+ * A meta policy covers the page only. Workers take their policy from the HTTP headers of their
+ * own script: the service worker adds this same policy to the worker scripts it serves, each
+ * worker removes its own network interfaces on start (worker-lockdown.ts), and the host should
+ * send the policy as a header as well, with frame-ancestors, which a meta element cannot carry. Dev builds skip it because Vite's HMR client needs
  * websockets and inline styles.
  */
 export const CSP = [
@@ -19,6 +24,7 @@ export const CSP = [
   "img-src 'self'",
   "connect-src 'none'",
   "worker-src 'self'",
+  "manifest-src 'self'",
   "base-uri 'none'",
   "form-action 'none'",
   "object-src 'none'",
@@ -64,7 +70,7 @@ function serviceWorker(): Plugin {
       const version = `${pkg.version}-${hash.digest('hex').slice(0, 12)}`;
       const template = readFileSync('src/sw-template.js', 'utf8');
       const urls = ['./', ...precache.map(f => `./${f}`)];
-      writeFileSync(join(outDir, 'sw.js'), template.replace('__VERSION__', version).replace('__PRECACHE__', JSON.stringify(urls)));
+      writeFileSync(join(outDir, 'sw.js'), template.replace('__VERSION__', version).replace('__PRECACHE__', JSON.stringify(urls)).replace('__CSP__', JSON.stringify(CSP)));
     },
   };
 }

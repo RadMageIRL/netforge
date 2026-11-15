@@ -6,6 +6,14 @@ NetForge is a collection of practical browser tools for systems administrators, 
 
 **Status:** in development (v0.1.0-dev). Not released.
 
+![NetForge home page with the tool list](screenshots/netforge-home.png)
+
+| Subnet & VLAN Planner | Cisco / Juniper Export |
+|---|---|
+| ![The planner with the example plan open](screenshots/netforge-planner.png) | ![A Cisco IOS snippet with its exact, approximate and unsupported items](screenshots/netforge-export.png) |
+| **Cron Explainer** | **Subnet Calculator** |
+| ![A cron expression explained with its next runs](screenshots/netforge-schedule.png) | ![An IPv4 network with its boundaries and counts](screenshots/netforge-subnet.png) |
+
 ## Tools
 
 Built:
@@ -44,15 +52,15 @@ Large inputs are refused with a message rather than cut or left to freeze the pa
 ## Privacy
 
 - All processing happens in the browser. There is no server component, no analytics, no cookies and no third-party scripts, fonts or other resources.
-- The production build sets a Content-Security-Policy with `connect-src 'none'`, so the page cannot open network connections.
+- The production build sets a Content-Security-Policy with `connect-src 'none'`, so the page cannot open network connections. A policy in the page does not reach background workers, which take theirs from HTTP headers: each NetForge worker removes its own network interfaces when it starts, the service worker adds the policy to the worker scripts it serves, and the host should send the same policy as a header.
 - Tool input stays in memory. A network plan is written only to a file you choose to save, and read only from a file you pick: it is never stored in the browser and never restored on its own. The export tools read a plan the same way, or take a copy of the planner's plan in memory, and store neither the plan nor anything typed into them (server names, DNS servers, MAC addresses, device VRF names). Schedule expressions, task names and commands are never stored either, and neither are tokens, keys, secrets, hashed text or files, generated values or anything else entered in the utilities. Only display preferences (theme, last tool, time zone and JSON indentation) are saved in local storage; the About page lists them and clears them.
 - The address registries are bundled with the app (`data/iana/`), so classification needs no network access.
 - NetForge ships one third-party library, the `yaml` parser (ISC license, no dependencies of its own), bundled into the build at a pinned version and loaded only by the YAML/XML tool. Nothing is fetched at run time.
-- After the first visit, a service worker keeps a copy of the app so it works offline.
+- After the first visit, a service worker keeps a copy of the app so it works offline, and the app can be installed (it has a web app manifest and icons). The offline copy holds only NetForge's own files, never anything typed, opened or generated. A new version is offered with a Reload button and never replaces a running page on its own.
 
 ## Development
 
-Requires Node.js 24 and Google Chrome (the browser tests drive the installed Chrome).
+Requires Node.js 24 and Google Chrome (the browser tests drive the installed Chrome). The same tests run in Microsoft Edge (`npx playwright test --project=edge`) and in Playwright's Firefox and WebKit builds (`npm run test:engines`).
 
 ```sh
 npm install
@@ -64,7 +72,7 @@ npm run test:all             # all of the above
 node scripts/mutations.mjs   # mutation check of the unit suite
 ```
 
-Test expectations come from sources independent of the code under test: Python's `ipaddress` and `zoneinfo` modules (`scripts/oracles/` regenerates `tests/fixtures/`, including brute-force references for VLSM, IPv6 prefix allocation and plan validation), the JavaScript engine's own `JSON.parse` and `JSON.stringify`, `Date.prototype.toISOString`, and values worked out from the relevant RFCs, registries and time zone rules. Scheduling is checked against Python's `croniter` (only where it follows Vixie cron), brute-force cron and Quartz references written from their documentation, `systemd-analyze calendar` from systemd 257, and Windows PowerShell's own parser and in-memory ScheduledTasks trigger objects (nothing is registered). The utilities are checked against published vectors (RFC 1321, RFC 4231, RFC 4648, RFC 7515, RFC 9562), Python's `hashlib`, `hmac`, `base64`, `urllib`, `uuid`, PyYAML and expat, tokens signed by the OpenSSL command line, and the JavaScript engine's own `String.prototype.replace`; the browser tests verify signatures made by Node's OpenSSL in Chrome's Web Crypto. Number conversion is checked against Python's integers and fractions, and permission changes against GNU coreutils `chmod` run on Linux. Generated PowerShell is read back by Windows PowerShell's own parser (nothing is run), generated HCL by an independent HCL parser, and the Cisco and Junos snippets by a line grammar written from the vendors' documented syntax. `terraform validate` has not been run against the AWS output, and no snippet has been tested on a device.
+Test expectations come from sources independent of the code under test: Python's `ipaddress` and `zoneinfo` modules (`scripts/oracles/` regenerates `tests/fixtures/`, including brute-force references for VLSM, IPv6 prefix allocation and plan validation), the JavaScript engine's own `JSON.parse` and `JSON.stringify`, `Date.prototype.toISOString`, and values worked out from the relevant RFCs, registries and time zone rules. Scheduling is checked against Python's `croniter` (only where it follows Vixie cron), brute-force cron and Quartz references written from their documentation, `systemd-analyze calendar` from systemd 257, and Windows PowerShell's own parser and in-memory ScheduledTasks trigger objects (nothing is registered). The utilities are checked against published vectors (RFC 1321, RFC 4231, RFC 4648, RFC 7515, RFC 9562), Python's `hashlib`, `hmac`, `base64`, `urllib`, `uuid`, PyYAML and expat, tokens signed by the OpenSSL command line, and the JavaScript engine's own `String.prototype.replace`; the browser tests verify signatures made by Node's OpenSSL in Chrome's Web Crypto. Number conversion is checked against Python's integers and fractions, and permission changes against GNU coreutils `chmod` run on Linux. Generated PowerShell is read back by Windows PowerShell's own parser (nothing is run), and every DHCP parameter is checked against Microsoft's published cmdlet reference; the commands have not been run against a DHCP server. The Terraform output is checked with the Terraform CLI (1.17.2) and the hashicorp/aws provider (6.73.0): `terraform validate` accepts every generated configuration, `terraform plan` shows the planned VPC, subnets, tags and references equal to the plan, and the values in the generated `.tfvars` files are read back by Terraform unchanged. Nothing is applied, so rules that only AWS enforces are not checked. The Cisco and Junos snippets are checked by a line grammar written from the vendors' documented syntax and against the vendors' command references; they have not been loaded on a device.
 
 The classification data is generated from the IANA files in `data/iana/` by `node scripts/registry/build-registry.mjs`; the unit tests fail if the generated module and the files disagree.
 

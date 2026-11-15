@@ -267,9 +267,9 @@
   "mutations": [
    [
     "export-ps: stop-parsing token written as a plain quoted argument",
-    "src/core/infra/powershell.ts",
-    "return text === STOP_PARSING ? `(${q.value})` : q.value;",
-    "return q.value;"
+    "src/core/schedule/commands.ts",
+    "if (value === PS_STOP_PARSING) return ok(\"('--%')\");",
+    "if (value === 'never') return ok(\"('--%')\");"
    ],
    [
     "export-ps: C1 control characters written",

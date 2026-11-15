@@ -1,0 +1,336 @@
+{
+ "note": "Made by scripts/oracles/terraform_validate.mjs. terraform validate, plan and show -json ran for every case; terraform apply never ran. AWS cases planned with placeholder credentials and contacted nothing.",
+ "terraform": "1.17.2",
+ "provider": {
+  "source": "registry.terraform.io/hashicorp/aws",
+  "version": "6.73.0",
+  "constraint": "~> 6.0"
+ },
+ "applied": false,
+ "missingZoneKey": {
+  "planFailed": true,
+  "summary": "Invalid index"
+ },
+ "cases": [
+  {
+   "id": "aws-example-ipv4",
+   "kind": "aws",
+   "hash": "0dcbe1ae3ea1e6b09ab0490ebdfc3d91c3047ac310f8aefb1b042def28ba2cb7",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "aws-example-byoip-ipv6",
+   "kind": "aws",
+   "hash": "7eac339dad20c6c12fcea0e178ef6659c0c3b485d9cd5920679b5ae342f41e9a",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "aws-example-branch-ipv6-no-tags",
+   "kind": "aws",
+   "hash": "c50d1026e24c39b3b6ab2de35f8d2ecc2df4f974cca7e8ecf255a388d04db637",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "aws-example-guest-vrf-24",
+   "kind": "aws",
+   "hash": "09225198500ab7c6440be016b18f9ebe3c610bcd5d62d4cd82325bfb5501a595",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "aws-example-branch-guest-no-tags",
+   "kind": "aws",
+   "hash": "2f4fb301a62117a67dae7e1d981f26fcae63a83aa506d472380a80815f71b5d1",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "aws-200-subnets",
+   "kind": "aws",
+   "hash": "e4bd1fa34241ed0b868e6dc2c7345bd6738c0a7dc358c1ab947f35391eaa55bf",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "aws-smallest",
+   "kind": "aws",
+   "hash": "07f00f5774ca9111add3c6710eee26f30b0d5fab27afb9bbe4aea57068166ff7",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "aws-hostile-0",
+   "kind": "aws",
+   "hash": "ba15f227f386eb09f7a274346afc47134630d76fb85e46cd6c796c2a7a1cef38",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "aws-hostile-1",
+   "kind": "aws",
+   "hash": "f232f647f0b6d77729b05849817933e7aee8974534452ed3fffb0c01da0f0407",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "aws-hostile-2",
+   "kind": "aws",
+   "hash": "79f64e7a6d54dfe76bfd7a37d22102f53fdd0f23f1464696b8cf3613b4eae2dd",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "aws-hostile-3",
+   "kind": "aws",
+   "hash": "97995974a0c39062d3b07b7ae532d22cd0e71bc46ef27aacc629544a880a8f59",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "aws-hostile-4",
+   "kind": "aws",
+   "hash": "6e6b1c063b5eef028887c1a367d49905d7472cd0c7a6fc423b86bc8897b9588d",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "aws-hostile-5",
+   "kind": "aws",
+   "hash": "edb1036ef91e05dd84541b8b096f4fb8071a71ef10d108390388e93e9902b9b9",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "aws-hostile-6",
+   "kind": "aws",
+   "hash": "0a1f464276ceaf973073078ecf2f699eaca5931736167d6d573fa584dc729a40",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "aws-hostile-7",
+   "kind": "aws",
+   "hash": "a900cd74c2a479088e1323be9cf880aa4fc9189609136992212893ffb5e9239b",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "aws-hostile-8",
+   "kind": "aws",
+   "hash": "b66bf409740dd8efef3bf683b3368c8e94fe3605e691a429c9d8f66b1d84416b",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "aws-hostile-9",
+   "kind": "aws",
+   "hash": "997da4598a0cb2b52f5b9c0b3f01d23cd6beec55d556f2acbece3d14d561d95b",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "variables-example-hcl",
+   "kind": "variables",
+   "hash": "d60aedbad74bf6bb72ddde4a4999b3a2261b3bb5ba11dd820c1d043836a00569",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "variables-example-json",
+   "kind": "variables",
+   "hash": "f60207092fe03cb2479c6cbf576e411375160a93193875a2f3d8a88c4486366c",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": true
+  },
+  {
+   "id": "variables-hostile-0-hcl",
+   "kind": "variables",
+   "hash": "af55c79e2486c61f638716c8ac5aadb36796ac771a5080cc3f67f4ffd1a69926",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "variables-hostile-0-json",
+   "kind": "variables",
+   "hash": "99c85c0cc3240b42e6f7304227f3921e84825f4f49cfaf788f79e3e9c7700a9b",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": true
+  },
+  {
+   "id": "variables-hostile-1-hcl",
+   "kind": "variables",
+   "hash": "cb2f698a98261a5ffc47cf884be5bec610148ce2ad3704b14fde3a1babe2a0aa",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "variables-hostile-1-json",
+   "kind": "variables",
+   "hash": "c5b93dfc1e01b8f60feed1a87f4d5d7f9f2f8a05a37bfa381a73435d3e0f4287",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": true
+  },
+  {
+   "id": "variables-hostile-2-hcl",
+   "kind": "variables",
+   "hash": "f24e433252d0c4c143e51894b9b70b7fa6483d38037beaa354b6a42854cf5fe7",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "variables-hostile-2-json",
+   "kind": "variables",
+   "hash": "47e57b03c1b0b54d7325f8e0ccd2e64d1929f0a006784a9cafa778137b503a8a",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": true
+  },
+  {
+   "id": "variables-hostile-3-hcl",
+   "kind": "variables",
+   "hash": "2ae3aa3171ffa55e8eda3b9050d6af1df878495cb2452e58792a7c0037605f21",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "variables-hostile-3-json",
+   "kind": "variables",
+   "hash": "3a65ba8a13824781c02cbed01c60d39201fc53602b2231b37d7af4662f4cf003",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": true
+  },
+  {
+   "id": "variables-hostile-4-hcl",
+   "kind": "variables",
+   "hash": "1ffd0ff9c1064093311b8d538bd8e4a1f13eeedaebba58715c73212d2f927fe1",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "variables-hostile-4-json",
+   "kind": "variables",
+   "hash": "76301e0647939f44cb666259fa90c6cb128903d3a5712f38a905d00b06341fd0",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": true
+  },
+  {
+   "id": "variables-hostile-5-hcl",
+   "kind": "variables",
+   "hash": "7be1c4510ef38811d32e774bedc592c13f64d4866059d98b373de09229a43143",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": false
+  },
+  {
+   "id": "variables-hostile-5-json",
+   "kind": "variables",
+   "hash": "694c49506f592848d1256d19df41a7b73e5040e67d61680b2c03677142236878",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": true
+  },
+  {
+   "id": "strings-hcl",
+   "kind": "variables",
+   "hash": "0516787d30dc4872ba34ccac952e4c63a674de8e4d0e2929b73e0c3af7b4b1cf",
+   "validate": true,
+   "plan": true,
+   "matches": true,
+   "problems": [],
+   "canonicalFormat": true
+  }
+ ]
+}

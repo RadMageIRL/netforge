@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { examplePlan } from '../../src/core/plan/example';
 import { planToJson } from '../../src/core/plan/file';
-import { openTool, recordRequests, resultValue } from './helpers';
+import { APP_FILE, openTool, recordRequests, resultValue } from './helpers';
 
 const SENTINELS = { subnet: '10.77.66.55/27', json: '{"secretToken":"nf-sentinel-7c1e"}', time: '1234567890' };
 
@@ -32,7 +32,7 @@ test('using every tool sends nothing anywhere: only the app files are requested'
   for (const r of log.all) {
     const url = new URL(r.url);
     expect(url.origin).toBe(origin);
-    expect(url.pathname).toMatch(/^\/(index\.html|theme-boot\.js|favicon\.svg|assets\/[A-Za-z0-9_-]+\.(js|css))?$/);
+    expect(url.pathname).toMatch(APP_FILE);
     expect(url.search).toBe('');
     for (const s of Object.values(SENTINELS)) expect(decodeURIComponent(r.url)).not.toContain(s);
   }
@@ -62,7 +62,7 @@ test('the Phase 1 network tools send nothing and store nothing', async ({ page, 
   expect(log.blockedExternal).toEqual([]);
   expect(log.all.filter(r => r.method !== 'GET')).toEqual([]);
   for (const r of log.all) {
-    expect(new URL(r.url).pathname).toMatch(/^\/(index\.html|theme-boot\.js|favicon\.svg|assets\/[A-Za-z0-9_-]+\.(js|css))?$/);
+    expect(new URL(r.url).pathname).toMatch(APP_FILE);
     expect(decodeURIComponent(r.url)).not.toContain('10.66.55');
     expect(decodeURIComponent(r.url)).not.toContain('SecretLab');
   }
@@ -95,7 +95,7 @@ test('the VLAN planner sends nothing, stores nothing and does not restore a plan
   expect(log.blockedExternal).toEqual([]);
   expect(log.all.filter(r => r.method !== 'GET')).toEqual([]);
   for (const r of log.all) {
-    expect(new URL(r.url).pathname).toMatch(/^\/(index\.html|theme-boot\.js|favicon\.svg|assets\/[A-Za-z0-9_-]+\.(js|css))?$/);
+    expect(new URL(r.url).pathname).toMatch(APP_FILE);
     for (const s of secrets) expect(decodeURIComponent(r.url)).not.toContain(s);
   }
   const state = await page.evaluate(async () => ({
@@ -199,7 +199,7 @@ test('the ScheduleForge tools send nothing, store nothing and restore nothing af
   expect(log.blockedExternal).toEqual([]);
   expect(log.all.filter(r => r.method !== 'GET')).toEqual([]);
   for (const r of log.all) {
-    expect(new URL(r.url).pathname).toMatch(/^\/(index\.html|theme-boot\.js|favicon\.svg|assets\/[A-Za-z0-9_-]+\.(js|css))?$/);
+    expect(new URL(r.url).pathname).toMatch(APP_FILE);
     for (const s of secrets) expect(decodeURIComponent(r.url)).not.toContain(s);
   }
   const state = await page.evaluate(async () => ({
@@ -282,7 +282,7 @@ test('the Phase 4 utilities send nothing, store nothing and restore nothing afte
     const url = new URL(r.url);
     expect(url.origin).toBe(origin);
     // App files only, workers included; no query string could carry data.
-    expect(url.pathname).toMatch(/^\/(index\.html|theme-boot\.js|favicon\.svg|assets\/[A-Za-z0-9_.-]+\.(js|css))?$/);
+    expect(url.pathname).toMatch(APP_FILE);
     expect(url.search).toBe('');
     for (const s of [...secrets, uuid, token.split('.')[1]]) expect(decodeURIComponent(r.url)).not.toContain(s);
   }
@@ -307,7 +307,7 @@ test('the Phase 4 utilities send nothing, store nothing and restore nothing afte
   }
 });
 
-test('a worker can only be started from the app\'s own files, and cannot connect out', async ({ page, context, baseURL }) => {
+test('a worker can only be started from the app\'s own files', async ({ page, context, baseURL }) => {
   const log = await recordRequests(context, new URL(baseURL!).origin);
   await page.goto('./#/regex-tester');
   const outcome = await page.evaluate(async () => {
@@ -378,7 +378,7 @@ test('the Phase 5 exports and utilities send nothing, store nothing and restore 
   for (const r of log.all) {
     const url = new URL(r.url);
     expect(url.origin).toBe(origin);
-    expect(url.pathname).toMatch(/^\/(index\.html|theme-boot\.js|favicon\.svg|assets\/[A-Za-z0-9_.-]+\.(js|css))?$/);
+    expect(url.pathname).toMatch(APP_FILE);
     expect(url.search).toBe('');
     for (const s of secrets) expect(decodeURIComponent(r.url)).not.toContain(s);
   }
@@ -406,4 +406,41 @@ test('the Phase 5 exports and utilities send nothing, store nothing and restore 
   for (const field of ['#ps-computer', '#ps-domain', '#ps-reservations', '#ps-task-name']) await expect(page.locator(field)).toHaveValue('');
   await page.goto('./#/number-bases');
   await expect(page.locator('#num-input')).toHaveValue('');
+});
+
+test('workers have no network interfaces: every worker removes them before running anything', async ({ page, context, baseURL }) => {
+  const log = await recordRequests(context, new URL(baseURL!).origin);
+  const probe = () => {
+    const results: Record<string, string> = {};
+    const scope = self as unknown as Record<string, (...args: unknown[]) => unknown>;
+    for (const name of ['fetch', 'XMLHttpRequest', 'WebSocket', 'EventSource', 'importScripts', 'Worker']) {
+      try {
+        // Called as a function and as a constructor: both must refuse.
+        try { scope[name]!('./index.html'); results[name] = 'called'; } catch (e) { results[name] = (e as Error).message; }
+        if (results[name] === 'called') continue;
+        try { new (scope[name] as unknown as new (u: string) => unknown)('./index.html'); results[name] = 'constructed'; } catch (e) { results[name] = (e as Error).message; }
+      } catch (e) { results[name] = `unexpected: ${(e as Error).message}`; }
+    }
+    return results;
+  };
+  const refused = 'NetForge workers have no network access.';
+  const expected = { fetch: refused, XMLHttpRequest: refused, WebSocket: refused, EventSource: refused, importScripts: refused, Worker: refused };
+
+  await page.goto('./#/hash-hmac');
+  await page.fill('#hash-text', 'abc');
+  await expect(page.locator('#hash-list')).toBeVisible();
+  await page.goto('./#/regex-tester');
+  await page.getByRole('button', { name: 'Example' }).click();
+  await expect(page.locator('#regex-matches')).toBeVisible();
+  await page.goto('./#/yaml-xml-tools');
+  await page.fill('#data-input', 'a: 1\n');
+  await expect(page.locator('#data-output')).toHaveValue('a: 1\n');
+  const workers = page.workers();
+  expect(workers.length).toBeGreaterThanOrEqual(1);
+  for (const worker of workers) expect([worker.url().replace(/^.*\/assets\//, '').replace(/-[A-Za-z0-9_-]{8}\.js$/, ''), await worker.evaluate(probe)]).toEqual([expect.stringMatching(/^(hash|regex|data)\.worker$/), expected]);
+  // The tools still work afterward, and nothing was requested beyond the app's own files.
+  await page.fill('#data-input', 'b: 2\n');
+  await expect(page.locator('#data-output')).toHaveValue('b: 2\n');
+  expect(log.blockedExternal).toEqual([]);
+  for (const r of log.all) expect(new URL(r.url).pathname).toMatch(APP_FILE);
 });

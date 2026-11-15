@@ -44,6 +44,16 @@ const CASES: Case[] = [
   fromBuilder('weekend', { frequency: 'days', weekdays: [6, 0], time: '23:45' }),
   fromBuilder('quotes', {}, { name: `Bob's ${Q(0x2018)}nightly${Q(0x2019)} job`, program: 'C:\\Program Files\\Backup Tool\\run.exe', arguments: "--label 'x' $env:TEMP `n %PATH% & | < > \"q\"" }),
   fromBuilder('more-quotes', { frequency: 'weekly', weekday: '5' }, { name: `a${Q(0x201a)}b${Q(0x201b)}c''d`, program: 'C:\\Tools\\x.exe', arguments: '' }),
+  // The stop-parsing token and its neighbors: none may end a command or start another one.
+  fromBuilder('stop-parsing-arguments', {}, { name: 'Report', program: 'C:\\Tools\\x.exe', arguments: '--%' }),
+  fromBuilder('stop-parsing-program', {}, { name: 'Report', program: '--%', arguments: 'x | Stop-Computer -Force #' }),
+  fromBuilder('stop-parsing-name', {}, { name: '--%', program: 'cmd.exe', arguments: '& calc.exe' }),
+  fromBuilder('stop-parsing-everywhere', { frequency: 'weekly', weekday: '2' }, { name: '--%', program: '--%', arguments: '--%' }),
+  fromBuilder('stop-parsing-inside', {}, { name: 'a --% b', program: '--% | calc', arguments: 'x --%' }),
+  fromBuilder('stop-parsing-lookalikes', {}, { name: '--', program: '-%', arguments: ' --%' }),
+  fromBuilder('parameter-lookalikes', {}, { name: '-TaskName', program: '-Execute', arguments: '-Argument x -User SYSTEM -RunLevel Highest' }),
+  fromBuilder('expressions', {}, { name: '$(Stop-Computer)', program: '@args', arguments: '; Remove-Item C:\\ -Recurse # $env:USERNAME `whoami` {calc} (calc) @(1)' }),
+  fromBuilder('redirections', {}, { name: 'a b', program: '1>&2', arguments: '2>$null | Out-File x.txt && calc || calc' }),
   { id: 'once-indefinite', trigger: { kind: 'once', start: { year: 2026, month: 11, day: 14, hour: 8, minute: 30, second: 0 }, repetition: { intervalMinutes: 120, durationMinutes: null } }, details: EMPTY_DETAILS },
   { id: 'once-for-a-day', trigger: { kind: 'once', start: { year: 2026, month: 11, day: 14, hour: 0, minute: 0, second: 0 }, repetition: { intervalMinutes: 30, durationMinutes: 1440 } }, details: EMPTY_DETAILS },
   { id: 'every-3-days', trigger: { kind: 'daily', start: { year: 2026, month: 12, day: 31, hour: 23, minute: 59, second: 0 }, daysInterval: 3, repetition: null }, details: EMPTY_DETAILS },
@@ -55,6 +65,10 @@ interface Observed {
   id: string;
   text: string;
   parseErrors: string[];
+  commands: string[];
+  pipelines: number;
+  actionElements: number;
+  registerElements: number;
   strings: { TaskName: string | null; Execute: string | null; Argument: string | null };
   trigger: { CimClassName: string; StartBoundary: string; DaysInterval: number | null; WeeksInterval: number | null; DaysOfWeek: number | null; Interval: string | null; Duration: string | null; StopAtDurationEnd: boolean | null };
 }
@@ -89,6 +103,20 @@ describe('PowerShell output checked by Windows PowerShell', () => {
       expect([c.id, o.strings.TaskName]).toEqual([c.id, c.details.name === '' ? '<TASK NAME>' : c.details.name]);
       expect([c.id, o.strings.Execute]).toEqual([c.id, c.details.program === '' ? '<PROGRAM>' : c.details.program]);
       expect([c.id, o.strings.Argument]).toEqual([c.id, c.details.arguments === '' ? null : c.details.arguments]);
+    }
+  });
+
+  it('contains exactly the expected commands and arguments, whatever was typed', () => {
+    const allowed = new Set(['New-ScheduledTaskTrigger', 'New-TimeSpan', 'New-ScheduledTaskAction', 'Register-ScheduledTask']);
+    for (const c of CASES) {
+      const o = byId.get(c.id)!;
+      expect([c.id, o.commands.filter(n => !allowed.has(n))]).toEqual([c.id, []]);
+      expect([c.id, o.commands.filter(n => n === 'New-ScheduledTaskAction').length, o.commands.filter(n => n === 'Register-ScheduledTask').length]).toEqual([c.id, 1, 1]);
+      expect([c.id, o.pipelines]).toEqual([c.id, 0]);
+      // The command name plus -Execute and its value, plus -Argument and its value when there are arguments.
+      expect([c.id, o.actionElements]).toEqual([c.id, c.details.arguments === '' ? 3 : 5]);
+      // The command name plus -TaskName, -Trigger and -Action with a value each.
+      expect([c.id, o.registerElements]).toEqual([c.id, 7]);
     }
   });
 

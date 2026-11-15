@@ -291,8 +291,8 @@
    [
     "export-ios: pool without its VRF",
     "src/core/infra/ios.ts",
-    "if (where.kind === 'named') { dhcpLines.push(` vrf ${where.name}`); wroteVrf = true; }",
-    "if (false) { dhcpLines.push(` vrf ${where.name}`); wroteVrf = true; }"
+    "if (where.kind === 'named') { dhcpLines.push(` vrf ${where.name}`); wroteVrf = true; vrfPool = true; }",
+    "if (false) { dhcpLines.push(` vrf ${where.name}`); wroteVrf = true; vrfPool = true; }"
    ],
    [
     "export-ios: pool written without knowing its VRF",
@@ -429,8 +429,8 @@
    [
     "export-junos: instance names allow dots",
     "src/core/infra/junos.ts",
-    "export const JUNOS_INSTANCE_NAME = /^[A-Za-z0-9_-]+$/;",
-    "export const JUNOS_INSTANCE_NAME = /^[A-Za-z0-9_.-]+$/;"
+    "[A-Za-z0-9][A-Za-z0-9_-]*$/i;",
+    "[A-Za-z0-9][A-Za-z0-9_.-]*$/i;"
    ],
    [
     "export-junos: VLAN names may start with a digit",

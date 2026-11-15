@@ -26,6 +26,13 @@ function Get-ParameterString($ast, [string]$command, [string]$parameter) {
     $e = $elements[$i]
     if ($e -is [System.Management.Automation.Language.CommandParameterAst] -and $e.ParameterName -eq $parameter) {
       $value = $elements[$i + 1]
+      # ('text') is an expression holding one constant string: read the string inside it.
+      if ($value -is [System.Management.Automation.Language.ParenExpressionAst]) {
+        $inner = @($value.FindAll({ param($n) $n -is [System.Management.Automation.Language.StringConstantExpressionAst] }, $true))
+        $all = @($value.FindAll({ param($n) $n -is [System.Management.Automation.Language.ExpressionAst] -and $n -ne $value }, $true))
+        if ($inner.Count -eq 1 -and $all.Count -eq 1 -and $inner[0].StringConstantType -eq 'SingleQuoted') { return $inner[0].Value }
+        return "NOT A CONSTANT: $($value.Extent.Text)"
+      }
       if ($value -is [System.Management.Automation.Language.StringConstantExpressionAst]) { return $value.Value }
       return "NOT A CONSTANT: $($value.GetType().Name)"
     }
@@ -61,6 +68,10 @@ foreach ($case in $casesDoc.cases) {
     id = $case.id
     text = $case.text
     parseErrors = $parseErrors
+    commands = @($ast.FindAll({ param($n) $n -is [System.Management.Automation.Language.CommandAst] }, $true) | ForEach-Object { $_.GetCommandName() })
+    pipelines = @($ast.FindAll({ param($n) $n -is [System.Management.Automation.Language.PipelineAst] -and $n.PipelineElements.Count -gt 1 }, $true)).Count
+    actionElements = @(($ast.FindAll({ param($n) $n -is [System.Management.Automation.Language.CommandAst] -and $n.GetCommandName() -eq 'New-ScheduledTaskAction' }, $true) | Select-Object -First 1).CommandElements).Count
+    registerElements = @(($ast.FindAll({ param($n) $n -is [System.Management.Automation.Language.CommandAst] -and $n.GetCommandName() -eq 'Register-ScheduledTask' }, $true) | Select-Object -First 1).CommandElements).Count
     strings = [ordered]@{
       TaskName = (Get-ParameterString $ast 'Register-ScheduledTask' 'TaskName')
       Execute = (Get-ParameterString $ast 'New-ScheduledTaskAction' 'Execute')

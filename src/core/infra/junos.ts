@@ -35,7 +35,8 @@ export interface JunosOptions {
 /** Names start with a letter and use letters, digits, hyphens and underscores. */
 export const JUNOS_NAME = /^[A-Za-z][A-Za-z0-9_-]*$/;
 export const JUNOS_VLAN_NAME_MAX = 64;
-export const JUNOS_INSTANCE_NAME = /^[A-Za-z0-9_-]+$/;
+/** Starts with a letter or digit; "default" and "master" are the names Junos gives its own instances. */
+export const JUNOS_INSTANCE_NAME = /^(?!(?:default|master)$)[A-Za-z0-9][A-Za-z0-9_-]*$/i;
 export const JUNOS_INSTANCE_NAME_MAX = 64;
 const JUNOS_DESCRIPTION_FORBIDDEN = /["\\?]/;
 /** Names Junos already uses or reserves. */

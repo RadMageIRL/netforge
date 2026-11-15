@@ -6,6 +6,18 @@ All notable changes to NetForge are recorded here. Versions follow [Semantic Ver
 
 ### 0.1.0-dev
 
+Release preparation:
+
+- Fixed: in the Schedule Builder's PowerShell output, a task name, program or argument that was exactly `--%` was written as a quoted argument, which PowerShell still reads as its stop-parsing token; the rest of the line was then taken verbatim. That value is now written as `('--%')`.
+- Fixed: a schtasks program path with spaces that ended in a backslash could close the `/TR` quoting early; it is now refused with the reason.
+- Fixed: a plan file could use `__proto__` as an id, and that item was then missing from the JSON and Terraform variable exports without a note; such a file is now refused.
+- Download names: direction overrides and other invisible characters are replaced, and Windows device names are recognized whatever follows the first dot.
+- Workers remove their own network interfaces on start, and the service worker adds the Content-Security-Policy to the worker scripts it serves, because a policy in the page does not reach workers.
+- Installable web app: a manifest, icons and a theme color. The offline copy holds only the app's own files.
+- The app checks for a new version whenever the page becomes visible again, as well as hourly.
+- Cisco IOS export: manual steps for VLAN names longer than 20 characters under VTP versions 1 and 2, and for checking DHCP exclusions in a VRF. Junos export: `default` and `master` are refused as routing-instance names.
+- Verified with the Terraform CLI and the AWS provider, Microsoft's DhcpServer cmdlet reference, the Cisco and Juniper command references, and in Chrome, Edge, Firefox and WebKit. Keyboard-only use and layouts at 200% and 400% zoom are tested on every page.
+
 Infrastructure exports:
 
 - A shared export model: every target returns files to review plus an account of each item as exact, approximate or unsupported, with assumptions, manual steps and what it never covers. Plans with validation errors are not exported, and nothing is run.

@@ -10,7 +10,7 @@ export const VERSION_LABEL = `v${__APP_VERSION__}`;
 
 const PRIVACY_POINTS = [
   'Every tool runs in your browser. Addresses, subnet plans, JSON, timestamps and anything else you enter are processed on this device and never sent to a server.',
-  'A Content-Security-Policy blocks the page from opening network connections (fetch, XHR, WebSocket or beacons) and from loading anything from another site.',
+  'A Content-Security-Policy blocks the page from opening network connections (fetch, XHR, WebSocket or beacons) and from loading anything from another site. The background workers that hash files, run regular expressions and read YAML and XML remove their own network interfaces before they do anything.',
   'No analytics, no tracking, no cookies and no third-party scripts, fonts or other resources. Everything NetForge needs ships with it.',
   'Tool input stays in memory and is gone when you close or reload the page. Only the display preferences listed below are saved on this device.',
 ];

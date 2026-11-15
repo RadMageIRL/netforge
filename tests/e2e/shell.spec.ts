@@ -128,7 +128,9 @@ test.describe('keyboard', () => {
     await expect(page.locator('#tool-search')).toBeFocused();
   });
 
-  test('the skip link is the first stop and moves focus to the page heading', async ({ page }) => {
+  test('the skip link is the first stop and moves focus to the page heading', async ({ page, browserName }) => {
+    // Safari does not move to links with Tab unless a system setting is changed (Option+Tab does).
+    test.skip(browserName === 'webkit', 'WebKit skips links on Tab by default');
     await openTool(page, 'subnet-calculator', 'Subnet Calculator');
     await page.locator('body').focus();
     await page.keyboard.press('Tab');

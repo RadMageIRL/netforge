@@ -7,7 +7,10 @@
  * Quoting:
  * - PowerShell: single-quoted strings, where only quote characters are special. PowerShell treats
  *   U+2018, U+2019, U+201A and U+201B as single quotes too, so every one of them is doubled.
- *   Control characters and line breaks are refused.
+ *   Control characters and line breaks are refused. One value needs more than quotes: an argument
+ *   that is exactly --% is PowerShell's stop-parsing token even when it is quoted, and everything
+ *   after it on the line would be read verbatim (a pipe would start a second command). That value
+ *   is written as the expression ('--%'), which PowerShell reads as an ordinary string.
  * - schtasks.exe for Command Prompt: values in double quotes. cmd.exe still expands % and ! inside
  *   quotes, and a quote inside a value would end the quoting for cmd and for the program's argument
  *   parser, so values containing " % ! ^ & | < > or control characters are refused instead of
@@ -42,9 +45,16 @@ export interface GeneratedText {
 const CONTROL = /[\u0000-\u001f\u007f\u0085\u2028\u2029]/;
 const PS_QUOTE_CHARS = /['\u2018\u2019\u201a\u201b]/g;
 
-/** A PowerShell single-quoted string literal. Refuses control characters and line breaks. */
+/** PowerShell's stop-parsing token. As a bare or quoted command argument it ends normal parsing of the line. */
+export const PS_STOP_PARSING = '--%';
+
+/**
+ * A PowerShell string for use as a command argument: a single-quoted literal, or for the
+ * stop-parsing token a parenthesized one. Refuses control characters and line breaks.
+ */
 export function psQuote(value: string): Result<string, 'control'> {
   if (CONTROL.test(value)) return fail('control', 'Control characters and line breaks are not allowed.');
+  if (value === PS_STOP_PARSING) return ok("('--%')");
   return ok(`'${value.replace(PS_QUOTE_CHARS, ch => ch + ch)}'`);
 }
 
@@ -218,6 +228,9 @@ export function schtasksCommand(t: WindowsTrigger, details: TaskDetails, dateFor
     const raw = details.arguments === '' ? details.program : `${details.program} ${details.arguments}`;
     const check = cmdQuote(raw);
     if (!check.ok) reasons.push(`Command: ${check.error.message} A placeholder is used instead.`);
+    // Inside /TR the path is wrapped in escaped quotes. A final backslash would join the one that
+    // escapes the closing quote, end the argument early and turn what follows into schtasks options.
+    else if (details.program.includes(' ') && details.program.endsWith('\\')) reasons.push('Command: a program path that has spaces and ends in a backslash would escape its closing quote. Remove the final backslash. A placeholder is used instead.');
     else if (full.length > SCHTASKS_TR_LIMIT) reasons.push(`Command: schtasks allows at most ${SCHTASKS_TR_LIMIT} characters in /TR. A placeholder is used instead.`);
     else trText = `"${full}"`;
   }

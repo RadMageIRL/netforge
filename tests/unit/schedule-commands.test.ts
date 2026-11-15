@@ -6,7 +6,7 @@
  * arguments"), which schtasks.exe uses for its argument vector.
  */
 import { describe, expect, it } from 'vitest';
-import { checkTaskName, checkUnitName, cmdQuote, EMPTY_DETAILS, powershellCommands, psQuote, schtasksCommand, SCHTASKS_TR_LIMIT, timerUnit } from '../../src/core/schedule/commands';
+import { checkTaskName, checkUnitName, cmdQuote, EMPTY_DETAILS, powershellCommands, PS_STOP_PARSING, psQuote, schtasksCommand, SCHTASKS_TR_LIMIT, timerUnit } from '../../src/core/schedule/commands';
 import type { LocalDateTime, WindowsTrigger } from '../../src/core/schedule/windows';
 
 const QUOTES = [0x27, 0x2018, 0x2019, 0x201a, 0x201b].map(c => String.fromCharCode(c));
@@ -88,6 +88,39 @@ describe('PowerShell quoting', () => {
 
   it('refuses line breaks and control characters', () => {
     for (const code of [0x0a, 0x0d, 0x00, 0x1b, 0x85, 0x2028]) expect(psQuote(`a${String.fromCharCode(code)}b`).ok).toBe(false);
+  });
+
+  it('never writes the stop-parsing token as a plain quoted argument', () => {
+    // '--%' as an argument stops PowerShell from parsing the rest of the line, quoted or not.
+    expect(psQuote('--%')).toEqual({ ok: true, value: "('--%')" });
+    expect(PS_STOP_PARSING).toBe('--%');
+    // Only the exact token is special: anything longer or shorter is an ordinary literal.
+    for (const s of ['--% ', ' --%', '--%x', 'x--%', '--', '-%', '--%%', '---%', "'--%'", '--% | calc']) {
+      const r = psQuote(s);
+      expect([s, r.ok && r.value]).toEqual([s, `'${s.replace(/'/g, "''")}'`]);
+    }
+  });
+
+  it('keeps the stop-parsing token out of generated task commands in every position', () => {
+    for (const details of [
+      { name: '--%', program: 'x.exe', arguments: '' },
+      { name: 'Task', program: '--%', arguments: 'x | Stop-Computer #' },
+      { name: 'Task', program: 'x.exe', arguments: '--%' },
+      { name: '--%', program: '--%', arguments: '--%' },
+    ]) {
+      const g = powershellCommands(daily, details);
+      expect(g.supported).toBe(true);
+      // No argument of any command is the bare or quoted token.
+      expect(g.text).not.toMatch(/ '--%'( |$)/m);
+      expect(g.text).not.toMatch(/ --%( |$)/m);
+      const action = g.text.split('\n').find(l => l.startsWith('$action = '))!;
+      const register = g.text.split('\n').find(l => l.startsWith('Register-ScheduledTask '))!;
+      if (details.program === '--%') expect(action).toContain("-Execute ('--%')");
+      if (details.arguments === '--%') expect(action).toContain("-Argument ('--%')");
+      if (details.name === '--%') expect(register).toBe("Register-ScheduledTask -TaskName ('--%') -Trigger $trigger -Action $action");
+      // Every other line is a comment, blank, or one of the two trigger assignments.
+      for (const line of g.text.split('\n')) expect(line).toMatch(/^(#.*|\$trigger(\.[A-Za-z.]+)? = .*|\$action = New-ScheduledTaskAction .*|Register-ScheduledTask .*|)$/);
+    }
   });
 });
 

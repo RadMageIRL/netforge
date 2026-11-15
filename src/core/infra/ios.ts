@@ -38,6 +38,8 @@ export interface IosOptions {
 /** One-word names: a conservative subset of what IOS accepts. */
 export const IOS_NAME = /^[A-Za-z0-9_.-]+$/;
 export const IOS_VLAN_NAME_MAX = 32;
+/** The VLAN name length the IOS-XE 17 Catalyst 9000 guides give for VTP versions 1 and 2. */
+export const IOS_VLAN_NAME_VTP12 = 20;
 export const IOS_VRF_NAME_MAX = 32;
 const IOS_DESCRIPTION_FORBIDDEN = /\?/;
 
@@ -92,6 +94,8 @@ export function iosConfig(plan: Plan, options: IosOptions): ExportOutput {
   const sviLines: string[] = [];
   const dhcpLines: string[] = [];
   let extended = false;
+  let longName = false;
+  let vrfPool = false;
   let wroteIpv6 = false;
   let wroteVrf = false;
 
@@ -123,6 +127,7 @@ export function iosConfig(plan: Plan, options: IosOptions): ExportOutput {
           else if ((tokenCount.get(t.value.toLowerCase()) ?? 0) > 1) item.unsupported('Name', `The name ${t.value} would be used by more than one VLAN in this export, and IOS VLAN names must be unique, so it is not written.`);
           else {
             vlanLines.push(` name ${t.value}`);
+            if (t.value.length > IOS_VLAN_NAME_VTP12) longName = true;
             item.wrote(`name ${t.value}`);
             if (t.kind === 'approximate') item.approximate('Name', `IOS VLAN names are one word: ${t.change}.`);
           }
@@ -176,7 +181,7 @@ export function iosConfig(plan: Plan, options: IosOptions): ExportOutput {
         const excluded = subtractRanges(usable, v.pools);
         for (const e of excluded) dhcpLines.push(`ip dhcp excluded-address${vrfSuffix(where)} ${ip4(e.first)}${e.first === e.last ? '' : ` ${ip4(e.last)}`}`);
         dhcpLines.push(`ip dhcp pool VLAN${n}`);
-        if (where.kind === 'named') { dhcpLines.push(` vrf ${where.name}`); wroteVrf = true; }
+        if (where.kind === 'named') { dhcpLines.push(` vrf ${where.name}`); wroteVrf = true; vrfPool = true; }
         dhcpLines.push(` network ${ip4(net.first)} ${mask4(v.net4.length)}`);
         if (v.gateway4 !== null) dhcpLines.push(` default-router ${ip4(v.gateway4)}`);
         else item.remark('The plan has no gateway for this VLAN, so the DHCP pool has no default-router line.');
@@ -212,6 +217,8 @@ export function iosConfig(plan: Plan, options: IosOptions): ExportOutput {
   if (wroteVrf) manualSteps.push('Each named VRF must already exist on the device (vrf definition with its address families). Applying "vrf forwarding" to an interface that already has addresses removes them: use it on new interfaces only.');
   if (wroteIpv6) manualSteps.push('IPv6 routing must be enabled on the device (ipv6 unicast-routing) for the IPv6 addresses to route.');
   if (sviLines.length > 0) manualSteps.push('A new VLAN interface comes up as soon as the VLAN is active on a port. Check that no other device already answers for these gateway addresses. Interface Vlan1 is shut down by default and stays so: nothing here enables it.');
+  if (longName) manualSteps.push(`At least one VLAN name is longer than ${IOS_VLAN_NAME_VTP12} characters. The IOS command references allow 32, but the IOS-XE 17 configuration guides for Catalyst 9000 switches state that VTP versions 1 and 2 support ${IOS_VLAN_NAME_VTP12} characters by default. Check the name the switch shows after pasting.`);
+  if (vrfPool) manualSteps.push('DHCP pools in a VRF: the "vrf" keyword of "ip dhcp excluded-address" depends on the software release. After pasting, check with "show ip dhcp pool" that the excluded addresses apply to the VRF pool before clients are connected.');
   if (dhcpLines.length > 0) manualSteps.push('Check that no DHCP pool named VLAN<id> exists already, and that the DHCP service is enabled. The device starts leasing as soon as a pool is complete.');
   return output({
     files: [{ name: 'netforge-ios.txt', kind: 'Cisco IOS / IOS-XE configuration', mime: 'text/plain', text: `${[...head, ...body].join('\n')}\n` }],

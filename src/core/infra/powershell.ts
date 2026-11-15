@@ -34,14 +34,6 @@ export interface DhcpOptions {
 
 export const DEFAULT_DHCP_OPTIONS: DhcpOptions = { scope: { siteId: '', vrfId: '', namespaceId: '' }, computerName: '', dnsServers: '', dnsDomain: '', activate: false, reservations: '' };
 
-/**
- * PowerShell's stop-parsing token. As a command argument it switches the rest of the line to
- * verbatim text up to the next pipe character, even when it is written in quotes: after
- * -Name '--%', a later value such as 'x | Stop-Computer' would run as a command. In parentheses
- * it is an ordinary string, so that is how this one value is written.
- */
-const STOP_PARSING = '--%';
-
 export const MAX_RESERVATIONS = 5000;
 export const MAX_RESERVATION_NAME = 255;
 
@@ -90,7 +82,8 @@ function literal(text: string): string | null {
   if (hasControl(text) || hasLoneSurrogate(text)) return null;
   const q = psQuote(text);
   if (!q.ok) return null;
-  return text === STOP_PARSING ? `(${q.value})` : q.value;
+  // psQuote writes the stop-parsing token --% as ('--%'), so no value here can end parsing of a line.
+  return q.value;
 }
 
 function rangeText(r: IpRange): string {

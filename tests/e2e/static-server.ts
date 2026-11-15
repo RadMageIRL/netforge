@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { extname, join, normalize } from 'node:path';
 
 const TYPES: Record<string, string> = {
-  '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml',
+  '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.webmanifest': 'application/manifest+json',
 };
 
 /**

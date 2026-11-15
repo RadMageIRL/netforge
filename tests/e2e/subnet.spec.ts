@@ -82,7 +82,9 @@ test.describe('copy and export', () => {
     ].join('\n'));
   });
 
-  test('falls back to the legacy copy command when the Clipboard API is unavailable', async ({ page }) => {
+  test('falls back to the legacy copy command when the Clipboard API is unavailable', async ({ page, browserName }) => {
+    // Needs to read the real clipboard, which Playwright's WebKit does not allow.
+    test.skip(browserName === 'webkit', 'no clipboard read access in WebKit');
     await page.fill('#subnet-input', '10.0.0.0/8');
     await page.evaluate(() => {
       const read = navigator.clipboard.readText.bind(navigator.clipboard);
