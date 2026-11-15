@@ -124,7 +124,13 @@ describe('repository rules', () => {
 
   it('loads nothing from other sites: no external URLs in the app', () => {
     const app = textFiles.filter(f => f.startsWith('src/') || f.startsWith('public/') || f === 'index.html');
-    expect(app.flatMap(f => findUrls(read(f)).map(u => `${f}: ${u}`))).toEqual([]);
+    // The page names its own public address (the canonical link and og:url), which loads nothing.
+    const own = `${'https'}://netforge.radmagelabs.com/`;
+    expect(app.flatMap(f => findUrls(read(f)).map(u => `${f}: ${u}`))).toEqual([`index.html: ${own}`, `index.html: ${own}`]);
+    const page = read('index.html');
+    expect(page).toContain(`<link rel="canonical" href="${own}">`);
+    expect(page).toContain(`<meta property="og:url" content="${own}">`);
+    expect([...page.matchAll(/(?:src|href)="([^"]+)"/g)].map(m => m[1]!).filter(u => u !== own && !u.startsWith('./') && !u.startsWith('#'))).toEqual([]);
   });
 
   it('bundles exactly one dependency, the YAML parser, pinned to an exact version', () => {

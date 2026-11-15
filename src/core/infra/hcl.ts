@@ -57,8 +57,8 @@ export class HclRaw {
 export type HclValue = string | number | boolean | null | HclRaw | readonly HclValue[] | { readonly [key: string]: HclValue };
 
 /**
- * A value as HCL. Object keys that are identifiers are written bare and every other key is
- * quoted. Throws on a string with a lone surrogate: callers check with hclString first.
+ * A value as HCL, laid out the way "terraform fmt" lays it out. Object keys that are identifiers
+ * are written bare and every other key is quoted. Throws on a string with a lone surrogate: callers check with hclString first.
  */
 export function hclValue(value: HclValue, indent = 0): string {
   const pad = '  '.repeat(indent);
@@ -84,6 +84,16 @@ export function hclValue(value: HclValue, indent = 0): string {
   const entries = Object.entries(value as { readonly [key: string]: HclValue });
   if (entries.length === 0) return '{}';
   const keys = entries.map(([k]) => (isHclIdentifier(k) ? k : hclValue(k)));
-  const width = Math.max(...keys.map(k => k.length));
-  return `{\n${entries.map(([, v], i) => `${inner}${keys[i]!.padEnd(width)} = ${hclValue(v, indent + 1)}`).join('\n')}\n${pad}}`;
+  const values = entries.map(([, v]) => hclValue(v, indent + 1));
+  // The layout "terraform fmt" produces: equals signs line up within each run of consecutive
+  // one-line attributes. An attribute whose value spans lines ends the run and is not padded.
+  const widths = keys.map(() => 0);
+  for (let start = 0; start < keys.length;) {
+    let end = start;
+    let width = 0;
+    while (end < keys.length && !values[end]!.includes('\n')) width = Math.max(width, keys[end++]!.length);
+    for (let i = start; i < end; i++) widths[i] = width;
+    start = end === start ? start + 1 : end;
+  }
+  return `{\n${keys.map((k, i) => `${inner}${k.padEnd(widths[i]!)} = ${values[i]!}`).join('\n')}\n${pad}}`;
 }

@@ -98,7 +98,7 @@ export function aboutPage(prefs: Prefs, clearPrefs: () => void): HTMLElement {
     ]),
     panel('Offline use', [offline]),
     panel('Keyboard shortcuts', [shortcutTable()]),
-    panel('Version', [h('p', null, `NetForge ${VERSION_LABEL}. In development; not released.`)]),
+    panel('Version', [h('p', null, `NetForge ${VERSION_LABEL}. Copyright (c) 2026 RadMage Labs. Released under the MIT License.`)]),
   );
 }
 

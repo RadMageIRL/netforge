@@ -147,6 +147,18 @@
     "src/core/infra/hcl.ts",
     "${inner}${hclValue(v, indent + 1)},`).join(",
     "${inner}${hclValue(v, indent + 1)}`).join("
+   ],
+   [
+    "export-hcl: a multi-line value aligned with its neighbors",
+    "src/core/infra/hcl.ts",
+    "while (end < keys.length && !values[end]!.includes('\\n')) width",
+    "while (end < keys.length) width"
+   ],
+   [
+    "export-hcl: one-line attributes not aligned",
+    "src/core/infra/hcl.ts",
+    "for (let i = start; i < end; i++) widths[i] = width;",
+    "for (let i = start; i < end; i++) widths[i] = 0;"
    ]
   ]
  },

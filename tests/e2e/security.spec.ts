@@ -113,7 +113,9 @@ test('the built page carries the policy as its first head element after the char
     csp: document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.getAttribute('content') ?? '',
     inlineScripts: [...document.scripts].filter(s => !s.src).length,
     inlineStyles: document.querySelectorAll('style').length,
-    remote: [...document.querySelectorAll('[src], link[href]')].map(e => (e as HTMLScriptElement).src || (e as HTMLLinkElement).href).filter(u => new URL(u).origin !== location.origin),
+    // The canonical link names the app's public address and loads nothing; it is checked below.
+    canonical: [...document.querySelectorAll('link[rel="canonical"]')].map(e => (e as HTMLLinkElement).href),
+    remote: [...document.querySelectorAll('[src], link[href]:not([rel="canonical"])')].map(e => (e as HTMLScriptElement).src || (e as HTMLLinkElement).href).filter(u => new URL(u).origin !== location.origin),
     referrer: document.querySelector('meta[name="referrer"]')?.getAttribute('content'),
   }));
   expect(head.order).toEqual(['META:utf-8', 'META:Content-Security-Policy']);
@@ -121,6 +123,7 @@ test('the built page carries the policy as its first head element after the char
   expect(head.csp).not.toMatch(/unsafe|\*|data:|blob:|https?:/);
   expect([head.inlineScripts, head.inlineStyles, head.remote]).toEqual([0, 0, []]);
   expect(head.referrer).toBe('no-referrer');
+  expect(head.canonical).toEqual([`${'https'}://netforge.radmagelabs.com/`]);
 });
 
 // The next two tests are measurements for the review. They assert only that the probe ran, and

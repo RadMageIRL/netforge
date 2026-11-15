@@ -206,6 +206,9 @@ describe('hclValue', () => {
   it('writes objects with bare identifier keys, quoted other keys and aligned equals signs', () => {
     expect(hclValue({})).toBe('{}');
     expect(hclValue({ a: 1 })).toBe('{\n  a = 1\n}');
+    // The "terraform fmt" layout: a value that spans lines is not padded and ends the aligned run.
+    expect(hclValue({ a: 1, long_name: 'x', tags: { k: 'v' }, b: 2, after: [], list: [{ z: 1 }], c: 3 })).toBe('{\n  a         = 1\n  long_name = "x"\n  tags = {\n    k = "v"\n  }\n  b     = 2\n  after = []\n  list = [\n    {\n      z = 1\n    },\n  ]\n  c = 3\n}');
+    expect(hclValue({ first: { k: 'v' }, second_longer: { k: 'v' } })).toBe('{\n  first = {\n    k = "v"\n  }\n  second_longer = {\n    k = "v"\n  }\n}');
     expect(hclValue({ Name: 'x', 'netforge:site': 'y' })).toBe('{\n  Name            = "x"\n  "netforge:site" = "y"\n}');
     expect(hclValue({ '1a': 1, 'a b': 2, '': 3 })).toBe('{\n  "1a"  = 1\n  "a b" = 2\n  ""    = 3\n}');
     expect(hclValue({ '${x}': 1 })).toBe('{\n  "$${x}" = 1\n}');

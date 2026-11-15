@@ -241,7 +241,7 @@ const filter = process.argv[2];
 const selected = MUTATIONS.filter(([label]) => !filter || label.includes(filter));
 const work = mkdtempSync(join(tmpdir(), 'netforge-mutations-'));
 try {
-  for (const entry of ['src', 'tests', 'scripts', 'public', 'data', 'package.json', 'tsconfig.json', 'vite.config.ts', 'index.html', '.gitignore', '.gitattributes', 'README.md', 'CHANGELOG.md']) {
+  for (const entry of ['src', 'tests', 'scripts', 'public', 'data', 'package.json', 'tsconfig.json', 'vite.config.ts', 'index.html', 'vercel.json', 'LICENSE', '.gitignore', '.gitattributes', 'README.md', 'CHANGELOG.md']) {
     cpSync(join(ROOT, entry), join(work, entry), { recursive: true });
   }
   symlinkSync(join(ROOT, 'node_modules'), join(work, 'node_modules'), 'junction');

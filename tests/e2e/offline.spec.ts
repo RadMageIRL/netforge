@@ -128,7 +128,7 @@ test('a new version waits for the user, and Reload activates it', async ({ page 
     await expect(page.locator('#update-bar')).toBeVisible({ timeout: 20_000 });
     await Promise.all([page.waitForEvent('load'), page.getByRole('button', { name: 'Reload' }).click()]);
     await expect.poll(async () => page.evaluate(async () => (await caches.keys()).filter(k => k.startsWith('netforge-')))).toContain('netforge-test-update');
-    expect(firstVersion).toMatch(/^netforge-0\.1\.0-dev-[0-9a-f]{12}$/);
+    expect(firstVersion).toMatch(/^netforge-0\.1\.0-[0-9a-f]{12}$/);
   } finally {
     await server.close();
   }
@@ -280,7 +280,7 @@ test('the offline cache holds only the app\'s own files, never anything typed, o
     return { names, entries, text };
   });
   expect(cache.names).toHaveLength(1);
-  expect(cache.names[0]).toMatch(/^netforge-0\.1\.0(-dev)?-[0-9a-f]{12}$/);
+  expect(cache.names[0]).toMatch(/^netforge-0\.1\.0-[0-9a-f]{12}$/);
   expect(cache.text).toBe('');
   for (const path of cache.entries) expect(path).toMatch(/^\/(index\.html|theme-boot\.js|favicon\.svg|manifest\.webmanifest|(icon-192|icon-512|icon-maskable-512|apple-touch-icon)\.png|assets\/[A-Za-z0-9_.-]+\.(js|css))?$/);
 });

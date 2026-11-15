@@ -2,9 +2,16 @@
 
 All notable changes to NetForge are recorded here. Versions follow [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.1.0] - 2026-11-14
 
-### 0.1.0-dev
+First release.
+
+Release:
+
+- Published under the MIT License at its own origin, https://netforge.radmagelabs.com/.
+- Host configuration (`vercel.json`): the Content-Security-Policy and the other security headers are sent as HTTP headers on every file, so the policy reaches workers on a first visit and other sites cannot frame the app. Hashed assets are cached for a year and everything else is revalidated.
+- Terraform Export: generated HCL is laid out as `terraform fmt` writes it. Only spacing changed: values, escaping and references are the same, and every generated configuration passes `terraform fmt -check`, `terraform validate` and `terraform plan`.
+- The page states its canonical address.
 
 Release preparation:
 

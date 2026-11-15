@@ -1,6 +1,6 @@
 /**
  * Hash routes (#/subnet-calculator). Hash routing needs no server rewrites, so the same build works
- * on GitHub Pages, behind a proxy under /netforge/, and from a local preview.
+ * at a site root, under a subpath, and from a local preview.
  */
 
 export type Route =

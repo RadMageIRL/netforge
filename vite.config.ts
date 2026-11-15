@@ -14,8 +14,9 @@ const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as { version: strin
  * A meta policy covers the page only. Workers take their policy from the HTTP headers of their
  * own script: the service worker adds this same policy to the worker scripts it serves, each
  * worker removes its own network interfaces on start (worker-lockdown.ts), and the host should
- * send the policy as a header as well, with frame-ancestors, which a meta element cannot carry. Dev builds skip it because Vite's HMR client needs
- * websockets and inline styles.
+ * send the policy as a header as well, with frame-ancestors, which a meta element cannot carry
+ * (vercel.json does). Dev builds skip it because Vite's HMR client needs websockets and inline
+ * styles.
  */
 export const CSP = [
   "default-src 'none'",
@@ -76,7 +77,8 @@ function serviceWorker(): Plugin {
 }
 
 export default defineConfig({
-  // Relative paths so the same build works at the site root, under /netforge/ and on GitHub Pages.
+  // Relative paths: the build is published at the root of its own origin and also works under a
+  // subpath and from a local preview, with no rebuild.
   base: './',
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   plugins: [contentSecurityPolicy(), serviceWorker()],

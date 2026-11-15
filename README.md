@@ -4,7 +4,7 @@ Local-first IT and network engineering toolbox.
 
 NetForge is a collection of practical browser tools for systems administrators, network engineers and developers. Every tool runs entirely in your browser: nothing you paste or type is sent to a server.
 
-**Status:** in development (v0.1.0-dev). Not released.
+**Version:** 0.1.0. Home: https://netforge.radmagelabs.com/
 
 ![NetForge home page with the tool list](screenshots/netforge-home.png)
 
@@ -42,7 +42,7 @@ Built:
 Exports. Each one is a preview to review, built from a plan saved by the planner, the plan open in the planner, or the example. NetForge runs nothing and connects to nothing. Every item is labeled exact, approximate (written, but something differs or is left out, with the reason) or unsupported (not written, with the reason), followed by the assumptions made, the manual steps left, and what the export never covers. A plan with validation errors is not exported. Text from a plan reaches the output only through a quoting or checking rule for that target; what cannot be written safely is left out and reported.
 
 - **PowerShell Generator**: Windows DHCP Server scopes for the VLANs that have DHCP pools (the DhcpServer module): each scope covers its network's host range with everything outside the plan's pools excluded, the router option comes from the plan's gateway, and scopes are created inactive unless you choose otherwise. DNS servers, a DNS domain, a server name and reservations (address, MAC address, name) are written only if you enter them, because a plan does not hold them. The script states at the top that it needs administrator rights. Also: a read-only script that holds the plan as PowerShell objects, and a scheduled task example written by the same engine as the Schedule Builder, with marked placeholders for a task name or program you have not given.
-- **Terraform Export**: the plan as provider-neutral JSON, as typed Terraform variables with their values (`.tfvars` in HCL or JSON syntax), or as an AWS VPC with subnets for the hashicorp/aws provider. The AWS export maps one parent block of one site and VRF to a VPC and each VLAN network inside it to a subnet, and says plainly that a VPC is not a VLAN or a VRF: VLAN IDs become tags only, and gateways, DHCP pools and reserved addresses that AWS cannot hold are listed as unsupported. It never writes an Availability Zone (each subnet reads one from a variable you fill in), a route table, a gateway or a provider block. IPv6 is written only when you state that the planned prefixes are in your own BYOIP pool.
+- **Terraform Export**: the plan as provider-neutral JSON, as typed Terraform variables with their values (`.tfvars` in HCL or JSON syntax, the HCL laid out as `terraform fmt` writes it), or as an AWS VPC with subnets for the hashicorp/aws provider. The AWS export maps one parent block of one site and VRF to a VPC and each VLAN network inside it to a subnet, and says plainly that a VPC is not a VLAN or a VRF: VLAN IDs become tags only, and gateways, DHCP pools and reserved addresses that AWS cannot hold are listed as unsupported. It never writes an Availability Zone (each subnet reads one from a variable you fill in), a route table, a gateway or a provider block. IPv6 is written only when you state that the planned prefixes are in your own BYOIP pool.
 - **Cisco / Juniper Export**: configuration snippets, not complete device configurations. For Cisco IOS / IOS-XE: VLANs and names, gateway interfaces (SVIs) with IPv4 and IPv6 addresses, VRF membership and DHCP pools with excluded addresses. For Juniper Junos (EX and QFX with ELS), as `set` commands: VLANs, IRB interfaces and routing-instance membership. The tool asks which VRF is the device's global routing table and what each VRF is called on the device instead of guessing. The output contains no command that removes, shuts down, saves or commits anything, and no port configuration. The snippets follow the vendors' command references and have not been loaded on a Cisco or Juniper device.
 
 ## Limits
@@ -52,7 +52,7 @@ Large inputs are refused with a message rather than cut or left to freeze the pa
 ## Privacy
 
 - All processing happens in the browser. There is no server component, no analytics, no cookies and no third-party scripts, fonts or other resources.
-- The production build sets a Content-Security-Policy with `connect-src 'none'`, so the page cannot open network connections. A policy in the page does not reach background workers, which take theirs from HTTP headers: each NetForge worker removes its own network interfaces when it starts, the service worker adds the policy to the worker scripts it serves, and the host should send the same policy as a header.
+- The production build sets a Content-Security-Policy with `connect-src 'none'`, so the page cannot open network connections. A policy in the page does not reach background workers, which take theirs from HTTP headers: each NetForge worker removes its own network interfaces when it starts, the service worker adds the policy to the worker scripts it serves, and the host sends the same policy as an HTTP header on every file, where it also forbids other sites from framing the app (see Hosting).
 - Tool input stays in memory. A network plan is written only to a file you choose to save, and read only from a file you pick: it is never stored in the browser and never restored on its own. The export tools read a plan the same way, or take a copy of the planner's plan in memory, and store neither the plan nor anything typed into them (server names, DNS servers, MAC addresses, device VRF names). Schedule expressions, task names and commands are never stored either, and neither are tokens, keys, secrets, hashed text or files, generated values or anything else entered in the utilities. Only display preferences (theme, last tool, time zone and JSON indentation) are saved in local storage; the About page lists them and clears them.
 - The address registries are bundled with the app (`data/iana/`), so classification needs no network access.
 - NetForge ships one third-party library, the `yaml` parser (ISC license, no dependencies of its own), bundled into the build at a pinned version and loaded only by the YAML/XML tool. Nothing is fetched at run time.
@@ -76,6 +76,16 @@ Test expectations come from sources independent of the code under test: Python's
 
 The classification data is generated from the IANA files in `data/iana/` by `node scripts/registry/build-registry.mjs`; the unit tests fail if the generated module and the files disagree.
 
-The build uses relative paths, so `dist/` can be served from a site root or from a subpath such as `/netforge/`.
+## Hosting
+
+NetForge is a static site with its own origin, https://netforge.radmagelabs.com/, so its preferences and offline copy are shared with no other app. The build uses relative paths: `dist/` works at a site root, under a subpath and from `npm run preview` without a rebuild.
+
+`vercel.json` holds the host configuration. Every response carries the Content-Security-Policy as an HTTP header (with `frame-ancestors 'none'`, and `connect-src 'self'` for the service worker script only, which has to fetch the app's files), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, a Permissions-Policy that turns off the device features NetForge never uses, `Cross-Origin-Opener-Policy` and `Cross-Origin-Resource-Policy: same-origin`, and `Strict-Transport-Security`. Files under `assets/` have content hashes in their names and are cached for a year; everything else is revalidated on each visit, so a new version is found at once.
+
+The browser tests apply these same rules through a local server and check that a worker cannot connect out on a first visit, that another site cannot frame the app, and that the app still installs, updates and works offline under them. A host that cannot send response headers leaves the first two unprotected.
+
+## License
+
+MIT. Copyright (c) 2026 RadMage Labs. See `LICENSE`.
 
 Published by RadMage Labs.

@@ -1,8 +1,10 @@
 {
   "name": "netforge",
-  "version": "0.1.0-dev",
+  "version": "0.1.0",
   "description": "NetForge - Local-first IT and network engineering toolbox",
-  "license": "UNLICENSED",
+  "license": "MIT",
+  "author": "RadMage Labs",
+  "homepage": "https://netforge.radmagelabs.com/",
   "private": true,
   "type": "module",
   "scripts": {

@@ -15,7 +15,7 @@ test.describe('navigation', () => {
       'Base64 / URL / Hex', 'Hash / HMAC', 'JWT Decoder', 'Regex Tester', 'List / Text Tools', 'UUID / Random Tokens', 'chmod Calculator', 'PowerShell Generator', 'Terraform Export', 'Cisco / Juniper Export']);
     await expect(page.locator('.tool-card')).toHaveCount(21);
     await expect(page.locator('#home-planned')).toHaveCount(0);
-    await expect(page.locator('#brand-version')).toHaveText('v0.1.0-dev');
+    await expect(page.locator('#brand-version')).toHaveText('v0.1.0');
     expect(errors).toEqual([]);
   });
 
@@ -170,6 +170,6 @@ test.describe('preferences', () => {
     await page.goto('./#/about');
     await expect(page.locator('.privacy-list li')).toHaveCount(4);
     await expect(page.locator('.about-page')).toContainText('never sent to a server');
-    await expect(page.locator('.about-page')).toContainText('NetForge v0.1.0-dev');
+    await expect(page.locator('.about-page')).toContainText('NetForge v0.1.0. Copyright (c) 2026 RadMage Labs. Released under the MIT License.');
   });
 });

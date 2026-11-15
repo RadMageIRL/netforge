@@ -209,10 +209,10 @@ describe('terraformVariables', () => {
     expect(decl).not.toMatch(/^(resource|provider|module|data|output) /m);
     const values = o.files[1]!.text;
     expect([...values.matchAll(/^([a-z_]+) = \{$/gm)].map(m => m[1])).toEqual(['netforge_sites', 'netforge_vrfs', 'netforge_vlan_namespaces', 'netforge_vlans']);
-    expect(values).toContain('    ipv4_network    = "10.10.10.0/24"');
-    expect(values).toContain('    vlan_id         = 10');
+    expect(values).toContain('    ipv4_network   = "10.10.10.0/24"');
+    expect(values).toContain('    vlan_id        = 10');
     expect(values).toContain('    ipv4_network    = null');
-    expect(values).toContain('    ipv6_prefixes   = ["2001:db8:10:10::/64"]');
+    expect(values).toContain('    ipv6_prefixes = ["2001:db8:10:10::/64"]\n    ipv6_gateway  = "fe80::1"\n    reserved = [');
     expect(o.counts).toEqual({ exact: 10, approximate: 0, unsupported: 0 });
   });
 
@@ -248,8 +248,8 @@ describe('terraformVariables', () => {
   it('escapes template sequences and quotes in the HCL values', () => {
     const o = terraformVariables(changed(p => { byId(p, 'v1').name = `\${file("x")} %{if true} ${BS}`; byId(p, 'v1').notes = 'line 1\nline 2'; }), HQ, 'hcl');
     const values = o.files[1]!.text;
-    expect(values).toContain(`name            = "$\${file(${BS}"x${BS}")} %%{if true} ${BS}${BS}"`);
-    expect(values).toContain(`notes           = "line 1${BS}nline 2"`);
+    expect(values).toContain(`name           = "$\${file(${BS}"x${BS}")} %%{if true} ${BS}${BS}"`);
+    expect(values).toContain(`notes          = "line 1${BS}nline 2"`);
     expect(values.split('\n').some(l => l === 'line 2"')).toBe(false);
   });
 
@@ -275,7 +275,7 @@ describe('terraformVariables', () => {
         expect(doc.netforge_vlans.v2.name).toBe('Voice');
         expect(doc.netforge_sites.s1.parent_blocks[0].reserved[0].label).toBeNull();
         expect(o.files[1]!.text).not.toContain(`${BS}ud800`);
-      } else expect(o.files[1]!.text).toContain('    name            = null');
+      } else expect(o.files[1]!.text).toContain('    name           = null');
     }
     expect(terraformVariables(examplePlan(), HQ, 'hcl').items[0]!.subject).toBe('Site Headquarters');
     const one = terraformVariables(changed(x => { byId(x, 'v1').name = C(0xd800); }), HQ, 'hcl');
@@ -323,12 +323,12 @@ describe('awsTerraform', () => {
       { type: 'aws_subnet', name: 'vlan_10_users' }, { type: 'aws_subnet', name: 'vlan_20_voice' },
       { type: 'aws_subnet', name: 'vlan_30_servers' }, { type: 'aws_subnet', name: 'vlan_99_management' },
     ]);
-    expect(resource(text, 'aws_vpc', 'netforge_headquarters_global')).toBe('  cidr_block = "10.10.0.0/16"\n  tags       = {\n    Name            = "Headquarters"\n    "netforge:site" = "Headquarters"\n    "netforge:vrf"  = "Global"\n  }');
+    expect(resource(text, 'aws_vpc', 'netforge_headquarters_global')).toBe('  cidr_block = "10.10.0.0/16"\n  tags = {\n    Name            = "Headquarters"\n    "netforge:site" = "Headquarters"\n    "netforge:vrf"  = "Global"\n  }');
     expect(resource(text, 'aws_subnet', 'vlan_10_users')).toBe([
       '  vpc_id            = aws_vpc.netforge_headquarters_global.id',
       '  cidr_block        = "10.10.10.0/24"',
       '  availability_zone = var.netforge_availability_zones["vlan_10_users"]',
-      '  tags              = {',
+      '  tags = {',
       '    Name                       = "Users"',
       '    "netforge:site"            = "Headquarters"',
       '    "netforge:vrf"             = "Global"',
@@ -578,7 +578,7 @@ describe('awsTerraform', () => {
     const o = aws(examplePlan(), { metadataTags: false });
     const text = tf(o);
     expect(text).not.toContain('netforge:');
-    expect(resource(text, 'aws_subnet', 'vlan_10_users')).toContain('  tags              = {\n    Name = "Users"\n  }');
+    expect(resource(text, 'aws_subnet', 'vlan_10_users')).toContain('  availability_zone = var.netforge_availability_zones["vlan_10_users"]\n  tags = {\n    Name = "Users"\n  }');
     expect(resource(text, 'aws_vpc', 'netforge_headquarters_global')).toContain('    Name = "Headquarters"');
     expect(note(item(o, 'VLAN 10 Users'), 'VLAN ID')!.detail).toContain('not written');
     const unnamed = aws(changed(p => { byId(p, 'v4').name = ''; }), { metadataTags: false });

@@ -277,6 +277,10 @@ describe('Terraform CLI validation of generated configurations', () => {
     }
   });
 
+  it('every generated HCL file is already in the form "terraform fmt" writes', () => {
+    expect(fixture.cases.filter(c => !c.canonicalFormat).map(c => c.id)).toEqual([]);
+  });
+
   it('a missing Availability Zone key fails at plan time instead of being guessed', () => {
     expect(fixture.missingZoneKey.planFailed).toBe(true);
     expect(fixture.missingZoneKey.summary).toContain('Invalid index');
