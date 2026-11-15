@@ -5,6 +5,11 @@ import type { OptionGroup } from './components';
 /** The value that stands for "this device's zone". */
 export const DEVICE_ZONE = '';
 
+/** True when the select lists value (a zone from a link must be one this browser offers). */
+export function hasOption(select: HTMLSelectElement, value: string): boolean {
+  return [...select.options].some(o => o.value === value);
+}
+
 export function zoneGroups(device: string): OptionGroup[] {
   const byRegion = new Map<string, { value: string; label: string }[]>();
   for (const zone of listTimeZones()) {

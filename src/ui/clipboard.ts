@@ -4,7 +4,11 @@
  * from the clipboard, ever.
  */
 
-export async function copyText(text: string): Promise<void> {
+/**
+ * `host` is where the fallback's hidden buffer goes: an open modal dialog makes the rest of the
+ * page inert, so a buffer outside it could not be selected.
+ */
+export async function copyText(text: string, host: HTMLElement = document.body): Promise<void> {
   if (window.isSecureContext && navigator.clipboard?.writeText) {
     try {
       await navigator.clipboard.writeText(text);
@@ -13,17 +17,17 @@ export async function copyText(text: string): Promise<void> {
       // Permission denied or document not focused: try the fallback.
     }
   }
-  if (!legacyCopy(text)) throw new Error('The browser did not allow copying.');
+  if (!legacyCopy(text, host)) throw new Error('The browser did not allow copying.');
 }
 
-function legacyCopy(text: string): boolean {
+function legacyCopy(text: string, host: HTMLElement): boolean {
   const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const buffer = document.createElement('textarea');
   buffer.value = text;
   buffer.setAttribute('readonly', '');
   buffer.setAttribute('aria-hidden', 'true');
   buffer.className = 'clipboard-buffer';
-  document.body.appendChild(buffer);
+  host.appendChild(buffer);
   buffer.select();
   let copied = false;
   try {

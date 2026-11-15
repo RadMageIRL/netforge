@@ -125,8 +125,11 @@ describe('repository rules', () => {
   it('loads nothing from other sites: no external URLs in the app', () => {
     const app = textFiles.filter(f => f.startsWith('src/') || f.startsWith('public/') || f === 'index.html');
     // The page names its own public address (the canonical link and og:url), which loads nothing.
+    // Share links are written with that address, and the RadMage Labs link is a plain link that
+    // the person follows into a new tab: neither is ever loaded by the app.
     const own = `${'https'}://netforge.radmagelabs.com/`;
-    expect(app.flatMap(f => findUrls(read(f)).map(u => `${f}: ${u}`))).toEqual([`index.html: ${own}`, `index.html: ${own}`]);
+    const labs = `${'https'}://radmagelabs.com/`;
+    expect(app.flatMap(f => findUrls(read(f)).map(u => `${f}: ${u}`)).sort()).toEqual([`index.html: ${own}`, `index.html: ${own}`, `src/app/share.ts: ${own}`, `src/app/share.ts: ${labs}`]);
     const page = read('index.html');
     expect(page).toContain(`<link rel="canonical" href="${own}">`);
     expect(page).toContain(`<meta property="og:url" content="${own}">`);

@@ -8,11 +8,13 @@ import { downloadText } from '../ui/download';
 import { byId, h, isEditable, replaceChildren } from '../ui/dom';
 import { announce, toast } from '../ui/feedback';
 import { icon } from '../ui/icons';
-import { aboutPage, homePage, notFoundPage, plannedPage } from './pages';
+import { aboutPage, homePage, labsLink, notFoundPage, plannedPage } from './pages';
 import type { Prefs } from './prefs';
-import { type ToolInstance, type ToolMeta, type ToolRegistry, type ToolServices } from './registry';
+import { type AvailableTool, type ToolInstance, type ToolMeta, type ToolRegistry, type ToolServices } from './registry';
 import { formatRoute, parseRoute, type Route } from './router';
 import { searchTools, type SearchableTool } from './search';
+import { readShareQuery, REFUSED_TEXT, toolLink } from './share';
+import { createShareDialog } from './share-dialog';
 
 const MOBILE_QUERY = '(max-width: 899px)';
 const APP_TITLE = 'NetForge';
@@ -82,6 +84,11 @@ export function startShell(registry: ToolRegistry, prefs: Prefs): void {
     return { group, items };
   });
   replaceChildren(nav, h('ul', { class: 'nav-list nav-top' }, h('li', null, homeLink)), groups.map(g => g.group), noMatches);
+  // Back to the RadMage Labs homepage, in a new tab so nothing open here is lost.
+  byId('sidebar').appendChild(h('div', { class: 'sidebar-foot' }, labsLink('labs-link nav-labs', 'sidebar-labs-link')));
+
+  const shareDialog = createShareDialog(announce);
+  document.body.appendChild(shareDialog.element);
 
   function visibleLinks(): HTMLAnchorElement[] {
     return [homeLink, ...links.values()].filter(link => link.closest('[hidden]') === null);
@@ -204,6 +211,8 @@ export function startShell(registry: ToolRegistry, prefs: Prefs): void {
 
   // ---- Keyboard shortcuts -----------------------------------------------------------------
   document.addEventListener('keydown', event => {
+    // The Share dialog is modal: its own keys (Tab, Escape) are all that apply while it is open.
+    if (shareDialog.element.open) return;
     if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === 'k') {
       event.preventDefault();
       focusSearch();
@@ -242,6 +251,54 @@ export function startShell(registry: ToolRegistry, prefs: Prefs): void {
     }
   }
 
+  // ---- Share links ------------------------------------------------------------------------
+  /** The Share button at the top of a tool, added once the tool has drawn its page. */
+  function addShareButton(tool: AvailableTool, slot: MountedTool): void {
+    const header = slot.root.querySelector<HTMLElement>('.tool-page > .page-header');
+    if (!header) return;
+    const share = h('button', { type: 'button', class: 'btn btn-secondary share-button', id: `share-${tool.id}`, 'aria-haspopup': 'dialog' },
+      icon('link'), h('span', null, 'Share'));
+    share.addEventListener('click', () => shareDialog.open({ id: tool.id, name: tool.name, link: toolLink(tool.id), share: slot.instance?.share ?? null }, share));
+    header.appendChild(share);
+  }
+
+  /**
+   * The address that settings were last taken from. Coming back to it with Back or Forward does
+   * not apply them again, so work done since is never overwritten by an old link.
+   */
+  let linkUsed: string | null = null;
+
+  function applyLink(tool: AvailableTool, slot: MountedTool): void {
+    const hash = location.hash;
+    if (hash === linkUsed) return;
+    const read = readShareQuery(hash);
+    if (read.kind === 'none' || (read.kind === 'settings' && read.params.size === 0)) return;
+    linkUsed = hash;
+    let problem: string | null = null;
+    if (read.kind === 'refused') problem = REFUSED_TEXT[read.reason];
+    else if (!slot.instance?.share) problem = REFUSED_TEXT.unsupported;
+    else {
+      let applied = false;
+      try {
+        applied = slot.instance.share.apply(read.params);
+      } catch {
+        applied = false;
+      }
+      if (!applied) problem = REFUSED_TEXT.invalid;
+    }
+    if (problem === null) {
+      toast(`Opened ${tool.name} with the settings from the link`);
+      announce(`Opened ${tool.name} with the settings from the link.`);
+      return;
+    }
+    const text = `The settings in this link were not used: ${problem}. ${tool.name} opened as it normally does.`;
+    const dismiss = h('button', { type: 'button', class: 'btn btn-ghost link-notice-dismiss' }, 'Dismiss');
+    const box = h('div', { class: 'notice notice-warning link-notice', id: 'link-notice' }, icon('warning'), h('div', { class: 'notice-body' }, h('p', null, text)), dismiss);
+    dismiss.addEventListener('click', () => { box.remove(); focusHeading(); });
+    slot.root.prepend(box);
+    announce(text);
+  }
+
   function showPage(node: HTMLElement): void {
     pageNode?.remove();
     pageNode = node;
@@ -253,6 +310,8 @@ export function startShell(registry: ToolRegistry, prefs: Prefs): void {
     const route = parseRoute(location.hash);
     currentToolId = route.name === 'tool' ? route.id : null;
     for (const slot of mounted.values()) slot.root.hidden = true;
+    // A notice about a refused link belongs to that visit only.
+    for (const old of view.querySelectorAll('.link-notice')) old.remove();
     pageNode?.remove();
     pageNode = null;
     setCurrent(route);
@@ -290,6 +349,7 @@ export function startShell(registry: ToolRegistry, prefs: Prefs): void {
             const module = await tool.load();
             replaceChildren(root);
             slot.instance = module.mount(root, services, tool, registry.categoryName(tool.category));
+            addShareButton(tool, slot);
           } catch {
             mounted.delete(tool.id);
             root.remove();
@@ -307,6 +367,7 @@ export function startShell(registry: ToolRegistry, prefs: Prefs): void {
           slot.instance?.activate?.();
         }
         slot.root.hidden = false;
+        applyLink(tool, slot);
       }
     }
     if (userInitiated) {

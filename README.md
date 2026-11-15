@@ -4,7 +4,9 @@ Local-first IT and network engineering toolbox.
 
 NetForge is a collection of practical browser tools for systems administrators, network engineers and developers. Every tool runs entirely in your browser: nothing you paste or type is sent to a server.
 
-**Version:** 0.1.0. Home: https://netforge.radmagelabs.com/
+**Open NetForge: [netforge.radmagelabs.com](https://netforge.radmagelabs.com/)**. Free, no account, works offline after the first visit and installs as an app.
+
+**Version:** 0.1.0. Part of [RadMage Labs](https://radmagelabs.com/).
 
 ![NetForge home page with the tool list](screenshots/netforge-home.png)
 
@@ -45,6 +47,28 @@ Exports. Each one is a preview to review, built from a plan saved by the planner
 - **Terraform Export**: the plan as provider-neutral JSON, as typed Terraform variables with their values (`.tfvars` in HCL or JSON syntax, the HCL laid out as `terraform fmt` writes it), or as an AWS VPC with subnets for the hashicorp/aws provider. The AWS export maps one parent block of one site and VRF to a VPC and each VLAN network inside it to a subnet, and says plainly that a VPC is not a VLAN or a VRF: VLAN IDs become tags only, and gateways, DHCP pools and reserved addresses that AWS cannot hold are listed as unsupported. It never writes an Availability Zone (each subnet reads one from a variable you fill in), a route table, a gateway or a provider block. IPv6 is written only when you state that the planned prefixes are in your own BYOIP pool.
 - **Cisco / Juniper Export**: configuration snippets, not complete device configurations. For Cisco IOS / IOS-XE: VLANs and names, gateway interfaces (SVIs) with IPv4 and IPv6 addresses, VRF membership and DHCP pools with excluded addresses. For Juniper Junos (EX and QFX with ELS), as `set` commands: VLANs, IRB interfaces and routing-instance membership. The tool asks which VRF is the device's global routing table and what each VRF is called on the device instead of guessing. The output contains no command that removes, shuts down, saves or commits anything, and no port configuration. The snippets follow the vendors' command references and have not been loaded on a Cisco or Juniper device.
 
+## Share links
+
+Every tool has a Share button. Its plain link opens the tool with nothing filled in, such as `https://netforge.radmagelabs.com/#/subnet-calculator`.
+
+Seven tools can also share harmless settings, behind a version number: `#/subnet-calculator?v=1&ip=192.0.2.10/24&split=26`.
+
+| Tool | A settings link holds |
+|---|---|
+| Subnet Calculator | address and prefix (canonical form), split and supernet lengths |
+| Cron Explainer | expression, dialect, a chosen time zone, the start of the run list |
+| Schedule Builder | frequency, times, days, a chosen time zone, start date (never the task or unit name, program or arguments) |
+| Timestamp Converter | timestamp, how to read it, a chosen time zone, which occurrence of a repeated local time |
+| Number Bases & Bytes | number, base, width, signedness, grouping, storage amount and unit |
+| chmod Calculator | the mode bits, file or directory (never the path) |
+| UUID / Random Tokens | kind, count, bytes per token (never a generated value) |
+
+- A settings link is made only when you press its Copy button, and the Share dialog lists what it holds first. Typing never changes the address bar.
+- The device's own time zone is never written into a link; a link without a zone opens in the zone of the device that opens it.
+- The other tools share their plain link only: tokens, keys, secrets, files, network plans, scripts, exports and pasted text are never put in a link.
+- Settings travel after the `#`, which browsers never send to a server. Opening a link runs, generates and downloads nothing.
+- A link is read strictly: if it is longer than 1,024 characters, cannot be decoded, repeats a setting, names one the tool does not know, carries another version, or has any value the tool's own parser rejects, none of it is used. The tool opens as it normally does and says why. Going Back to a link does not apply it again over later work.
+
 ## Limits
 
 Large inputs are refused with a message rather than cut or left to freeze the page: 8,000,000 characters for encoding, 512 MiB per file for hashing, 1,000,000 characters of text per regex run, 5,000,000 characters and 200,000 lines for text tools, 2,000,000 characters of YAML or JSON and 10,000,000 of XML, 5,000 characters and 4,096 bits for number conversion, 5,000 DHCP reservations and 2,000 AWS subnets per export. Hashing, regular expressions and YAML/XML processing run in workers with time limits.
@@ -56,6 +80,7 @@ Large inputs are refused with a message rather than cut or left to freeze the pa
 - Tool input stays in memory. A network plan is written only to a file you choose to save, and read only from a file you pick: it is never stored in the browser and never restored on its own. The export tools read a plan the same way, or take a copy of the planner's plan in memory, and store neither the plan nor anything typed into them (server names, DNS servers, MAC addresses, device VRF names). Schedule expressions, task names and commands are never stored either, and neither are tokens, keys, secrets, hashed text or files, generated values or anything else entered in the utilities. Only display preferences (theme, last tool, time zone and JSON indentation) are saved in local storage; the About page lists them and clears them.
 - The address registries are bundled with the app (`data/iana/`), so classification needs no network access.
 - NetForge ships one third-party library, the `yaml` parser (ISC license, no dependencies of its own), bundled into the build at a pinned version and loaded only by the YAML/XML tool. Nothing is fetched at run time.
+- Share links carry only the settings listed under Share links, and only when you copy one. Nothing is added to the address bar as you type.
 - After the first visit, a service worker keeps a copy of the app so it works offline, and the app can be installed (it has a web app manifest and icons). The offline copy holds only NetForge's own files, never anything typed, opened or generated. A new version is offered with a Reload button and never replaces a running page on its own.
 
 ## Development
@@ -88,4 +113,4 @@ The browser tests apply these same rules through a local server and check that a
 
 MIT. Copyright (c) 2026 RadMage Labs. See `LICENSE`.
 
-Published by RadMage Labs.
+Published by [RadMage Labs](https://radmagelabs.com/). The app links back to the Labs homepage from its sidebar and About page, in a new tab.

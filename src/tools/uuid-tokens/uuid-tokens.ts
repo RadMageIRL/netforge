@@ -5,7 +5,8 @@
  */
 import { generate, TOKEN_LIMITS, type Generated, type RandomFill, type TokenKind } from '../../core/random/tokens';
 import { formatInteger } from '../../core/format';
-import type { ToolMeta, ToolServices } from '../../app/registry';
+import type { ToolInstance, ToolMeta, ToolServices } from '../../app/registry';
+import { readTokenShare, tokenOffer } from './uuid-share';
 import { button, copyButton, notice, panel, selectField, textArea, toolPage } from '../../ui/components';
 import { h, replaceChildren } from '../../ui/dom';
 import { noteList, numberField, plural, statusLine } from '../util-shared/util-view';
@@ -24,7 +25,7 @@ const secureFill: RandomFill = bytes => {
   }
 };
 
-export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta, categoryName: string): void {
+export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta, categoryName: string): ToolInstance {
   let kind: TokenKind = 'uuid-v4';
   let generated: Generated | null = null;
 
@@ -94,4 +95,24 @@ export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta,
     h('p', { class: 'source-note' }, 'Randomness comes from crypto.getRandomValues, the secure generator built into the browser, and never from a predictable one. Values are not stored: copy or download what you need before leaving the page.'),
   ));
   render();
+
+  return {
+    share: {
+      offer: () => tokenOffer(kind, count.control.value, bytes.control.value),
+      // Fills in the options only. Nothing is generated until Generate is pressed.
+      apply(params) {
+        const s = readTokenShare(params);
+        if (!s) return false;
+        kind = s.kind;
+        kindField.control.value = s.kind;
+        count.control.value = String(s.count);
+        if (s.bytes !== null) bytes.control.value = String(s.bytes);
+        count.setError(null);
+        bytes.setError(null);
+        generated = null;
+        render();
+        return true;
+      },
+    },
+  };
 }

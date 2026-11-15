@@ -879,3 +879,53 @@ kbd {
 .perm-group { align-content: start; }
 .perm-meaning .badge { margin-right: 6px; }
 .perm-meaning .result-value { font-size: 13.5px; }
+
+/* ---- Share links and the RadMage Labs link (0.1.0) ----------------------------------------- */
+.tool-page > .page-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; }
+.tool-page > .page-header > * { grid-column: 1; min-width: 0; }
+.tool-page > .page-header > .share-button { grid-column: 2; grid-row: 1 / span 3; align-self: start; }
+.link-notice { align-items: flex-start; margin-bottom: 16px; }
+.link-notice .notice-body { flex: 1 1 auto; }
+.link-notice-dismiss { flex: none; min-height: 28px; margin: -4px -4px -4px 0; }
+
+.share-dialog {
+  width: min(40rem, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+.share-dialog::backdrop { background: rgb(0 0 0 / 0.55); }
+.share-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 10px 10px 18px; border-bottom: 1px solid var(--border); }
+.share-title { margin: 0; font-size: 16px; font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.share-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 16px 18px 4px; }
+.share-option { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; min-width: 0; }
+.share-heading { margin: 0; font-size: 13px; font-weight: 600; color: var(--text-2); }
+.share-text { margin: 0; font-size: 14px; }
+.share-private { padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); }
+.share-summary { margin: 0; padding-left: 20px; display: grid; gap: 2px; font-size: 14px; overflow-wrap: anywhere; }
+.share-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.input.mono.share-link { font-size: 13px; text-overflow: ellipsis; }
+.share-status { margin: 0; padding: 8px 18px 16px; min-height: 2.6em; font-size: 13.5px; color: var(--ok); }
+
+.sidebar-foot { margin: 20px 4px 0; padding-top: 12px; border-top: 1px solid var(--border); }
+.labs-link { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; color: var(--text-2); text-decoration: none; }
+.labs-link:hover { background: var(--surface-2); color: var(--text); }
+.labs-card { justify-self: start; border: 1px solid var(--border-strong); }
+.labs-mark { width: 26px; height: 26px; flex: none; image-rendering: pixelated; }
+.labs-text { display: grid; min-width: 0; line-height: 1.25; }
+.labs-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.labs-sub { font-size: 12px; color: var(--muted); }
+.labs-external { width: 15px; height: 15px; margin-left: auto; color: var(--muted); }
+
+@media (max-width: 560px) {
+  .tool-page > .page-header > .share-button { grid-column: 1; grid-row: auto; justify-self: start; margin-top: 12px; }
+  .share-row { grid-template-columns: minmax(0, 1fr); }
+  .share-row .share-copy { justify-self: start; }
+  .share-body { padding: 14px 14px 4px; }
+  .share-status { padding: 8px 14px 14px; }
+}

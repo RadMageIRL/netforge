@@ -50,16 +50,19 @@ async function focused(page: Page): Promise<Stop | null> {
   });
 }
 
-test('Tab stops in every tool are visible, named and marked, in document order, with no trap', async ({ page }) => {
+test('Tab stops in every tool are visible, named and marked, in document order, with no trap', async ({ page, browserName }) => {
+  // Safari does not move to links with Tab unless a system setting is changed (Option+Tab does),
+  // so in WebKit the links (the About page's RadMage Labs link) are not counted as Tab stops.
+  const tabReachesLinks = browserName !== 'webkit';
   test.setTimeout(180_000);
   const problems: string[] = [];
   for (const route of ROUTES) {
     await page.goto(`./${route}`);
     await expect(page.locator('h1:visible')).toHaveCount(1);
-    const expected = await page.locator('main').evaluate(main => [...main.querySelectorAll<HTMLElement>('a[href], button, input, select, textarea, summary, [tabindex="0"]')]
+    const expected = await page.locator('main').evaluate((main, links) => [...main.querySelectorAll<HTMLElement>(`${links ? 'a[href], ' : ''}button, input, select, textarea, summary, [tabindex="0"]`)]
       .filter(el => !el.hasAttribute('disabled') && el.tabIndex >= 0 && el.checkVisibility() && !el.closest('[hidden]') && getComputedStyle(el).visibility !== 'hidden'
         // One Tab stop per radio group and per tab list.
-        && !(el instanceof HTMLInputElement && el.type === 'radio' && !el.checked) && el.getAttribute('aria-selected') !== 'false').length);
+        && !(el instanceof HTMLInputElement && el.type === 'radio' && !el.checked) && el.getAttribute('aria-selected') !== 'false').length, tabReachesLinks);
     // Start from the page heading, where navigation puts focus.
     await page.locator('h1:visible').focus();
     let last = -1;

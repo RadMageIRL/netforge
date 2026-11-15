@@ -8,7 +8,8 @@ import {
   BASE_NAME, convert, groupDigits, NUMBER_LIMITS, STANDARD_WIDTHS, widthRange, withPrefix, type Base, type Conversion,
 } from '../../core/numbers/bases';
 import { convertAmount, UNIT_LIMITS, UNITS, type UnitConversion } from '../../core/numbers/units';
-import type { ToolMeta, ToolServices } from '../../app/registry';
+import type { ToolInstance, ToolMeta, ToolServices } from '../../app/registry';
+import { numberOffer, readNumberShare } from './number-share';
 import { button, panel, resultTable, segmented, selectField, textField, toolPage, type ResultRow } from '../../ui/components';
 import { h, replaceChildren } from '../../ui/dom';
 import { noteList, numberField, statusLine } from '../util-shared/util-view';
@@ -31,7 +32,7 @@ function short(value: bigint): string {
   return s.length > 40 ? `${s.slice(0, 10)}...${s.slice(-6)} (${s.replace('-', '').length} digits)` : formatInteger(value, 'en-US');
 }
 
-export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta, categoryName: string): void {
+export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta, categoryName: string): ToolInstance {
   let signed = false;
   let group = 4;
 
@@ -201,4 +202,42 @@ export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta,
   ));
   renderNumber();
   renderUnits();
+
+  return {
+    share: {
+      offer() {
+        const w = width();
+        if (w === 'invalid') return { ok: false, reason: 'Fix the custom width to put the settings in a link.' };
+        const number = input.control.value.trim();
+        const amountText = amount.control.value.trim();
+        return numberOffer({
+          number: number === '' ? null : number, base: Number(baseField.control.value) as Base, width: w, signed, group: group === 8 ? 8 : 4,
+          amount: amountText === '' ? null : amountText, unit: unitField.control.value,
+        });
+      },
+      apply(params) {
+        const s = readNumberShare(params);
+        if (!s) return false;
+        if (s.number !== null) input.control.value = s.number;
+        baseField.control.value = String(s.base);
+        if (s.width === null) widthField.control.value = 'none';
+        else if (STANDARD_WIDTHS.includes(s.width)) widthField.control.value = String(s.width);
+        else {
+          widthField.control.value = 'custom';
+          customWidth.control.value = String(s.width);
+        }
+        signed = s.signed;
+        signControl.set(s.signed ? 'signed' : 'unsigned');
+        group = s.group;
+        groupControl.set(String(s.group));
+        if (s.amount !== null) {
+          amount.control.value = s.amount;
+          unitField.control.value = s.unit;
+        }
+        renderNumber();
+        renderUnits();
+        return true;
+      },
+    },
+  };
 }

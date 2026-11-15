@@ -1,12 +1,31 @@
 /** The shell's own pages: home, about and privacy, planned tools and not found. */
 import { emptyState, notice, pageHeader, panel } from '../ui/components';
 import { h, replaceChildren } from '../ui/dom';
-import { icon } from '../ui/icons';
+import { icon, labsMark } from '../ui/icons';
 import type { Prefs } from './prefs';
 import type { ToolMeta, ToolRegistry } from './registry';
 import { formatRoute } from './router';
+import { LABS_URL, MAX_LINK_CHARS } from './share';
 
 export const VERSION_LABEL = `v${__APP_VERSION__}`;
+
+/** The link back to the RadMage Labs homepage. It opens a new tab, so work in this one stays put. */
+export function labsLink(className: string, id: string): HTMLAnchorElement {
+  return h('a', { class: className, id, href: LABS_URL, target: '_blank', rel: 'noopener noreferrer' },
+    labsMark(),
+    h('span', { class: 'labs-text' }, h('span', { class: 'labs-name' }, 'RadMage Labs'), h('span', { class: 'labs-sub' }, 'More tools and projects')),
+    icon('external', 'icon labs-external'),
+    h('span', { class: 'visually-hidden' }, ' (opens in a new tab)'),
+  );
+}
+
+const SHARE_POINTS = [
+  'Every tool has a Share button. The plain link opens the tool with nothing filled in, for example #/subnet-calculator.',
+  'Some tools can also share harmless settings: the Subnet Calculator (address, prefix, split and supernet), Cron Explainer (expression, dialect, time zone, start), Schedule Builder (the schedule, without task names, programs or arguments), Timestamp Converter, Number Bases & Bytes, chmod Calculator (the mode bits, without the path) and UUID / Random Tokens (the options, never the values).',
+  'A settings link is made only when you press its Copy button, and the Share dialog lists what it holds first. NetForge never changes the address bar as you type.',
+  'Tokens, keys, secrets, files, plans, scripts and pasted text are never put in a link. The JWT Decoder, Hash / HMAC, the planner, the exports and the text tools share their plain link only.',
+  `Settings follow the # in the address, which browsers never send to a server. A link longer than ${MAX_LINK_CHARS} characters, or with any value the tool does not accept, is not used at all: the tool opens as it normally does and says why.`,
+];
 
 const PRIVACY_POINTS = [
   'Every tool runs in your browser. Addresses, subnet plans, JSON, timestamps and anything else you enter are processed on this device and never sent to a server.',
@@ -96,8 +115,13 @@ export function aboutPage(prefs: Prefs, clearPrefs: () => void): HTMLElement {
       h('p', { class: 'muted' }, 'NetForge saves only these display preferences, in this browser\'s local storage. Clearing them restores the defaults.'),
       storedBody,
     ]),
+    panel('Share links', [h('ul', { class: 'privacy-list', id: 'share-points' }, SHARE_POINTS.map(p => h('li', null, icon('link'), h('span', null, p))))]),
     panel('Offline use', [offline]),
     panel('Keyboard shortcuts', [shortcutTable()]),
+    panel('RadMage Labs', [
+      h('p', null, 'NetForge is made by RadMage Labs, which publishes free tools and projects at radmagelabs.com.'),
+      labsLink('labs-link labs-card', 'about-labs-link'),
+    ]),
     panel('Version', [h('p', null, `NetForge ${VERSION_LABEL}. Copyright (c) 2026 RadMage Labs. Released under the MIT License.`)]),
   );
 }

@@ -4,6 +4,7 @@
  * bundle, and the shell never needs to change when a tool is added.
  */
 import type { Prefs } from './prefs';
+import type { ShareOffer } from './share';
 
 export interface Category {
   readonly id: string;
@@ -20,9 +21,24 @@ export interface ToolServices {
   announce(message: string): void;
 }
 
+/**
+ * A tool's settings links (see share.ts). Only tools whose settings are harmless have one; the
+ * others share their route and nothing else.
+ */
+export interface ToolShare {
+  /** What a settings link would carry now: validated settings and a line for each, or why there is none. */
+  offer(): ShareOffer;
+  /**
+   * Applies settings read from a link. Every value is checked before anything changes: on false the
+   * tool is left exactly as it was. Applying never runs, generates or downloads anything.
+   */
+  apply(params: ReadonlyMap<string, string>): boolean;
+}
+
 export interface ToolInstance {
   /** Called each time the tool's view is shown again. */
   activate?(): void;
+  readonly share?: ToolShare;
 }
 
 export interface ToolModule {

@@ -17,6 +17,10 @@ const STATES: [string, (page: Page) => Promise<void>][] = [
   ['timestamp overlap', async page => { await page.goto('./#/timestamp-converter'); await page.fill('#timestamp-input', '2026-11-01 01:30'); }],
   ['timestamp gap', async page => { await page.goto('./#/timestamp-converter'); await page.fill('#timestamp-input', '2026-03-08 02:30'); }],
   ['about', async page => { await page.goto('./#/about'); }],
+  // 0.1.0: share links
+  ['share dialog with a settings link', async page => { await page.goto('./#/subnet-calculator'); await page.fill('#subnet-input', '192.0.2.10/24'); await page.locator('#share-subnet-calculator').click(); }],
+  ['share dialog for a tool that shares its route only', async page => { await page.goto('./#/jwt-decoder'); await page.locator('#share-jwt-decoder').click(); }],
+  ['a refused link', async page => { await page.goto('./#/chmod-calculator?v=1&mode=9'); await page.locator('#link-notice').waitFor(); }],
   ['search with no match', async page => { await page.goto('./'); await page.fill('#tool-search', 'zzzz'); }],
   // Phase 1
   ['subnet IPv6 with split and supernet open', async page => {

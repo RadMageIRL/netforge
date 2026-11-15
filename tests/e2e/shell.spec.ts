@@ -168,8 +168,10 @@ test.describe('preferences', () => {
 
   test('About explains privacy and shows the version', async ({ page }) => {
     await page.goto('./#/about');
-    await expect(page.locator('.privacy-list li')).toHaveCount(4);
+    await expect(page.locator('.privacy-list:not(#share-points) li')).toHaveCount(4);
+    await expect(page.locator('#share-points li')).toHaveCount(5);
     await expect(page.locator('.about-page')).toContainText('never sent to a server');
+    await expect(page.locator('#about-labs-link')).toHaveAttribute('href', `${'https'}://radmagelabs.com/`);
     await expect(page.locator('.about-page')).toContainText('NetForge v0.1.0. Copyright (c) 2026 RadMage Labs. Released under the MIT License.');
   });
 });

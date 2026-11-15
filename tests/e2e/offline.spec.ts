@@ -307,3 +307,20 @@ test('worker scripts served by the service worker carry the policy as a header, 
     expect(r.policy).toContain("script-src 'self'");
   }
 });
+
+test('deep links and settings links open offline after the first visit', async ({ page, context }) => {
+  await page.goto('./');
+  await waitForController(page);
+  await context.setOffline(true);
+  // A new tab, as when a shared link is opened later from another app.
+  const tab = await context.newPage();
+  await tab.goto('./#/cron-explainer?v=1&dialect=cron&expr=0%209%20*%20*%201-5&tz=Europe/Berlin');
+  await expect(tab.getByRole('heading', { level: 1, name: 'Cron Explainer' })).toBeVisible();
+  await expect(tab.locator('#cron-input')).toHaveValue('0 9 * * 1-5');
+  await expect(tab.locator('#cron-zone')).toHaveValue('Europe/Berlin');
+  await tab.goto('./#/subnet-calculator?v=1&ip=10.20.30.40/22');
+  await tab.reload();
+  await expect(resultValue(tab, 'broadcast')).toHaveText('10.20.31.255');
+  await tab.goto('./#/jwt-decoder');
+  await expect(tab.getByRole('heading', { level: 1, name: 'JWT Decoder' })).toBeVisible();
+});

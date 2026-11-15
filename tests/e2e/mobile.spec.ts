@@ -296,3 +296,28 @@ test('the Phase 5 export tools and utilities fit a phone, with code scrolling in
   await expectNoHorizontalScroll(page);
   expect(errors).toEqual([]);
 });
+
+test('the Share dialog and the RadMage Labs link fit a phone', async ({ page }) => {
+  const errors = watchErrors(page);
+  await page.goto('./#/schedule-builder');
+  const share = page.locator('#share-schedule-builder');
+  await expect(share).toBeVisible();
+  await expectNoHorizontalScroll(page);
+  await share.click();
+  const dialog = page.locator('#share-dialog');
+  await expect(dialog).toBeVisible();
+  const box = (await dialog.boundingBox())!;
+  const width = page.viewportSize()!.width;
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(width);
+  await expect(page.locator('#share-settings-link-copy')).toBeVisible();
+  await expect(page.locator('#share-tool-link-copy')).toBeInViewport();
+  await page.locator('#share-close').click();
+  await expect(dialog).toBeHidden();
+  await page.locator('#nav-toggle').click();
+  const labs = page.locator('#sidebar-labs-link');
+  await labs.scrollIntoViewIfNeeded();
+  await expect(labs).toBeVisible();
+  await expect(labs).toHaveAttribute('target', '_blank');
+  expect(errors).toEqual([]);
+});

@@ -15,10 +15,11 @@ import { dstImpacts } from '../../core/schedule/dst';
 import { builderJson, builderText, runsCsv, runViews, stopMessage, type RunView } from '../../core/schedule/reports';
 import { DEFAULT_RUN_COUNT, patternWalls, type NextRuns } from '../../core/schedule/search';
 import { browserTimeZone } from '../../core/time/zones';
-import type { ToolMeta, ToolServices } from '../../app/registry';
+import type { ToolInstance, ToolMeta, ToolServices } from '../../app/registry';
+import { builderOffer, readBuilderShare } from './builder-share';
 import { button, checkbox, copyButton, emptyState, notice, panel, segmented, selectField, textField, toolPage, type FieldHandle } from '../../ui/components';
 import { h, replaceChildren } from '../../ui/dom';
-import { DEVICE_ZONE, zoneGroups } from '../../ui/zone-select';
+import { DEVICE_ZONE, hasOption, zoneGroups } from '../../ui/zone-select';
 import { bulletList, codeBlock, dstSection, runTable, section, warnings } from '../schedule-shared/schedule-view';
 
 const FIDELITY_TEXT: Readonly<Record<Fidelity, string>> = { exact: 'Exact', approximate: 'Approximate', unsupported: 'Unsupported' };
@@ -53,7 +54,7 @@ function compareRuns(intended: NextRuns, actual: NextRuns): string | null {
   return null;
 }
 
-export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta, categoryName: string): { activate(): void } {
+export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta, categoryName: string): ToolInstance {
   const device = browserTimeZone();
   let zoneChoice = DEVICE_ZONE;
   let result: BuilderResult | null = null;
@@ -240,5 +241,33 @@ export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta,
     ]),
   ));
   update();
-  return { activate: update };
+  return {
+    activate: update,
+    share: {
+      offer: () => builderOffer({ ...input(), zone: zoneChoice === DEVICE_ZONE ? null : zoneChoice }, device),
+      // The schedule only: the names for the generated commands are left as they are.
+      apply(params) {
+        const s = readBuilderShare(params);
+        if (!s || (s.zone !== null && !hasOption(zoneField.control, s.zone))) return false;
+        frequency.control.value = s.frequency;
+        everyMinutes.control.value = s.everyMinutes;
+        everyHours.control.value = s.everyHours;
+        minute.control.value = s.minute;
+        time.control.value = s.time;
+        weekday.control.value = s.weekday;
+        everyWeeks.control.value = s.everyWeeks;
+        dayChecks.forEach((c, i) => { c.input.checked = s.weekdays.includes(DAY_ORDER[i]); });
+        monthlyKind = s.monthlyKind;
+        monthlyControl.set(s.monthlyKind);
+        monthDay.control.value = s.monthDay;
+        nth.control.value = s.nth;
+        nthWeekday.control.value = s.nthWeekday;
+        zoneChoice = s.zone ?? DEVICE_ZONE;
+        zoneField.control.value = zoneChoice;
+        if (s.startDate !== '') startField.control.value = s.startDate;
+        update();
+        return true;
+      },
+    },
+  };
 }

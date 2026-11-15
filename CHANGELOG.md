@@ -9,6 +9,8 @@ First release.
 Release:
 
 - Published under the MIT License at its own origin, https://netforge.radmagelabs.com/.
+- Share links: every tool has a Share button with a plain link to the tool (`#/subnet-calculator`). The Subnet Calculator, Cron Explainer, Schedule Builder, Timestamp Converter, Number Bases & Bytes, chmod Calculator and UUID / Random Tokens can also share harmless settings in a versioned link (`?v=1&...`), listed in the dialog before copying. Tokens, keys, plans, scripts, paths, command names and pasted text are never included, the device's own time zone is never written, and typing never changes the address bar. Links are read strictly: a link that is too long, malformed, from another version, or with any value the tool rejects is not used at all, and the tool says why.
+- A link back to RadMage Labs in the sidebar and on the About page, opening in a new tab.
 - Host configuration (`vercel.json`): the Content-Security-Policy and the other security headers are sent as HTTP headers on every file, so the policy reaches workers on a first visit and other sites cannot frame the app. Hashed assets are cached for a year and everything else is revalidated.
 - Terraform Export: generated HCL is laid out as `terraform fmt` writes it. Only spacing changed: values, escaping and references are the same, and every generated configuration passes `terraform fmt -check`, `terraform validate` and `terraform plan`.
 - The page states its canonical address.

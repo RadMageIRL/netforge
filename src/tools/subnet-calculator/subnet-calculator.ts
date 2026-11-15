@@ -13,7 +13,8 @@ import { formatIPv6 } from '../../core/net/ipv6';
 import { splitPrefix, supernet } from '../../core/net/ops';
 import { REGISTRY_SOURCES } from '../../core/net/registry-data';
 import { prefixListCsv, prefixListJson } from '../../core/net/reports';
-import type { ToolMeta, ToolServices } from '../../app/registry';
+import type { ToolInstance, ToolMeta, ToolServices } from '../../app/registry';
+import { readSubnetShare, subnetOffer } from './subnet-share';
 import { button, chipList, copyButton, dataTable, emptyState, notice, panel, resultTable, segmented, summaryTable, textField, toolPage, type ResultRow } from '../../ui/components';
 import { h, replaceChildren } from '../../ui/dom';
 
@@ -182,7 +183,7 @@ function classificationView(c: Classification, prefix: IpPrefix): HTMLElement {
   );
 }
 
-export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta, categoryName: string): void {
+export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta, categoryName: string): ToolInstance {
   let family: Family = 4;
   const values: Record<Family, string> = { 4: '', 6: '' };
   const field = textField({ id: 'subnet-input', label: TEXT[4].label, placeholder: TEXT[4].placeholder, mono: true, hint: TEXT[4].hint });
@@ -397,5 +398,30 @@ export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta,
     superPanel,
   ));
   update();
+
+  return {
+    share: {
+      // The split and supernet lengths go in only when their panels are open: those are the ones chosen.
+      offer: () => subnetOffer(family, input.value,
+        splitPanel.open && !splitSelect.disabled ? Number(splitSelect.value) : null,
+        superPanel.open && !superSelect.disabled ? Number(superSelect.value) : null),
+      apply(params) {
+        const s = readSubnetShare(params);
+        if (!s) return false;
+        switchTo(s.family, s.text);
+        if (s.split !== null) {
+          splitSelect.value = String(s.split);
+          renderSplit();
+          splitPanel.open = true;
+        }
+        if (s.supernet !== null) {
+          superSelect.value = String(s.supernet);
+          renderSupernet();
+          superPanel.open = true;
+        }
+        return true;
+      },
+    },
+  };
 }
 

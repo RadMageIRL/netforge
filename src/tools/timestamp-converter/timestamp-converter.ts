@@ -5,10 +5,11 @@ import {
   formatWallIso, parseTimestamp, resolveTimestamp, type ParsedTimestamp, type TimestampMode,
 } from '../../core/time/timestamp';
 import { browserTimeZone, formatOffset, offsetAt, wallFromUtc, type ZonedInstant } from '../../core/time/zones';
-import type { ToolMeta, ToolServices } from '../../app/registry';
+import type { ToolInstance, ToolMeta, ToolServices } from '../../app/registry';
+import { readTimestampShare, timestampOffer } from './timestamp-share';
 import { button, emptyState, notice, panel, resultTable, segmented, selectField, textField, toolPage, type ResultRow } from '../../ui/components';
 import { h, replaceChildren } from '../../ui/dom';
-import { DEVICE_ZONE, zoneGroups } from '../../ui/zone-select';
+import { DEVICE_ZONE, hasOption, zoneGroups } from '../../ui/zone-select';
 
 const DEVICE = DEVICE_ZONE;
 
@@ -34,7 +35,7 @@ function interpretation(parsed: ParsedTimestamp, zone: string): string {
     : `Read as ${unit}: Auto treats numbers of ${limit} and above as milliseconds. Choose Seconds if this is a second value.`;
 }
 
-export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta, categoryName: string): { activate(): void } {
+export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta, categoryName: string): ToolInstance {
   const device = browserTimeZone();
   let mode: TimestampMode = 'auto';
   let zoneChoice = services.prefs.get('timeZone');
@@ -156,5 +157,23 @@ export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta,
   ));
   update();
   // "Relative to now" goes stale while the view is hidden; refresh it on return.
-  return { activate: update };
+  return {
+    activate: update,
+    share: {
+      offer: () => timestampOffer({ text: input.value, mode, zone: zoneChoice === DEVICE ? null : zoneChoice, pick }),
+      // A zone from a link is used for this visit only; it is not saved as a preference.
+      apply(params) {
+        const s = readTimestampShare(params);
+        if (!s || (s.zone !== null && !hasOption(zoneField.control, s.zone))) return false;
+        input.value = s.text;
+        mode = s.mode;
+        modeControl.set(s.mode);
+        zoneChoice = s.zone ?? DEVICE;
+        zoneField.control.value = zoneChoice;
+        pick = s.pick;
+        update();
+        return true;
+      },
+    },
+  };
 }

@@ -1,0 +1,105 @@
+[
+ {
+  "tests": [
+   "tests/unit/share.test.ts"
+  ],
+  "mutations": [
+   [
+    "share: repeated key accepted",
+    "src/app/share.ts",
+    "if (params.has(key)) return { kind: 'refused', reason: 'duplicate' };",
+    "if (false) return { kind: 'refused', reason: 'duplicate' };"
+   ],
+   [
+    "share: version not checked",
+    "src/app/share.ts",
+    "if (params.get('v') !== SHARE_VERSION) return { kind: 'refused', reason: 'version' };",
+    "if (false) return { kind: 'refused', reason: 'version' };"
+   ],
+   [
+    "share: oversized fragment read",
+    "src/app/share.ts",
+    "if (hash.length > MAX_LINK_CHARS) return { kind: 'refused', reason: 'too-long' };",
+    "if (false) return { kind: 'refused', reason: 'too-long' };"
+   ],
+   [
+    "share: control characters accepted in values",
+    "src/app/share.ts",
+    "if (!PRINTABLE.test(value)) return { kind: 'refused', reason: 'malformed' };",
+    "if (false) return { kind: 'refused', reason: 'malformed' };"
+   ],
+   [
+    "share: unknown keys accepted",
+    "src/app/share.ts",
+    "for (const key of params.keys()) if (!allowed.includes(key)) return false;",
+    "for (const key of params.keys()) if (false) return false;"
+   ],
+   [
+    "share: upper bound of numbers ignored",
+    "src/app/share.ts",
+    "return n >= min && n <= max ? n : null;",
+    "return n >= min ? n : null;"
+   ],
+   [
+    "share: overlong link written",
+    "src/app/share.ts",
+    "return link.length <= MAX_LINK_CHARS ? link : null;",
+    "return link;"
+   ],
+   [
+    "share: ampersand left unencoded in values",
+    "src/app/share.ts",
+    ".replace(/%40/g, '@')",
+    ".replace(/%26/g, '&')"
+   ],
+   [
+    "share: empty zone path segment accepted",
+    "src/app/share.ts",
+    "(\\/[A-Za-z0-9_+-]+){0,3}",
+    "(\\/[A-Za-z0-9_+-]*){0,3}"
+   ],
+   [
+    "share: device time zone written into timestamp links",
+    "src/tools/timestamp-converter/timestamp-share.ts",
+    "  if (s.zone !== null) {",
+    "  if (true) {"
+   ],
+   [
+    "share: schedule link may name the task",
+    "src/tools/schedule-builder/builder-share.ts",
+    "const keys = ['freq', 'tz', 'start'];",
+    "const keys = ['freq', 'tz', 'start', 'name'];"
+   ],
+   [
+    "share: subnet split no longer than the prefix accepted",
+    "src/tools/subnet-calculator/subnet-share.ts",
+    "split = intIn(params.get('split'), c.length + 1, bits);",
+    "split = intIn(params.get('split'), c.length, bits);"
+   ],
+   [
+    "share: bytes accepted for a UUID",
+    "src/tools/uuid-tokens/uuid-share.ts",
+    "if (!isToken(kind)) return params.has('bytes') ? null : { kind, count, bytes: null };",
+    "if (!isToken(kind)) return { kind, count, bytes: null };"
+   ],
+   [
+    "share: cron expression from a link not parsed",
+    "src/tools/cron-explainer/cron-share.ts",
+    "if (expression.length > MAX_EXPRESSION_CHARS || !parsesAs(dialect, expression)) return null;",
+    "if (expression.length > MAX_EXPRESSION_CHARS) return null;"
+   ],
+   [
+    "share: number from a link not converted",
+    "src/tools/number-bases/number-share.ts",
+    "number.length > MAX_NUMBER_CHARS || !convert(number, { base: Number(base) as Base, signed, width }).ok)) return null;",
+    "number.length > MAX_NUMBER_CHARS)) return null;"
+   ],
+   [
+    "share: chmod path kept out only by accident",
+    "src/tools/chmod-calculator/chmod-share.ts",
+    "if (!onlyKeys(params, KEYS)) return null;",
+    "if (!onlyKeys(params, [...KEYS, 'path'])) return null;"
+   ]
+  ]
+ }
+]

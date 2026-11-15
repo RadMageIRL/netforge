@@ -14,10 +14,11 @@ import { DEFAULT_RUN_COUNT, nextPatternRuns, patternWalls } from '../../core/sch
 import { explainSystemd, parseSystemd, systemdPattern, SYSTEMD_DST_POLICY } from '../../core/schedule/systemd';
 import { words } from '../../core/schedule/tokens';
 import { browserTimeZone } from '../../core/time/zones';
-import type { ToolMeta, ToolServices } from '../../app/registry';
+import type { ToolInstance, ToolMeta, ToolServices } from '../../app/registry';
+import { cronOffer, readCronShare } from './cron-share';
 import { button, copyButton, dataTable, emptyState, notice, panel, segmented, selectField, textField, toolPage } from '../../ui/components';
 import { h, replaceChildren } from '../../ui/dom';
-import { DEVICE_ZONE, zoneGroups } from '../../ui/zone-select';
+import { DEVICE_ZONE, hasOption, zoneGroups } from '../../ui/zone-select';
 import { caretLine, codeBlock, dstSection, readStart, runTable, section, warnings } from '../schedule-shared/schedule-view';
 
 interface DialectInfo {
@@ -83,7 +84,7 @@ function otherDialect(dialect: DialectId, text: string): DialectId | null {
   return null;
 }
 
-export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta, categoryName: string): { activate(): void } {
+export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta, categoryName: string): ToolInstance {
   const device = browserTimeZone();
   let dialect: DialectId = 'cron';
   let zoneChoice = DEVICE_ZONE;
@@ -208,5 +209,20 @@ export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta,
   ));
   update();
   // "Now" moves on while the view is hidden; recompute when it is shown again.
-  return { activate: update };
+  return {
+    activate: update,
+    share: {
+      offer: () => cronOffer({ dialect, expression: input.value, zone: zoneChoice === DEVICE_ZONE ? null : zoneChoice, from: fromField.control.value }),
+      apply(params) {
+        const s = readCronShare(params);
+        if (!s || (s.zone !== null && !hasOption(zoneField.control, s.zone))) return false;
+        input.value = s.expression;
+        fromField.control.value = s.from ?? '';
+        zoneChoice = s.zone ?? DEVICE_ZONE;
+        zoneField.control.value = zoneChoice;
+        setDialect(s.dialect);
+        return true;
+      },
+    },
+  };
 }

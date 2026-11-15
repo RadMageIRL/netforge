@@ -7,7 +7,8 @@ import {
   applyNumeric, applySymbolic, bit, chmodCommands, CLASS_NAME, CLASSES, explainMode, formatLs, formatOctal, formatOctal4, formatSymbolic,
   modeWarnings, parseLsMode, parseOctalMode, parseUmask, S_ISGID, S_ISUID, S_ISVTX, type PermClass,
 } from '../../core/perm/chmod';
-import type { ToolMeta, ToolServices } from '../../app/registry';
+import type { ToolInstance, ToolMeta, ToolServices } from '../../app/registry';
+import { chmodOffer, readChmodShare } from './chmod-share';
 import { button, checkbox, notice, panel, resultTable, segmented, textField, toolPage, type ResultRow } from '../../ui/components';
 import { h, replaceChildren } from '../../ui/dom';
 import { statusLine } from '../util-shared/util-view';
@@ -21,7 +22,7 @@ const SPECIAL: readonly { id: string; label: string; mask: number }[] = [
   { id: 'perm-sticky', label: 'Sticky', mask: S_ISVTX },
 ];
 
-export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta, categoryName: string): void {
+export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta, categoryName: string): ToolInstance {
   let mode = 0o644;
   let directory = false;
 
@@ -187,4 +188,19 @@ export function mount(host: HTMLElement, services: ToolServices, meta: ToolMeta,
     ]),
   ));
   render('init');
+
+  return {
+    share: {
+      offer: () => chmodOffer({ mode, directory }),
+      apply(params) {
+        const s = readChmodShare(params);
+        if (!s) return false;
+        mode = s.mode;
+        directory = s.directory;
+        typeControl.set(directory ? 'directory' : 'file');
+        render('init');
+        return true;
+      },
+    },
+  };
 }
